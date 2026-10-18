@@ -9,6 +9,7 @@
  */
 import { pendente } from "@/lib/pendente";
 import type { ConfiguracaoCasamento } from "@/types/casamento";
+import { PRESENTES } from "./presentes";
 import imagemCasal from "../../public/images/casal.jpeg";
 
 const MAX_ACOMPANHANTES = 4;
@@ -69,33 +70,7 @@ export const casamento = {
     mensagemComprovante: "Oi! Acabei de enviar o presente de vocês 💛 Segue o comprovante:",
   },
 
-  presentes: [
-    {
-      id: "bronze",
-      tipo: "cota",
-      titulo: "Cota Bronze",
-      valor: 150,
-      descricao: "",
-      icone: "taca",
-    },
-    {
-      id: "prata",
-      tipo: "cota",
-      titulo: "Cota Prata",
-      valor: 200,
-      descricao: "",
-      icone: "alianca",
-    },
-    {
-      id: "ouro",
-      tipo: "cota",
-      titulo: "Cota Ouro",
-      valor: 250,
-      descricao: "",
-      icone: "presente",
-      destaque: true,
-    },
-  ],
+  presentes: PRESENTES,
 
   historia: pendente("3 a 5 marcos de “nossa história” (ano, título e uma frase)"),
 

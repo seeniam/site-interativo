@@ -305,3 +305,40 @@ placeholder; "SEGUNDOS" colado no divisor; download do .ics no Safari/iOS; salto
 leitura instável do relógio; agenda errada no modo de dois cards (agora uma só, fora dos cards); foco perdido ao abrir
 o mapa; screenshots e decisões desatualizados. Também foi pego na revisão visual (antes dela) um monograma cortado pelo
 `<use>` do sprite — hoje coberto por teste de geometria.
+
+---
+
+## Fase 4 — `/presentear` e `/confirmar-presente/[id]`
+
+### O que vai ser feito
+1. `/presentear`: cabeçalho curto; **as três cotas como três planos** (empilhadas no celular, lado a lado a partir de
+   768px, Ouro elevada e com o filete mais presente), cada uma com seu ícone; chips de faixa de valor; linha
+   "Prefere outro valor? Fale com a gente" → WhatsApp; área de presentes nomeados (1/2/3 colunas) que só aparece
+   quando houver algum; estado "já presenteado" lido de `presentes_reservados` (no servidor).
+2. `/confirmar-presente/[id]`: resumo com o valor em destaque; **QR do PIX gerado na hora** (no navegador, carregado
+   sob demanda); código copia-e-cola selecionável com fade; **Copiar código PIX** com o check dourado e o flash de
+   champanhe (3.5.4) e toast; **Enviar comprovante** (`wa.me` com presente, valor e espaço para o nome); passo a passo
+   em três linhas; "Escolher outro presente"; `generateStaticParams`; id inválido → 404.
+3. `lib/whatsapp.ts` (links do WhatsApp, puro e testado).
+
+### Decisões
+| # | Decisão | Motivo |
+|---|---------|--------|
+| P1 | O payload PIX é calculado no servidor (função pura de `lib/pix.ts`) e só o QR é desenhado no navegador. | O código fica no HTML desde o primeiro quadro (copiável mesmo antes do JS); o QR, que pesa, chega depois (briefing 8). |
+| P2 | Nada é "reservado" ao presentear uma cota (V2). O estado "já presenteado" existe e é lido do banco, mas só se aplica a presentes nomeados — hoje não há nenhum. | Cotas não se esgotam. |
+| P3 | Chips de faixa: "Todos", "Até R$ 200", "Acima de R$ 200" — derivados dos valores do config. | O briefing pede o filtro; com três cotas, faixas fixas seriam inventadas. |
+| P4 | O "Copiar" usa `motion` (animação `layout` pedida na 3.5.4), carregado só nesta página. | O resto do site não paga esse peso. |
+| P5 | Id de presente inexistente é barrado no `src/proxy.ts` (reescreve para uma rota que não existe → 404 do site). A lista de presentes foi para `src/config/presentes.ts`, reexportada por `casamento.ts`. | Com pré-renderização parcial, `notFound()` dentro da página chegava depois da casca já enviada com 200 ("404 suave"). O proxy decide antes de renderizar; o módulo separado evita que ele importe a foto. Continua havendo uma fonte única. |
+
+### Fora do escopo
+- Rota `POST /api/presentes/[id]/reservar` e demais Route Handlers: Fase 5 (briefing).
+
+### Fechamento da Fase 4 (2026-10-18)
+- Gate: format, lint, typecheck, unitários (dois fusos), build e 193 E2E nos três tamanhos — verdes.
+- Screenshots: `docs/qa/fase-4/` (`/presentear` e `/confirmar-presente/ouro` em 390, 768 e 1440).
+- Testado de ponta a ponta: escolher a Cota Ouro → copiar o código (área de transferência lida de volta) → link do
+  WhatsApp com presente, valor e "Meu nome: "; QR desenhado na tela lido com jsqr = código copia-e-cola; payload com
+  CRC válido, valor, chave em +55, recebedora e txid; 404 real para id inexistente; axe nas duas rotas.
+- Revisão visual: no celular o código copia-e-cola mostra só a primeira linha com fade (de propósito — o botão é a
+  ação; o código inteiro está no DOM e selecionável).
+- Ficou de fora: Route Handlers (Fase 5); presentes nomeados (não há nenhum no config — a grade só aparece quando houver).

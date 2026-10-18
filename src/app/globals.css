@@ -1310,3 +1310,139 @@ html[data-abertura] .heroi-foto-revela {
     }
   }
 }
+
+/* ── Presentes e PIX ──────────────────────────────────────────────────────── */
+@layer components {
+  /* Chips de faixa de valor (pílulas). */
+  .chip {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 18px;
+    border: 1px solid var(--borda);
+    border-radius: 999px;
+    background: var(--branco);
+    color: var(--fumaca);
+    font-size: var(--text-14);
+    transition:
+      background-color 200ms var(--ease-convite),
+      color 200ms var(--ease-convite),
+      border-color 200ms var(--ease-convite);
+  }
+  @media (hover: hover) {
+    .chip:hover {
+      color: var(--tinta);
+      border-color: var(--ouro);
+    }
+  }
+  .chip[aria-pressed="true"] {
+    border-color: var(--tinta);
+    background: var(--tinta);
+    color: var(--branco);
+  }
+
+  /* As três cotas como três planos (briefing 6.2): empilhadas no celular, a Ouro elevada no desktop. */
+  .planos-cotas {
+    display: grid;
+    gap: 20px;
+    max-width: 1040px;
+    margin-inline: auto;
+  }
+  @media (min-width: 768px) {
+    .planos-cotas {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: end;
+    }
+    .planos-cotas > [data-destaque] {
+      translate: 0 -20px;
+    }
+    .planos-cotas > [data-destaque] .borda-ouro {
+      box-shadow:
+        0 1px 2px rgb(23 20 15 / 0.06),
+        0 28px 60px -28px rgb(140 107 47 / 0.45);
+    }
+  }
+
+  /* Cartão do QR: branco, com o filete dourado. */
+  .cartao-pix {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+    border-radius: var(--radius-secao);
+    background: var(--branco);
+    box-shadow: var(--sombra-quente);
+    outline: 1px solid var(--borda);
+    position: relative;
+  }
+  .cartao-pix::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background-image: var(--gradiente-ouro);
+  }
+  .qr-pix {
+    width: min(100%, 260px);
+  }
+  .qr-pix__codigo {
+    aspect-ratio: 1;
+    width: 100%;
+  }
+  .qr-pix__codigo svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Código copia-e-cola: selecionável, truncado com fade, flash de champanhe ao copiar. */
+  .codigo-pix {
+    display: block;
+    max-height: 4.8em;
+    overflow: hidden;
+    padding: 14px 18px;
+    border-radius: var(--radius-card);
+    background: var(--linho);
+    color: var(--tinta);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: var(--text-12);
+    line-height: 1.6;
+    word-break: break-all;
+    user-select: all;
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  }
+  .codigo-pix--flash {
+    animation: flash-champanhe 600ms ease-out;
+  }
+
+  .passos-pix {
+    counter-reset: passo;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--fumaca);
+    font-size: var(--text-14);
+  }
+  .passos-pix li {
+    counter-increment: passo;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .passos-pix li::before {
+    content: counter(passo);
+    font-family: var(--font-display);
+    font-size: var(--text-20);
+    color: var(--ouro-escuro);
+    font-variant-numeric: tabular-nums;
+  }
+}
+@keyframes flash-champanhe {
+  from {
+    background-color: var(--champanhe);
+  }
+}
