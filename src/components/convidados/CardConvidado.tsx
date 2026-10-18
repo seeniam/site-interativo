@@ -1,7 +1,8 @@
 import { CalendarDays, UsersRound } from "lucide-react";
-import { SeloStatus, type StatusResposta } from "@/components/ui/SeloStatus";
+import { SeloStatus } from "@/components/ui/SeloStatus";
 import { textos } from "@/config/textos";
 import { formatarDiaMes } from "@/lib/format";
+import type { StatusResposta } from "@/types/dominio";
 
 export interface CardConvidadoProps {
   nome: string;

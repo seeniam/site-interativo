@@ -104,9 +104,9 @@
     color: var(--tinta);
   }
 
-  /* Foco visível e bonito em todo elemento interativo (seção 7.2). */
+  /* Foco visível em todo elemento interativo (seção 7.2): --ouro-escuro dá ~4,7:1 (WCAG 1.4.11). */
   :focus-visible {
-    outline: 2px solid var(--ouro);
+    outline: 2px solid var(--ouro-escuro);
     outline-offset: 2px;
   }
 
@@ -220,13 +220,17 @@
     text-underline-offset: 0.3em;
   }
 
-  .texto-pendente__selo {
-    display: inline-block;
+  /*
+   * Selos do vocabulário (briefing 4). Nunca um pelo outro:
+   * "a definir" = o dado não existe · "a confirmar" = chegou, mas com dúvida.
+   */
+  .selo-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
     margin-inline-start: 0.6em;
     padding: 0.15em 0.7em;
     border-radius: 999px;
-    background: var(--champanhe);
-    color: var(--fumaca);
     font-family: var(--font-sans);
     font-style: normal;
     font-weight: 400;
@@ -235,6 +239,30 @@
     letter-spacing: 0.02em;
     vertical-align: 0.2em;
     text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .selo-estado--a-definir {
+    background: var(--linho);
+    color: var(--fumaca);
+  }
+
+  /*
+   * O briefing pede texto --ouro-escuro sobre --champanhe (4,28:1, reprova no AA).
+   * O ouro fica no filete e no ponto; o texto vai em --tinta (DECISOES F1).
+   */
+  .selo-estado--a-confirmar {
+    background: var(--champanhe);
+    box-shadow: inset 0 0 0 1px var(--ouro);
+    color: var(--tinta);
+  }
+
+  .selo-estado--a-confirmar::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--ouro-escuro);
   }
 
   /* ── Botões ─────────────────────────────────────────────────────────────── */
@@ -278,7 +306,7 @@
   }
 
   .botao[data-estado="foco"] {
-    outline: 2px solid var(--ouro);
+    outline: 2px solid var(--ouro-escuro);
     outline-offset: 2px;
   }
 

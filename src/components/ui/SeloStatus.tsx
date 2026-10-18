@@ -1,6 +1,5 @@
 import { textos } from "@/config/textos";
-
-export type StatusResposta = "confirmado" | "recusou";
+import type { StatusResposta } from "@/types/dominio";
 
 /** Ponto + texto: o status nunca depende só da cor. */
 export function SeloStatus({ status }: { status: StatusResposta }) {

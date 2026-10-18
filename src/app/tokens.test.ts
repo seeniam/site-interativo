@@ -32,9 +32,10 @@ function rgba(valor: string): string {
   return `rgba(${numeros.join(",")})`;
 }
 
-/** Blocos "seletor { declarações }" do CSS (os mais internos, sem aninhamento). */
+/** Blocos "seletor { declarações }" do CSS (os mais internos, sem aninhamento), sem comentários. */
 function blocos(fonte: string): { seletor: string; corpo: string }[] {
-  return [...fonte.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({
+  const semComentarios = fonte.replace(/\/\*[\s\S]*?\*\//g, "");
+  return [...semComentarios.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({
     seletor: (m[1] ?? "").trim(),
     corpo: m[2] ?? "",
   }));
@@ -145,5 +146,42 @@ describe("contraste AA", () => {
     const amostra = `.x:hover { border: 0; background: var(--champanhe); color: var(--ouro-escuro); }`;
     expect(blocos(amostra).filter(({ corpo }) => COMBINACAO_PROIBIDA(corpo))).toHaveLength(1);
     expect(blocos(css).length).toBeGreaterThan(30);
+  });
+});
+
+describe("anel de foco (briefing 7.2 corrigido)", () => {
+  it("usa --ouro-escuro, não --ouro", () => {
+    const foco = blocos(css).filter((b) => b.seletor.includes("focus-visible") || b.seletor.includes('"foco"'));
+    expect(foco.length).toBeGreaterThanOrEqual(2);
+    for (const { corpo } of foco) expect(corpo).toMatch(/outline:\s*2px solid var\(--ouro-escuro\)/);
+  });
+
+  it.each(["papel", "branco", "linho", "champanhe"])("tem pelo menos 3:1 sobre --%s (WCAG 1.4.11)", (fundo) => {
+    expect(contraste(token("ouro-escuro"), token(fundo))).toBeGreaterThanOrEqual(3);
+  });
+
+  it("--ouro não serviria: fica abaixo de 3:1 sobre --papel", () => {
+    expect(contraste(token("ouro"), token("papel"))).toBeLessThan(3);
+  });
+});
+
+describe("selos do vocabulário (briefing 4)", () => {
+  const selo = (classe: string) => blocos(css).find((b) => b.seletor === `.${classe}`)?.corpo ?? "";
+
+  it("'a definir': --linho com texto --fumaca, e passa no AA", () => {
+    expect(selo("selo-estado--a-definir")).toMatch(/background:\s*var\(--linho\)/);
+    expect(selo("selo-estado--a-definir")).toMatch(/color:\s*var\(--fumaca\)/);
+    expect(contraste(token("fumaca"), token("linho"))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("'a confirmar': --champanhe com filete de ouro e texto --tinta (DECISOES F1), e passa no AA", () => {
+    expect(selo("selo-estado--a-confirmar")).toMatch(/background:\s*var\(--champanhe\)/);
+    expect(selo("selo-estado--a-confirmar")).toMatch(/var\(--ouro\)/);
+    expect(selo("selo-estado--a-confirmar")).toMatch(/color:\s*var\(--tinta\)/);
+    expect(contraste(token("tinta"), token("champanhe"))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("os dois estados são visualmente distintos", () => {
+    expect(selo("selo-estado--a-definir")).not.toBe(selo("selo-estado--a-confirmar"));
   });
 });

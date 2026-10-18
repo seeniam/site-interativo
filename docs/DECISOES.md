@@ -17,7 +17,7 @@ Fonte de requisitos: `docs/BRIEFING.md`. O que falta do cliente está em `docs/P
 | G6 | Gerenciador de pacotes: pnpm. Node local: v26. | Briefing, seção 5. |
 | G7 | A mensagem pré-preenchida do WhatsApp mantém o 💛 que o cliente escreveu. É a única exceção à proibição de emoji, e o teste `scripts/higiene.test.ts` a isola pelo nome do campo. | A seção 9 proíbe emoji **na interface**. A mensagem é texto do casal que sai do celular do convidado, não aparece no site. Se o casal preferir sem, é uma linha no config. |
 | G8 | A microcopy da interface (rótulos, botões, estados) vive em `src/config/textos.ts`; o conteúdo do casal em `src/config/casamento.ts`. Textos do `/design-system` (página interna de documentação) ficam na própria página. | Briefing 4: nenhum texto dentro de componente. Separar voz da interface de conteúdo do casal deixa claro o que o casal edita. |
-| G9 | Valores enviados pelo cliente mas com dúvida aberta (ano, de-para das cotas, recebedor PIX…) entram como valor real, com comentário apontando para `PENDENCIAS.md` (C1–C7). Só o que **não** foi enviado vira `pendente(...)`. | Placeholder em dado que já existe esconderia informação real; a dúvida é rastreada no documento, não na tela. |
+| G9 | Valores enviados pelo cliente mas com dúvida aberta (ano, de-para das cotas, recebedor PIX…) entram como valor real e ficam em `casamento.aConfirmar` (PENDENCIAS C1–C7). Só o que **não** foi enviado vira `pendente(...)`. *(Revisada na Fase 1: o valor aparece com o selo "a confirmar" em qualquer tela enquanto a dúvida existir — briefing 4. Publicar exige zerar a lista.)* | Placeholder em dado que já existe esconderia informação real. |
 | G10 | Briefing atualizado em 2026-10-17 (dados reais do casal, três cotas, card único de local, regras do PIX por telefone). A versão anterior foi substituída em `docs/BRIEFING.md`. | Mensagem do cliente durante a Fase 0. |
 
 ---
@@ -84,3 +84,68 @@ confirmados, 9 descartados. Todos os confirmados foram corrigidos:
 tem contraste de ~2,3:1, abaixo dos 3:1 que a WCAG 2.2 pede para indicador de foco. O briefing
 (7.2) especifica exatamente `--ouro`, então foi mantido. Alternativa compatível com a identidade:
 anel em `--ouro-escuro` (~4,7:1). Decisão do casal/briefing.
+
+---
+
+## Fase 1 — Dados, domínio e PIX
+
+**Data:** 2026-10-17
+
+### Correções vindas do cliente antes da fase
+- **Anel de foco em `--ouro-escuro`** (briefing 7.2 corrigido): `--ouro` dava ~2,3:1 e reprovava no WCAG 1.4.11.
+  Regra nova do briefing: contraste abaixo do mínimo é erro do documento — corrigir e registrar aqui.
+- **Emoji só no corpo de mensagens para o WhatsApp** (briefing 9). Nunca em nó da página.
+- **Vocabulário obrigatório** (briefing 4): "a confirmar" (dado chegou com dúvida) × "a definir" (dado não existe), com estilos distintos.
+
+### O que vai ser feito
+1. `src/types/`: tipos do domínio (config do casamento, presente, confirmação de presença, presente reservado). As interfaces saem de `config/casamento.ts`.
+2. Schemas zod (`src/lib/schemas/`): formulário de RSVP com mensagens humanas, documento de confirmação, presente reservado, e validação do próprio config (limites do PIX).
+3. `lib/pix.ts`: payload BR Code (EMV) puro, CRC16-CCITT (0x1021, início 0xFFFF), validação dos limites (nome ≤ 25, cidade ≤ 15, chave de telefone em `+55…`), normalização (maiúsculas, sem acento). Testes: payload conhecido do manual do Banco Central, valor de verificação do CRC, casos negativos e **leitura do QR de volta com `jsqr`**.
+4. `lib/ics.ts`: arquivo `.ics` (RFC 5545: CRLF, escape, dobra de linha em 75 octetos, horário em UTC) e link do Google Calendar.
+5. `lib/format.ts`: BRL, telefone (formatar, máscara progressiva para digitação, mascarar para privacidade), data por extenso pt-BR no fuso de Brasília, data curta, primeiro nome. Com date-fns + `@date-fns/tz`.
+6. `lib/dados/`: repositórios de confirmações e presentes reservados com duas implementações — Firestore (SDK carregado sob demanda) e **mock local em `localStorage`** quando não houver `.env.local`. O mock propaga entre abas (evento `storage`) e permite simular falha de rede para os testes das Fases 5 e 6.
+7. `firestore.rules`, `.env.example`.
+8. Vocabulário: registro `aConfirmar` no config + selo "a confirmar" distinto do placeholder "a definir"; ambos no `/design-system`.
+9. Anel de foco em `--ouro-escuro`.
+
+### Fora do escopo
+- Qualquer tela ou fluxo que use esses módulos (QR na tela, formulário, lista): Fases 3 a 6.
+- Projeto Firebase real e deploy das regras: dependem das credenciais do casal.
+- Teste das regras do Firestore no emulador (exige Java + Firebase CLI): fica registrado como pendência técnica.
+
+### Decisões e premissas
+| # | Decisão | Motivo |
+|---|---------|--------|
+| F1 | **Estilo "a confirmar": fundo `--champanhe`, filete de 1px em `--ouro`, ponto em `--ouro-escuro`, texto em `--tinta`.** "A definir" segue como no briefing: `--linho` com texto `--fumaca`. | O briefing pede texto `--ouro-escuro` sobre `--champanhe`, que dá 4,28:1 e reprova no AA (4,5) para texto de 12px. Pela regra 7.2, é erro do documento. O ouro continua marcando o estado (filete + ponto), e os dois selos seguem distintos. |
+| F2 | **Confirmações são só de inclusão (append-only).** Cada resposta vira um documento novo; a resposta valendo para um telefone é a mais recente. "Atualizar resposta" cria outro documento. | O briefing bloqueia `update`/`delete` no Firestore e, ao mesmo tempo, exige "permitir sobrescrever" quando o telefone já confirmou. Inclusão + "vale a mais recente" atende os dois. De quebra fica o histórico. |
+| F3 | **`presentes_reservados` também tem `read` liberado.** Os documentos guardam só `{ presenteId, criadoEm }`, sem dado pessoal. | O briefing libera `read` apenas em `confirmacoes`, mas o estado "já presenteado" de `/presentear` precisa ler `presentes_reservados`. Sem leitura, esse estado é impossível. |
+| F4 | **Cotas não se esgotam;** só presentes nomeados ficam "já presenteado". | Várias pessoas podem dar a mesma cota. Hoje não há presentes nomeados (PENDENCIAS P8), então o estado existe no código e no design system, mas nenhuma cota o usa. |
+| F5 | Horário de término **a definir** (P9): `agenda.duracaoHoras` é `pendente(...)` e a agenda usa o plano B de 6 horas (`DURACAO_PLANO_B_HORAS`). *(Corrigida na revisão: tinha sido marcada "a confirmar", mas o valor não veio do cliente.)* | Um evento `.ics` precisa de término e o cliente informou só o início. |
+| F6 | `gerarPayloadPix` não altera o texto que recebe: valida (ASCII, limites) e recusa o que estiver fora. A normalização (maiúsculas, sem acento) fica em `normalizarCampoPix`, aplicada ao montar o PIX a partir do config. | Função pura e previsível, testável contra o exemplo oficial do Banco Central, que usa letras minúsculas. |
+| F7 | Datas no fuso de Brasília via `Intl.formatToParts` + date-fns (locale pt-BR), sem `@date-fns/tz`. Os testes unitários rodam no fuso de Tóquio (UTC+9). | O construtor do `TZDate` chama `new Date()` sem argumento, e o Next 16 com cacheComponents recusa isso na pré-renderização (o build quebrou). O fuso de Tóquio nos testes prova que nada depende do relógio da máquina — e pegou um bug de conversão dupla que passaria em UTC-3. |
+
+### Risco registrado (para decisão até a Fase 6)
+**Telefones dos convidados ficam legíveis por qualquer pessoa.** Com `read` liberado em `confirmacoes` e chaves públicas no cliente, qualquer um que abra o console do navegador lê a coleção inteira, com telefones. O PIN de `/convidados` esconde a informação na tela, mas não protege o dado (o briefing já diz que é dissuasão). Saídas possíveis sem servidor: (a) guardar o telefone só mascarado e um hash para a idempotência, perdendo o "Mostrar telefones"; (b) Firebase Auth anônimo para os convidados e e-mail/senha para os noivos, com `read` só para os noivos. Fica para decisão do cliente antes da Fase 6.
+
+### Fechamento da Fase 1 (2026-10-17)
+
+**Portão:** `pnpm qa:fase` verde (ver relatório). Vitest roda a suíte inteira em dois fusos
+(Tóquio e Nova York) — datas, agenda e PIX não dependem do relógio da máquina.
+
+**Revisão adversarial** (4 revisores + 1 cético por lente): 19 achados confirmados, 6 descartados. Corrigidos:
+- **Perda silenciosa de resposta** (3 revisores): nome de acompanhante > 120 era aceito, gravado e descartado na leitura. Limites agora num módulo só (`lib/schemas/limites.ts`); repositórios conferem com o esquema de leitura **antes** de gravar; regras do Firestore conferem cada nome; teste de propriedade "tudo que o formulário aprova, a leitura aceita".
+- **Firebase pela metade em produção caía em silêncio na demonstração** (RSVPs só no celular de cada convidado): `escolherOrigem` agora dá erro com as chaves faltantes; produção sem Firebase só com `NEXT_PUBLIC_MODO_DEMONSTRACAO=1`.
+- **Horário de verão de quem abre o convite** (Nova York, Lisboa) errava a hora: datas saem direto do `Intl` com o fuso de Brasília.
+- Download do SDK falhando não virava `ErroDeRede`; inicialização com falha ficava presa no cache.
+- Apóstrofo do iPhone (’) e acento decomposto recusados no nome; telefone colado com 0 de tronco embaralhado; "+55" aceito na máscara e recusado no validador.
+- Quem responde "não" ficava preso em erros dos campos do passo que pulou.
+- PIX: fração de centavo era arredondada em silêncio; chave e-mail aceitava acento e mais de 77 caracteres.
+- Leitura aceitava `null`/número como data (virava 1970) e telefone que o app não formata.
+- `crypto.randomUUID` quebrava a demonstração aberta por IP da rede local.
+- `primeiroNome`: "Dr. João" → "João"; "Ana-Clara" e "D'Ávila" corretos.
+- Testes fracos reforçados (inválidos de telefone, VALARM, chave do config por tipo).
+- Vocabulário: término da festa movido de "a confirmar" para "a definir" (P9); C3 reescrito conforme o manual do BC.
+
+**Nota de nomenclatura:** a "camada `lib/firebase`" do briefing é `src/lib/dados/` (Firestore + demonstração local atrás da mesma interface).
+
+**Revisão automática de segurança:** apontou o mesmo risco já registrado — telefones legíveis por qualquer visitante com `read` público em `confirmacoes`. Mantido como decisão pendente do cliente (T2) porque contraria a seção 5 do briefing; recomendação no relatório da fase.

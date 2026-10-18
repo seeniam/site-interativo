@@ -6,11 +6,14 @@ import { FileteDourado } from "@/components/brand/FileteDourado";
 import { ICONES_DA_MARCA } from "@/components/brand/icons";
 import { Monograma } from "@/components/brand/Monograma";
 import { TextoPendente } from "@/components/brand/TextoPendente";
+import { ValorAConfirmar } from "@/components/brand/ValorAConfirmar";
 import { CardConvidado } from "@/components/convidados/CardConvidado";
 import { CardPresente } from "@/components/presentes/CardPresente";
 import { Botao, BotaoLink } from "@/components/ui/Botao";
 import { casamento } from "@/config/casamento";
+import { formatarDataPorExtenso } from "@/lib/format";
 import { listarPendencias } from "@/lib/pendente";
+import type { CampoAConfirmar } from "@/types/casamento";
 import { GRUPOS_DE_COR } from "./_componentes/paleta";
 import { PalcoMonograma } from "./_componentes/PalcoMonograma";
 import { Legenda, Secao } from "./_componentes/Secao";
@@ -100,6 +103,18 @@ const CONVIDADOS_DE_EXEMPLO = [
 ] as const;
 
 const PENDENCIAS = listarPendencias(casamento);
+
+/** Nome legível de cada campo "a confirmar" — documentação interna desta página. */
+const CAMPOS_A_CONFIRMAR: Record<CampoAConfirmar, string> = {
+  data: "Data",
+  "presentes.valores": "Cotas",
+  "pix.nomeRecebedor": "Recebedor do PIX",
+  "whatsapp.numero": "WhatsApp",
+  "local.cerimoniaNoMesmoLocal": "Cerimônia",
+  "versiculo.referencia": "Versículo",
+  "rsvp.maxAcompanhantes": "Acompanhantes",
+};
+const A_CONFIRMAR = Object.entries(casamento.aConfirmar) as [CampoAConfirmar, string][];
 
 export default function DesignSystemPage() {
   return (
@@ -457,8 +472,22 @@ export default function DesignSystemPage() {
           <Secao
             id="pendencias"
             titulo="Dados pendentes"
-            descricao="O que o casal ainda não enviou aparece assim. A lista abaixo é lida da configuração inteira: quando um dado chegar, ele some daqui sozinho."
+            descricao="Dois estados, nunca um pelo outro. “A confirmar”: o dado chegou, mas há dúvida — ele aparece, com o selo. “A definir”: o dado não existe — o lugar dele mostra o que falta. As duas listas são lidas da configuração."
           >
+            <h3 className="mb-3 text-16 font-normal text-tinta">A confirmar</h3>
+            <p className="mb-5 font-display text-25">
+              <ValorAConfirmar>{formatarDataPorExtenso(casamento.data)}</ValorAConfirmar>
+            </p>
+            <dl className="mb-14 divide-y divide-borda rounded-card bg-branco px-5 ring-1 ring-borda sm:px-8">
+              {A_CONFIRMAR.map(([campo, motivo]) => (
+                <div key={campo} className="flex flex-col gap-1 py-3.5 sm:flex-row sm:gap-8">
+                  <dt className="w-40 shrink-0 text-14 font-normal text-tinta">{CAMPOS_A_CONFIRMAR[campo]}</dt>
+                  <dd className="text-14 text-fumaca">{motivo}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <h3 className="mb-3 text-16 font-normal text-tinta">A definir</h3>
             <p className="mb-4 text-14 text-fumaca">
               <span className="numeros">{PENDENCIAS.length}</span> itens aguardando o casal
             </p>

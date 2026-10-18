@@ -3,13 +3,38 @@
  * O botão diz o que acontece. Conteúdo do casal (datas, locais, frases) fica em `casamento.ts`.
  */
 export const textos = {
+  rsvp: {
+    erros: {
+      nomeObrigatorio: "Escreva seu nome completo, por favor.",
+      nomeCurto: "Seu nome precisa ter pelo menos 3 letras.",
+      nomeCaracteres: "Use só letras no nome (acentos, hífen e apóstrofo valem).",
+      nomeLongo: "Esse nome ficou longo demais. Pode abreviar?",
+      telefoneObrigatorio: "Faltou o telefone pra gente te avisar de mudanças.",
+      telefoneInvalido: "Confira o telefone: DDD + número, como (98) 99967-6346.",
+      statusObrigatorio: "Conta pra gente: você vem?",
+      acompanhanteNome: "Escreva o nome de quem vem com você.",
+      acompanhantesDemais: (max: number) => `Dá para trazer até ${max} acompanhante${max === 1 ? "" : "s"}.`,
+      convidadoPorObrigatorio: "Conta pra gente quem te convidou.",
+      convidadoPorLongo: "Esse nome ficou longo demais.",
+      recadoLongo: (max: number) => `O recado pode ter até ${max} caracteres.`,
+    },
+  },
+  agenda: {
+    titulo: (casal: string) => `Casamento de ${casal}`,
+    descricao: (casal: string) => `Te esperamos para celebrar com a gente. ${casal}`,
+  },
   metadados: {
     descricao: (casal: string) => `Convite de casamento de ${casal}.`,
   },
+  /** Vocabulário obrigatório (briefing 4). Nunca usar um pelo outro. */
   pendente: {
     leitorDeTela: "Ainda não definido:",
-    // "a definir" = o casal ainda não enviou. Diferente de "a confirmar" em PENDENCIAS.md.
+    /** O dado ainda não existe. */
     selo: "a definir",
+  },
+  aConfirmar: {
+    /** O dado chegou, mas há dúvida sobre ele. */
+    selo: "a confirmar",
   },
   presentes: {
     botao: "Presentear",

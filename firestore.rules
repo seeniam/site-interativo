@@ -1,0 +1,62 @@
+rules_version = '2';
+
+// Regras do convite de Jaqueline & Diorlando (briefing 5 + DECISOES F2/F3).
+// - Coleções só de inclusão: create validado, update e delete bloqueados para todos.
+// - Limites iguais aos de src/lib/schemas/limites.ts (conferido por scripts/regras-firestore.test.ts).
+// - Risco registrado em DECISOES (Fase 1): read em confirmacoes expõe telefones.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function textoEntre(valor, minimo, maximo) {
+      return valor is string && valor.size() >= minimo && valor.size() <= maximo;
+    }
+
+    // Cada nome também é limitado: sem isso, um nome longo seria gravado e depois descartado
+    // na leitura do app, e a resposta sumiria sem aviso.
+    function acompanhanteValido(lista, i) {
+      return lista.size() <= i || textoEntre(lista[i], 1, 120);
+    }
+
+    function acompanhantesValidos(lista) {
+      return lista is list && lista.size() <= 10
+        && acompanhanteValido(lista, 0) && acompanhanteValido(lista, 1)
+        && acompanhanteValido(lista, 2) && acompanhanteValido(lista, 3)
+        && acompanhanteValido(lista, 4) && acompanhanteValido(lista, 5)
+        && acompanhanteValido(lista, 6) && acompanhanteValido(lista, 7)
+        && acompanhanteValido(lista, 8) && acompanhanteValido(lista, 9);
+    }
+
+    match /confirmacoes/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['nome', 'telefone', 'status', 'acompanhantes', 'convidadoPor', 'recado', 'criadoEm'])
+                    && request.resource.data.keys().hasAll(
+                         ['nome', 'telefone', 'status', 'acompanhantes', 'convidadoPor', 'recado', 'criadoEm'])
+                    && textoEntre(request.resource.data.nome, 3, 120)
+                    && request.resource.data.telefone is string
+                    // Celular (9 depois do DDD) ou fixo (2 a 5), como telefoneValido no app.
+                    && request.resource.data.telefone.matches('^[1-9][1-9](9[0-9]{8}|[2-5][0-9]{7})$')
+                    && request.resource.data.status in ['confirmado', 'recusou']
+                    && acompanhantesValidos(request.resource.data.acompanhantes)
+                    && textoEntre(request.resource.data.convidadoPor, 0, 60)
+                    && textoEntre(request.resource.data.recado, 0, 240)
+                    && request.resource.data.criadoEm == request.time;
+      allow update, delete: if false;
+    }
+
+    match /presentes_reservados/{id} {
+      // Leitura liberada: só { presenteId, criadoEm }, sem dado pessoal (DECISOES F3).
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['presenteId', 'criadoEm'])
+                    && request.resource.data.keys().hasAll(['presenteId', 'criadoEm'])
+                    && textoEntre(request.resource.data.presenteId, 1, 40)
+                    && request.resource.data.criadoEm == request.time;
+      allow update, delete: if false;
+    }
+
+    // Qualquer outra coleção: fechada.
+    match /{documento=**} {
+      allow read, write: if false;
+    }
+  }
+}

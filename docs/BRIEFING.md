@@ -248,6 +248,13 @@ export const casamento = {
 **Tudo que estiver como `TODO cliente` entra em `docs/PENDENCIAS.md`** e aparece na
 interface como um placeholder elegante (nunca "undefined", nunca quebrado).
 
+**Vocabulário obrigatório (vale no código, nos selos da interface e no `PENDENCIAS.md`):**
+- **"a confirmar"** = o dado chegou, mas há dúvida sobre ele (ano, referência do versículo,
+  de-para das cotas, nome do recebedor do PIX, número do WhatsApp, local da cerimônia).
+- **"a definir"** = o dado ainda não existe (nossa história, galeria, trajes, prazo do RSVP).
+Os dois estados são visualmente distintos: "a confirmar" em `--champanhe` com texto
+`--ouro-escuro`; "a definir" em `--linho` com texto `--fumaca`. Nunca usar um termo pelo outro.
+
 ---
 
 ## 5. Stack técnica
@@ -391,8 +398,13 @@ Monograma, "Esta página não existe no nosso convite", botão de volta. Mesma i
 
 ## 7. Acessibilidade e mobile (não-negociáveis)
 1. Contraste AA em todo texto (verificar o dourado — texto dourado só em `--ouro-escuro`).
-2. Foco visível e bonito: anel de 2px em `--ouro` com 2px de deslocamento, em **todos** os
-   elementos interativos. Navegação completa por teclado, inclusive lightbox e acordeão.
+2. Foco visível e bonito: anel de 2px em **`--ouro-escuro`** com 2px de deslocamento, em
+   **todos** os elementos interativos. (Correção: a versão anterior deste briefing pedia
+   `--ouro`, que dá ~2,3:1 sobre `--papel` e reprova no WCAG 1.4.11, que exige 3:1 para
+   elemento não-textual. `--ouro-escuro` dá ~4,7:1.) Navegação completa por teclado,
+   inclusive lightbox e acordeão. **Acessibilidade vence o token:** se qualquer outra regra
+   deste documento levar a um contraste abaixo do mínimo, trate como erro do documento,
+   corrija e registre em `DECISOES.md`.
 3. HTML semântico: `<main>`, `<nav>`, `<section aria-labelledby>`, `<h1>` único por rota.
 4. Imagens com `alt` descritivo em português. Ícones decorativos com `aria-hidden`.
 5. Toda animação atrás de `prefers-reduced-motion`.
@@ -414,6 +426,9 @@ Monograma, "Esta página não existe no nosso convite", botão de volta. Mesma i
 ## 9. PROIBIDOS (sinais de template genérico — motivo de refação)
 - Fundo dourado chapado, botão com gradiente dourado "brilhante" e sombra amarela.
 - Emoji como ícone (❤️, 📍, 💍) em qualquer lugar da interface.
+  **Única exceção:** o corpo de mensagens que saem para o WhatsApp (texto que o convidado
+  envia no app dele, nunca renderizado no DOM do site). Emoji em botão, rótulo, toast,
+  estado vazio, título ou qualquer nó da página continua proibido.
 - Bordas douradas grossas (> 2px), molduras "art déco" prontas, ornamentos florais de banco.
 - Cards todos iguais, mesmo raio, mesma sombra cinza, grade monótona de 3×3.
 - Fade-in + slide-up disparando em cada elemento a cada rolagem.

@@ -1,9 +1,13 @@
 # Pendências do cliente
 
-Duas listas. Os itens **a confirmar** já estão no site com o valor que o casal enviou, mas
-têm uma dúvida aberta. Os itens **pendentes** não foram enviados: no código são
-`pendente("...")` em `src/config/casamento.ts` e aparecem como placeholder visível.
-A lista completa e sempre atualizada dos pendentes está em `/design-system#pendencias`.
+Vocabulário obrigatório (briefing 4), igual no código, nos selos e aqui — nunca um pelo outro:
+
+- **a confirmar** — o dado chegou, mas há dúvida. Está no site com o valor enviado e o selo
+  "a confirmar". No código: `casamento.aConfirmar`.
+- **a definir** — o dado não existe. O lugar dele mostra o que falta, com o selo "a definir".
+  No código: `pendente("...")`.
+
+As duas listas, sempre atualizadas a partir do config, estão em `/design-system#pendencias`.
 
 **Prazo:** antes da Fase 3 (montagem da página do convite).
 
@@ -11,7 +15,7 @@ A lista completa e sempre atualizada dos pendentes está em `/design-system#pend
 
 Nomes (Jaqueline & Diorlando), local (Espaço Max), endereço, link do Google Maps, horário
 (a partir das 16h30), versículo, chave PIX (telefone), cidade do PIX, WhatsApp, nomes e
-valores das três cotas, limite de 4 acompanhantes, foto do casal.
+valores das três cotas, foto do casal.
 
 ## A confirmar — bloqueiam a Fase 3
 
@@ -19,13 +23,13 @@ valores das três cotas, limite de 4 acompanhantes, foto do casal.
 |---|--------|--------------------|---------|
 | C1 | **Ano do casamento** | 21/12/2026, 16h30 | 21/12/2026 cai numa **segunda-feira**. Confirmar se é 2026 mesmo. |
 | C2 | **De-para das cotas** | Bronze R$ 150 · Prata R$ 200 · Ouro R$ 250 | A ordem que o cliente mandou invertia Bronze e Prata; usamos a hierarquia natural. |
-| C3 | **Nome do recebedor do PIX** exatamente como no extrato (máx. 25 caracteres, sem acento) | `JAQUELINE` | Nome divergente do cadastro faz alguns bancos alertarem o pagador. |
+| C3 | **Nome do recebedor do PIX** exatamente como no extrato (máx. 25 caracteres, sem acento) | `JAQUELINE` | O banco de quem paga mostra o nome cadastrado no DICT e ignora o do QR (manual do BC, nota 26); o campo só precisa ter até 25 caracteres ASCII. Confirmar mesmo assim, para o código copia-e-cola ficar coerente. |
 | C4 | **WhatsApp para comprovantes** é o mesmo número da chave PIX? | `55 98 99967-6346` | — |
 | C5 | **Cerimônia religiosa**: é no Espaço Max ou em outro endereço/horário? | Mesmo local | Se for outro lugar, a página passa a mostrar dois cards (já preparado no tipo `Local`). |
 | C6 | Referência do versículo | Colossenses 3:14 | O cliente escreveu "3.4"; o texto enviado corresponde a 3:14. |
 | C7 | Limite de acompanhantes por convidado | 4 | Valor de exemplo do briefing, marcado com dúvida. |
 
-## Pendentes — têm plano B (placeholder honesto)
+## A definir — têm plano B (placeholder honesto)
 
 | # | Item | Onde entra | Plano B enquanto não chega |
 |---|------|------------|----------------------------|
@@ -37,3 +41,12 @@ valores das três cotas, limite de 4 acompanhantes, foto do casal.
 | P6 | Uma frase do casal para cada cota (Bronze, Prata, Ouro) | Cards de `/presentear` | Placeholder na frase |
 | P7 | Sobrenomes, se quiserem no rodapé | Rodapé | Opcional: sem sobrenome, o rodapé usa só os nomes |
 | P8 | Lista de presentes nomeados, se houver além das cotas | `/presentear` | Só as três cotas |
+| P9 | Horário de término da festa | "Adicionar à agenda" (.ics e Google Agenda) | A agenda usa 6 horas a partir do início (`DURACAO_PLANO_B_HORAS` em `lib/ics.ts`) |
+
+## Pendências técnicas (do time, não do cliente)
+
+| # | Item | Quando |
+|---|------|--------|
+| T1 | Testar `firestore.rules` no emulador do Firebase (exige Java + Firebase CLI). Hoje há uma guarda estática em `scripts/regras-firestore.test.ts`. | Antes de publicar com o Firestore |
+| T2 | Decidir a privacidade dos telefones em `confirmacoes` (risco registrado em DECISOES, Fase 1). | Antes da Fase 6 |
+| T3 | Criar o projeto Firebase do casal e preencher `.env.local` (modelo em `.env.example`). Sem isso, o build de produção recusa rodar, a não ser com `NEXT_PUBLIC_MODO_DEMONSTRACAO=1` (preview para o casal). | Antes de publicar |

@@ -84,7 +84,7 @@ test.describe("/design-system", () => {
     await expect(page.getByRole("img", { name: "Jaqueline & Diorlando" }).first()).toBeVisible();
   });
 
-  test("todo elemento focável mostra o anel dourado de 2px com 2px de folga", async ({ page }) => {
+  test("todo elemento focável mostra o anel em --ouro-escuro, 2px com 2px de folga", async ({ page }) => {
     const totalFocaveis = await page.evaluate(
       () =>
         [...document.querySelectorAll<HTMLElement>("a[href], button:not([disabled])")].filter(
@@ -106,7 +106,7 @@ test.describe("/design-system", () => {
             estilo.outlineStyle === "solid" &&
             estilo.outlineWidth === "2px" &&
             estilo.outlineOffset === "2px" &&
-            estilo.outlineColor === "rgb(201, 162, 39)",
+            estilo.outlineColor === "rgb(140, 107, 47)",
         };
       });
       if (foco && !foco.ok) semAnel.push(foco.rotulo);

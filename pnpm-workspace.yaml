@@ -2,3 +2,5 @@ allowBuilds:
   sharp: true
   esbuild: true
   unrs-resolver: false
+  "@firebase/util": false
+  protobufjs: false
