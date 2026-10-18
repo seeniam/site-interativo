@@ -39,4 +39,14 @@ describe("higiene", () => {
       .join("\n");
     expect(naInterface).not.toMatch(/\p{Extended_Pictographic}/u);
   });
+
+  // Caractere invisível no código (BOM, marca de acento solta, espaço inseparável, largura zero) não se vê
+  // na revisão: quando precisar de um, escreva o escape (﻿,  …).
+  it.each([...fontes, ...arquivos("e2e")].map((f) => [path.relative(RAIZ, f), f]))(
+    "%s não tem caractere invisível literal",
+    (_rel, arquivo) => {
+      const texto = fs.readFileSync(arquivo, "utf8").normalize("NFC");
+      expect(texto).not.toMatch(/[﻿ ​-‍⁠]|(?<!\p{L})\p{M}/u);
+    },
+  );
 });

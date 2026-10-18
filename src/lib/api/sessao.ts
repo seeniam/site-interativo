@@ -36,6 +36,11 @@ export function sessaoValida(token: string | undefined, segredo: string, agora: 
   return Number(expira) > agora;
 }
 
+/** A sessão vale agora? (O relógio fica aqui, fora da renderização dos componentes.) */
+export function sessaoValidaAgora(token: string | undefined, segredo: string): boolean {
+  return sessaoValida(token, segredo, Date.now());
+}
+
 /**
  * Compara a senha digitada com `SENHA_NOIVOS` sem vazar, pelo tempo de resposta, quantos
  * caracteres acertou: as duas passam por HMAC antes (mesmo tamanho) e a comparação é constante.

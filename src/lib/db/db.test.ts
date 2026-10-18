@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { RegistroInvalido } from "@/lib/schemas/dominio";
 import { LIMITES } from "@/lib/schemas/limites";
 import { bancoDeTeste } from "./banco-de-teste";
-import { AmbienteInvalido, DEMONSTRACAO, lerAmbiente } from "./ambiente";
+import { AmbienteInvalido, DEMONSTRACAO, lerAmbiente, senhaVisivelNoLogin } from "./ambiente";
 import { hashTelefone } from "./hash";
 import { criarRepositorioMemoria, seedDemonstracao } from "./memoria";
 import { criarRepositorioPostgres } from "./postgres";
@@ -192,5 +192,12 @@ describe("lerAmbiente", () => {
     expect(() => lerAmbiente({ VERCEL_ENV: "production" })).toThrow(AmbienteInvalido);
     expect(lerAmbiente({ VERCEL_ENV: "production", DEMO: "true" }).modo).toBe("demonstracao");
     expect(lerAmbiente({ VERCEL_ENV: "preview" }).modo).toBe("demonstracao");
+  });
+
+  it("o aviso com a senha da demonstração nunca aparece em produção", () => {
+    expect(senhaVisivelNoLogin(lerAmbiente(producao))).toBeNull();
+    expect(senhaVisivelNoLogin(lerAmbiente({ ...producao, VERCEL_ENV: "production" }))).toBeNull();
+    expect(senhaVisivelNoLogin(lerAmbiente({}))).toBe("demo");
+    expect(senhaVisivelNoLogin(lerAmbiente({ ...producao, DEMO: "true" }))).toBe("demo");
   });
 });

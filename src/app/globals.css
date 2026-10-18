@@ -1788,3 +1788,160 @@ html[data-abertura] .heroi-foto-revela {
     transform: translate3d(var(--deriva), 78vh, 0) rotate(var(--giro));
   }
 }
+
+/* ── Lista de convidados (área dos noivos) ────────────────────────────────── */
+@property --contador {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@layer components {
+  /* Três contadores com filete dourado; o número sobe uma vez, ao aparecer. */
+  /* Lado a lado já no celular: os três números de uma vez, sem empurrar a lista para baixo. */
+  .contadores {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  @media (min-width: 640px) {
+    .contadores {
+      gap: 14px;
+    }
+  }
+  .contador {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 12px 14px;
+    border-radius: var(--radius-card);
+    background: var(--branco);
+    box-shadow: var(--sombra-quente);
+    outline: 1px solid var(--borda);
+  }
+  .contador::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 12px;
+    height: 1px;
+    background-image: var(--gradiente-ouro);
+  }
+  .contador__numero {
+    --contador: var(--valor);
+    counter-reset: contador var(--contador);
+    color: var(--tinta);
+    font-family: var(--font-display);
+    font-size: var(--text-39);
+    font-weight: 300;
+    line-height: 1;
+    font-variant-numeric: lining-nums tabular-nums;
+    animation: contar 1100ms var(--ease-convite);
+  }
+  .contador__numero::after {
+    content: counter(contador);
+  }
+  @media (min-width: 640px) {
+    .contador {
+      padding: 22px 22px 18px;
+    }
+    .contador::before {
+      left: 22px;
+      right: 22px;
+    }
+    .contador__numero {
+      font-size: var(--text-49);
+    }
+  }
+
+  /* Carregando: blocos com um brilho dourado que atravessa. */
+  .esqueleto {
+    border-radius: var(--radius-card);
+    background:
+      linear-gradient(100deg, transparent 30%, rgb(232 208 138 / 0.35) 50%, transparent 70%) 0 0 / 200% 100%,
+      var(--linho);
+    animation: brilho-esqueleto 1.6s linear infinite;
+  }
+
+  /* A tabela do desktop: densa, cabeçalho fixo, zebra em papel, números à direita. */
+  .tabela-convidados table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: var(--text-14);
+  }
+  .tabela-convidados th,
+  .tabela-convidados td {
+    padding: 12px 14px;
+    text-align: left;
+    vertical-align: top;
+    font-weight: 300;
+    color: var(--tinta);
+  }
+  .tabela-convidados th.text-right,
+  .tabela-convidados td.text-right {
+    text-align: right;
+  }
+  .tabela-convidados thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-bottom: 1px solid var(--ouro);
+    background: var(--branco);
+    color: var(--fumaca);
+    font-size: var(--text-12);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .tabela-convidados tbody tr:nth-child(odd) > * {
+    background: var(--papel);
+  }
+  .tabela-convidados tbody tr:nth-child(even) > * {
+    background: var(--branco);
+  }
+  .tabela-convidados tbody tr > * {
+    border-bottom: 1px solid var(--borda);
+  }
+  .tabela-convidados__ordenar {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+    gap: 6px;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+  }
+  .tabela-convidados th[aria-sort="ascending"] .tabela-convidados__ordenar,
+  .tabela-convidados th[aria-sort="descending"] .tabela-convidados__ordenar {
+    color: var(--tinta);
+  }
+  .tabela-convidados__recado {
+    overflow-wrap: anywhere;
+    color: var(--fumaca) !important;
+    font-family: var(--font-display);
+    font-size: var(--text-16);
+    font-style: italic;
+  }
+}
+@keyframes contar {
+  from {
+    --contador: 0;
+  }
+}
+@keyframes brilho-esqueleto {
+  from {
+    background-position:
+      100% 0,
+      0 0;
+  }
+  to {
+    background-position:
+      -100% 0,
+      0 0;
+  }
+}

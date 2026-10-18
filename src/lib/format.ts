@@ -175,6 +175,12 @@ export function formatarDataPontuada(data: Date | string): string {
   return `${dia}.${mes}.${ano}`;
 }
 
+/** "18/10/2026 15:05" — para planilha (o Excel reconhece como data e hora). */
+export function formatarDataHoraPlanilha(data: Date | string): string {
+  const { dia, mes, ano, hora, minuto } = emBrasilia(data);
+  return `${dia}/${mes}/${ano} ${String(hora).padStart(2, "0")}:${String(minuto).padStart(2, "0")}`;
+}
+
 /** "12/03" — data curta. */
 export function formatarDiaMes(data: Date | string): string {
   const { dia, mes } = emBrasilia(data);

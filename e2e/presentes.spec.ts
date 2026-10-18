@@ -75,7 +75,7 @@ test.describe("escolher presente → copiar código → abrir WhatsApp", () => {
     expect(whatsapp.origin + whatsapp.pathname).toBe("https://wa.me/5598999676346");
     const texto = whatsapp.searchParams.get("text") ?? "";
     // O Intl separa "R$" do número com espaço inseparável; o resto da frase usa espaço comum.
-    expect(texto).toContain("Presente: Cota Ouro (R$ 250)");
+    expect(texto).toContain("Presente: Cota Ouro (R$\u00A0250)");
     expect(texto.endsWith("Meu nome: ")).toBe(true);
   });
 });

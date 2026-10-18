@@ -4,7 +4,7 @@ import { expect, test as base } from "@playwright/test";
  * Rotas que os links já apontam mas que só existem em fases futuras (DECISOES L4).
  * O prefetch delas responde 404 — tolerado só para estas. Remover cada uma quando a fase chegar.
  */
-const ROTAS_FUTURAS = ["/convidados", "/favicon.ico"];
+const ROTAS_FUTURAS = ["/favicon.ico"];
 
 const ehRotaFutura = (url: string) => {
   const caminho = new URL(url).pathname;
@@ -16,9 +16,11 @@ const ehRotaFutura = (url: string) => {
  * ou se algum recurso responder 404 fora das rotas futuras e da navegação principal
  * (teste que visita um 404 de propósito não conta).
  */
-export const test = base.extend<{ errosDaPagina: string[] }>({
+export const test = base.extend<{ errosDaPagina: string[]; respostasEsperadas: string[] }>({
+  /** Caminhos cujo status ≥400 o teste provoca de propósito (ex.: senha errada → 401). */
+  respostasEsperadas: [[], { option: true }],
   errosDaPagina: [
-    async ({ page }, usar) => {
+    async ({ page, respostasEsperadas }, usar) => {
       const erros: string[] = [];
       page.on("pageerror", (erro) => erros.push(`pageerror: ${erro.message}`));
       page.on("console", (msg) => {
@@ -30,7 +32,8 @@ export const test = base.extend<{ errosDaPagina: string[] }>({
       page.on("response", (resposta) => {
         const pedido = resposta.request();
         const navegacaoPrincipal = pedido.isNavigationRequest() && pedido.frame() === page.mainFrame();
-        if (resposta.status() >= 400 && !navegacaoPrincipal && !ehRotaFutura(resposta.url())) {
+        const esperada = respostasEsperadas.includes(new URL(resposta.url()).pathname);
+        if (resposta.status() >= 400 && !navegacaoPrincipal && !ehRotaFutura(resposta.url()) && !esperada) {
           erros.push(`${resposta.status()}: ${resposta.url()}`);
         }
       });

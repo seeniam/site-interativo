@@ -389,3 +389,40 @@ o mapa; screenshots e decisões desatualizados. Também foi pego na revisão vis
   falha de rede (requisição abortada, dados mantidos, "Tentar de novo"), teclado do início ao fim, validação no
   blur, limite da sessão, honeypot fora do Tab, HTML do servidor sem envio possível, axe nos três passos e no
   agradecimento, confete ausente com movimento reduzido.
+
+---
+
+## Fase 6 — `/convidados`
+
+### O que foi feito
+- **Porta no servidor:** a página lê o cookie e decide entre a tela de login e o painel; o painel busca os dados em
+  `GET /api/convidados` (401 sem sessão). A página em si nunca lê a lista. Layout próprio, sem a navegação do
+  convidado; `noindex, nofollow`.
+- **Login** sóbrio com o monograma; aviso "modo demonstração" com a senha só quando o ambiente é de demonstração
+  (`senhaVisivelNoLogin`, com teste de que em produção é sempre `null`).
+- **Painel:** três contadores com filete (o número sobe uma vez, só CSS); busca com `useDeferredValue` que ignora
+  acento e acha também pelo acompanhante; chips; cartões no celular e tabela no desktop (≥1024px) com cabeçalho
+  fixo, zebra em papel, números à direita, ordenação por nome/data e 25 por página; agrupamento com subtotal;
+  telefones mascarados até "Mostrar telefones"; CSV; atualização a cada 15 s com a aba visível (e ao voltar a ela);
+  estados de carregando (brilho dourado), vazio (ícone de aliança) e erro ("Tentar de novo").
+- Lógica pura e testada em `src/lib/convidados.ts` e `src/lib/csv.ts`.
+
+### Decisões
+| # | Decisão | Motivo |
+|---|---------|--------|
+| C1 | "Mostrar telefones" sem PIN. | A seção 6.6 (detalhada) pede o botão como camada de discrição; o "com PIN" aparece só no resumo da Fase 10. Os noivos já entraram com senha — um segundo código seria mais uma coisa para esquecer, sem proteger dado nenhum a mais (o telefone já está no navegador deles). |
+| C2 | "Tempo real" = revalidação a cada 15 s com a aba visível. | É o que a 6.6 descreve; o resumo da fase diz "realtime". |
+| C3 | O chip "Por quem convidou" liga/desliga o **agrupamento** (com subtotal), em vez de ser mais um filtro. | A 6.6 lista o chip e o agrupamento opcional; um filtro por pessoa repetiria o que os grupos já mostram. |
+| C4 | O CSV exporta o que está na tela (busca e filtro aplicados), na ordem atual. Células que começam com `=`, `+`, `-` ou `@` ganham apóstrofo. | Nome e recado vêm de convidados: sem isso, o Excel executaria fórmula (injeção de CSV) no computador dos noivos. |
+| C5 | Quem não vem fica no grupo "Quem não vem (não informa)". | O formulário só pergunta "quem convidou" para quem vem (6.4). |
+| C6 | Contadores lado a lado já no celular. | Empilhados, ocupavam quase 300 px antes da lista (revisão visual na 390). |
+| C7 | Tabela com larguras fixas (`table-layout: fixed`). | Com o agrupamento, cada grupo calculava as próprias colunas e elas desalinhavam (revisão visual). |
+| C8 | Higiene: teste novo reprova caractere invisível literal (BOM, espaço inseparável, marca de acento solta) no código. | Pegou um espaço inseparável literal num teste da Fase 4; agora o código usa os escapes. |
+| C9 | `await connection()` antes de conferir a validade da sessão na página. | Com `partialPrefetching`, o Next pré-renderiza mesmo depois de `cookies()`, e a hora atual não pode entrar nessa pré-renderização. |
+
+### Fechamento da Fase 6 (2026-10-18)
+- Screenshots: `docs/qa/fase-6/` — login, lista e lista agrupada (telefones visíveis) em 390, 768 e 1440.
+- E2E: porta sem dado nenhum (e 401 na rota), senha errada, `noindex`, contadores e máscara de telefone, busca
+  (sem acento, por acompanhante), chips e agrupamento, CSV (BOM, `;`, só o filtrado), tabela com ordenação no
+  desktop, **confirmar presença numa aba → aparece sozinho na lista aberta em outra**, sair, estados vazio e de
+  erro, axe na porta e no painel.

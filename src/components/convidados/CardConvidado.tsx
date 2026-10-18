@@ -1,4 +1,4 @@
-import { CalendarDays, UsersRound } from "lucide-react";
+import { CalendarDays, Phone, UsersRound } from "lucide-react";
 import { SeloStatus } from "@/components/ui/SeloStatus";
 import { textos } from "@/config/textos";
 import { formatarDiaMes } from "@/lib/format";
@@ -9,9 +9,14 @@ export interface CardConvidadoProps {
   status: StatusResposta;
   /** Quantas pessoas vêm junto (não conta o próprio convidado). */
   acompanhantes: number;
-  /** Quem convidou: o nome da noiva ou do noivo. */
+  /** Quem convidou: o nome da noiva ou do noivo. Vazio para quem não vem. */
   convidadoPor: string;
   confirmadoEm: Date;
+  /** Telefone já no formato de exibição (mascarado ou não — quem decide é a lista). */
+  telefone?: string;
+  recado?: string;
+  /** A pessoa mudou a resposta depois da primeira. */
+  atualizada?: boolean;
   /** Nível do título na página onde o card aparece. */
   nivelTitulo?: "h2" | "h3" | "h4";
 }
@@ -23,6 +28,9 @@ export function CardConvidado({
   acompanhantes,
   convidadoPor,
   confirmadoEm,
+  telefone,
+  recado,
+  atualizada = false,
   nivelTitulo: Titulo = "h3",
 }: CardConvidadoProps) {
   const data = formatarDiaMes(confirmadoEm);
@@ -42,25 +50,44 @@ export function CardConvidado({
           <div>
             <dt className="sr-only">{rotulos.acompanhantes}</dt>
             <dd className="flex items-center gap-1.5 numeros">
-              <UsersRound aria-hidden size={15} strokeWidth={1.5} className="text-ouro" />+{acompanhantes}
+              <UsersRound aria-hidden size={15} strokeWidth={1.5} className="text-ouro-escuro" />+{acompanhantes}
+            </dd>
+          </div>
+        )}
+        {convidadoPor && (
+          <div>
+            <dt className="sr-only">{rotulos.convidadoPor}</dt>
+            <dd>
+              <span aria-hidden>{textos.convidados.prefixoConvidadoPor} </span>
+              {convidadoPor}
             </dd>
           </div>
         )}
         <div>
-          <dt className="sr-only">{rotulos.convidadoPor}</dt>
-          <dd>
-            <span aria-hidden>{textos.convidados.prefixoConvidadoPor} </span>
-            {convidadoPor}
-          </dd>
-        </div>
-        <div>
           <dt className="sr-only">{rotulos.respondeuEm}</dt>
           <dd className="flex items-center gap-1.5 numeros">
-            <CalendarDays aria-hidden size={15} strokeWidth={1.5} className="text-ouro" />
+            <CalendarDays aria-hidden size={15} strokeWidth={1.5} className="text-ouro-escuro" />
             <time dateTime={confirmadoEm.toISOString()}>{data}</time>
+            {atualizada && <span className="text-12">({textos.convidados.mudouResposta})</span>}
           </dd>
         </div>
+        {telefone && (
+          <div>
+            <dt className="sr-only">{textos.convidados.tabela.telefone}</dt>
+            <dd className="flex items-center gap-1.5 numeros">
+              <Phone aria-hidden size={14} strokeWidth={1.5} className="text-ouro-escuro" />
+              <span data-telefone="">{telefone}</span>
+            </dd>
+          </div>
+        )}
       </dl>
+
+      {recado && (
+        <p className="mt-3 border-l border-ouro pl-3 font-display text-16 text-tinta italic">
+          <span className="sr-only">{textos.convidados.tabela.recado}: </span>
+          {recado}
+        </p>
+      )}
     </article>
   );
 }

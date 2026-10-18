@@ -62,3 +62,11 @@ export function lerAmbiente(v: VariaveisServidor): Ambiente {
     sal: v.RSVP_SALT?.trim() ?? "",
   };
 }
+
+/**
+ * A senha que a tela de login mostra no aviso "modo demonstração" (briefing 5).
+ * Só existe em demonstração; em produção é sempre `null` — há teste garantindo.
+ */
+export function senhaVisivelNoLogin(ambiente: Ambiente): string | null {
+  return ambiente.modo === "demonstracao" ? ambiente.senhaNoivos : null;
+}
