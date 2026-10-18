@@ -8,6 +8,8 @@ test.describe("/presentear", () => {
   test("três cotas como três planos, cada uma com seu ícone, a Ouro em destaque", async ({ page }) => {
     await page.goto("/presentear");
     await expect(page.locator("h1")).toHaveText("Presentear");
+    // Sem parágrafo de apoio abaixo do título (retirado a pedido do cliente, DECISOES B4).
+    await expect(page.locator("main")).not.toContainText(/faça o PIX na hora|começar a nossa casa/);
     const planos = page.locator(".planos-cotas > li");
     await expect(planos).toHaveCount(3);
     await expect(planos.nth(2)).toHaveAttribute("data-destaque", "");

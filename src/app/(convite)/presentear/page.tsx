@@ -35,7 +35,6 @@ export default function Presentear() {
       <header className="mx-auto mb-12 flex max-w-2xl flex-col items-center gap-5 text-center sm:mb-16">
         <h1 className="font-display text-49 font-light text-tinta sm:text-61">{presentear.titulo}</h1>
         <FileteDourado />
-        <p className="medida text-16 text-balance text-fumaca">{presentear.texto}</p>
       </header>
 
       {/* Enquanto o banco responde, as cotas já aparecem (cotas nunca ficam indisponíveis). */}

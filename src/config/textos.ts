@@ -67,7 +67,6 @@ export const textos = {
   },
   presentear: {
     titulo: "Presentear",
-    texto: "Escolha uma cota e faça o PIX na hora. Cada uma ajuda a começar a nossa casa.",
     filtros: {
       rotulo: "Filtrar por valor",
       todos: "Todos",
