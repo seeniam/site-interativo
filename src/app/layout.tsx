@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SCRIPT_ABERTURA } from "@/components/layout/AberturaConvite";
 import { casamento } from "@/config/casamento";
 import { textos } from "@/config/textos";
 import { COR_PAPEL } from "@/lib/tokens";
@@ -25,8 +26,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" className={`${cormorant.variable} ${jost.variable} ${pinyon.variable}`}>
-      <body className="min-h-dvh">{children}</body>
+    // suppressHydrationWarning: o script da abertura marca o <html> antes da hidratação (DECISOES L1).
+    <html lang="pt-BR" className={`${cormorant.variable} ${jost.variable} ${pinyon.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_ABERTURA }} />
+      </head>
+      <body className="min-h-dvh">
+        <a href="#conteudo" className="pular-conteudo">
+          {textos.navegacao.pularParaConteudo}
+        </a>
+        {children}
+      </body>
     </html>
   );
 }

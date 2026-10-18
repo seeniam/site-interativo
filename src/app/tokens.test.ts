@@ -151,7 +151,10 @@ describe("contraste AA", () => {
 
 describe("anel de foco (briefing 7.2 corrigido)", () => {
   it("usa --ouro-escuro, não --ouro", () => {
-    const foco = blocos(css).filter((b) => b.seletor.includes("focus-visible") || b.seletor.includes('"foco"'));
+    // Blocos de foco que desenham anel (alguns só reposicionam, como o "pular para o conteúdo").
+    const foco = blocos(css).filter(
+      (b) => (b.seletor.includes("focus-visible") || b.seletor.includes('"foco"')) && /outline:/.test(b.corpo),
+    );
     expect(foco.length).toBeGreaterThanOrEqual(2);
     for (const { corpo } of foco) expect(corpo).toMatch(/outline:\s*2px solid var\(--ouro-escuro\)/);
   });

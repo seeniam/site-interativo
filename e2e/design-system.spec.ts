@@ -173,8 +173,3 @@ test.describe("movimento reduzido", () => {
     await expect(palco.locator("clipPath")).toHaveCount(0);
   });
 });
-
-test("a raiz leva ao design system durante a Fase 0", async ({ page }) => {
-  await page.goto("/");
-  await expect(page).toHaveURL(/\/design-system$/);
-});

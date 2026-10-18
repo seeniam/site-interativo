@@ -223,3 +223,30 @@ contínua da Fase 1 (retrabalho) até a última fase, com portão e commit por f
 - O adaptador Postgres é testado contra o **`db/schema.sql` real** no `pg-mem`. Um detalhe do pg-mem (`on conflict do nothing returning` devolve linha mesmo ignorando) levou a reservar com `where not exists` + `on conflict` — correto nos dois.
 - Config com os dados confirmados; sem galeria; "nossa história" = lista inteira "a definir" (sem marcos, sem seção); cotas sem frase (descrição vazia, como no briefing); FAQ a partir dos dados confirmados (V6).
 - Os "a definir" ficaram exatamente os três do briefing (D1–D3).
+
+---
+
+## Fase 2 — Layout, navegação e abertura
+
+### O que vai ser feito
+1. Grupo de rotas `(convite)` com o layout do convite: **cabeçalho no desktop (≥ 768px)** que encolhe ao rolar, **barra inferior fixa no celular** (Convite · Presentear · Confirmar) com `backdrop-filter` e safe-area, que aparece só depois do herói (sem herói na página, aparece sempre), e **rodapé** (monograma, assinatura em Pinyon, link discreto para `/convidados`, créditos). O `/design-system` fica fora desse layout.
+2. `not-found` com a identidade: monograma, "Esta página não existe no nosso convite", botão de volta.
+3. **Abertura do convite** (3.5.1), uma vez por sessão.
+4. Link "Pular para o conteúdo" (teclado e leitor de tela).
+
+### Decisões
+| # | Decisão | Motivo |
+|---|---------|--------|
+| L1 | A abertura é **CSS + um script inline no `<head>`**: o script lê o `sessionStorage` e marca `<html data-abertura>` antes da primeira pintura; o monograma se desenha com `stroke-dashoffset` em CSS, sobe, e a camada some sozinha. Sem JavaScript de animação. | Aparece antes da hidratação (sem "piscar" o herói), não pesa no bundle e não atrasa o LCP. Com `prefers-reduced-motion`, o script nem liga a abertura. |
+| L2 | No celular não há cabeçalho no topo: a navegação é a barra inferior. | Briefing 6.1; o topo do celular é da foto. |
+| L3 | Créditos do rodapé: "Foto: arquivo do casal". | O briefing pede créditos sem dizer quais; não invento autoria. |
+| L4 | Até as Fases 3–6, os links para rotas que ainda não existem levam ao 404 com a identidade. | Não implementar fase futura adiantado. |
+
+### Fora do escopo
+- Conteúdo do convite (herói, seções): Fase 3. Nesta fase a home é o layout vazio.
+
+### Fechamento da Fase 2
+- Abertura em CSS + script no `<head>` (L1), conferida quadro a quadro (350/800/1150/1450 ms): traçado em ouro, preenchimento, brilho, monograma subindo e camada abrindo. Não repete na sessão, só na home, nunca com movimento reduzido — tudo coberto por E2E.
+- Barra inferior recriada por rota (`key`) em vez de `setState` no corpo do efeito (regra do React Compiler).
+- A fixture do E2E passou a reprovar **qualquer resposta HTTP ≥ 400** fora de uma lista explícita de rotas futuras (`e2e/fixtures.ts`), que encolhe a cada fase.
+- Assinatura do rodapé em 25px no celular para não quebrar no "&".

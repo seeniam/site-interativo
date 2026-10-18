@@ -447,3 +447,241 @@
     mask-size: 224px 20px;
   }
 }
+
+/* ── Layout do convite ────────────────────────────────────────────────────── */
+@layer components {
+  .pular-conteudo {
+    position: absolute;
+    left: 16px;
+    top: -100px;
+    z-index: 200;
+    padding: 12px 20px;
+    border-radius: 999px;
+    background: var(--tinta);
+    color: var(--branco);
+    font-size: var(--text-14);
+  }
+  .pular-conteudo:focus-visible {
+    top: 16px;
+  }
+
+  /* Cabeçalho do desktop: encolhe ao rolar. */
+  .cabecalho {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 88px;
+    background: rgb(252 250 247 / 0);
+    border-bottom: 1px solid transparent;
+    transition:
+      height 300ms var(--ease-convite),
+      background-color 300ms var(--ease-convite),
+      border-color 300ms var(--ease-convite);
+  }
+  .cabecalho[data-encolhido] {
+    height: 64px;
+    background: rgb(252 250 247 / 0.86);
+    border-bottom-color: var(--borda);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
+  }
+  .cabecalho__marca {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    width: 68px;
+    transition: width 300ms var(--ease-convite);
+  }
+  .cabecalho[data-encolhido] .cabecalho__marca {
+    width: 54px;
+  }
+  .cabecalho__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: var(--fumaca);
+    font-size: var(--text-14);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    transition: color 200ms var(--ease-convite);
+  }
+  @media (hover: hover) {
+    .cabecalho__link:hover {
+      color: var(--tinta);
+    }
+  }
+  .cabecalho__link[aria-current="page"] {
+    color: var(--tinta);
+    text-decoration: underline;
+    text-decoration-color: var(--ouro);
+    text-underline-offset: 8px;
+  }
+  .cabecalho__cta {
+    min-height: 44px;
+    padding: 0 22px;
+    font-size: var(--text-14);
+  }
+
+  /* Barra inferior do celular, com safe-area do iPhone. */
+  .barra-inferior {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 50;
+    padding: 6px max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+    background: rgb(252 250 247 / 0.88);
+    border-top: 1px solid var(--borda);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    backdrop-filter: blur(16px) saturate(1.2);
+    transform: translateY(110%);
+    transition: transform 360ms var(--ease-convite);
+  }
+  .barra-inferior[data-visivel] {
+    transform: none;
+  }
+  .barra-inferior__item {
+    display: flex;
+    min-height: 52px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border-radius: 14px;
+    color: var(--fumaca);
+    font-size: var(--text-12);
+    letter-spacing: 0.02em;
+  }
+  .barra-inferior__item[aria-current="page"] {
+    color: var(--tinta);
+  }
+  .barra-inferior__item[aria-current="page"] svg {
+    color: var(--ouro-escuro);
+  }
+  /* O conteúdo não fica escondido atrás da barra no celular. */
+  .com-barra-inferior {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 768px) {
+    .com-barra-inferior {
+      padding-bottom: 0;
+    }
+  }
+
+  .rodape {
+    padding-block: clamp(72px, 12vw, 120px) 40px;
+  }
+  .rodape__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 8px;
+    text-decoration: underline;
+    text-decoration-color: var(--borda);
+    text-underline-offset: 4px;
+  }
+  @media (hover: hover) {
+    .rodape__link:hover {
+      color: var(--tinta);
+      text-decoration-color: var(--ouro);
+    }
+  }
+}
+
+/* ── Abertura do convite (briefing 3.5.1, DECISOES L1) ────────────────────── */
+.abertura {
+  display: none;
+}
+html[data-abertura] .abertura {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--papel);
+  animation: abertura-abre 420ms var(--ease-convite) 1.25s forwards;
+}
+.abertura__monograma {
+  width: min(62vw, 300px);
+  height: auto;
+  overflow: visible;
+  color: var(--tinta);
+  animation: abertura-sobe 520ms var(--ease-convite) 1.05s forwards;
+}
+.abertura__glifo {
+  fill: currentColor;
+  fill-opacity: 0;
+  stroke: url(#abertura-ouro);
+  stroke-width: 6;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation:
+    abertura-desenha 1s var(--ease-convite) forwards,
+    abertura-preenche 450ms ease-out 0.85s forwards;
+}
+.abertura__glifo--ouro {
+  fill: url(#abertura-ouro);
+}
+.abertura__glifo--2 {
+  animation-delay: 0.12s, 0.9s;
+}
+.abertura__glifo--3 {
+  animation-delay: 0.24s, 0.95s;
+}
+.abertura__luz {
+  transform: translateX(-600px);
+  animation: abertura-brilho 700ms cubic-bezier(0.45, 0, 0.2, 1) 0.95s forwards;
+}
+@keyframes abertura-desenha {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes abertura-preenche {
+  to {
+    fill-opacity: 1;
+    stroke-opacity: 0;
+  }
+}
+@keyframes abertura-brilho {
+  to {
+    transform: translateX(1700px);
+  }
+}
+@keyframes abertura-sobe {
+  to {
+    transform: translateY(-38dvh) scale(0.36);
+  }
+}
+@keyframes abertura-abre {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+/* O herói se revela de baixo, com a foto em scale(1.06) → 1 (usado na Fase 3). */
+html[data-abertura] .heroi-revela {
+  animation: heroi-revela 900ms var(--ease-convite) 1.25s both;
+}
+html[data-abertura] .heroi-foto-revela {
+  animation: heroi-foto-revela 1400ms var(--ease-convite) 1.25s both;
+}
+@keyframes heroi-revela {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+@keyframes heroi-foto-revela {
+  from {
+    transform: scale(1.06);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-abertura] .abertura {
+    display: none;
+  }
+}

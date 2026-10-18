@@ -3,6 +3,27 @@
  * O botão diz o que acontece. Conteúdo do casal (datas, locais, frases) fica em `casamento.ts`.
  */
 export const textos = {
+  navegacao: {
+    rotulo: "Navegação do convite",
+    pularParaConteudo: "Pular para o conteúdo",
+    inicio: "Voltar ao início do convite",
+    itens: [
+      { href: "/", rotulo: "Convite", icone: "alianca" },
+      { href: "/presentear", rotulo: "Presentear", icone: "presente" },
+      { href: "/confirmar-presenca", rotulo: "Confirmar", icone: "taca" },
+    ],
+    confirmarPresenca: "Confirmar presença",
+  },
+  rodape: {
+    assinatura: (casal: string) => `com amor, ${casal}`,
+    convidados: "Lista de convidados",
+    creditoFoto: "Foto: arquivo do casal",
+  },
+  naoEncontrada: {
+    titulo: "Esta página não existe no nosso convite",
+    texto: "O endereço pode ter mudado, ou um caractere ficou de fora no link.",
+    voltar: "Voltar ao convite",
+  },
   rsvp: {
     erros: {
       nomeObrigatorio: "Escreva seu nome completo, por favor.",
