@@ -24,6 +24,12 @@ describe("firestore.rules", () => {
     expect(bloco).toContain("request.resource.data.criadoEm == request.time");
   });
 
+  it("confirmacoes nunca tem leitura pública (briefing 5)", () => {
+    const bloco = blocoDa("confirmacoes");
+    expect(bloco).not.toMatch(/allow (read|get|list)[^;]*:\s*if true/);
+    expect(bloco).toMatch(/allow read: if false;|allow read: if request\.auth != null/);
+  });
+
   it("qualquer outra coleção fica fechada", () => {
     expect(regras).toMatch(/match \/\{documento=\*\*\} \{\s*allow read, write: if false;/);
   });

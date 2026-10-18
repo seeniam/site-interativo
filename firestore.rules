@@ -3,7 +3,8 @@ rules_version = '2';
 // Regras do convite de Jaqueline & Diorlando (briefing 5 + DECISOES F2/F3).
 // - Coleções só de inclusão: create validado, update e delete bloqueados para todos.
 // - Limites iguais aos de src/lib/schemas/limites.ts (conferido por scripts/regras-firestore.test.ts).
-// - Risco registrado em DECISOES (Fase 1): read em confirmacoes expõe telefones.
+// - PROVISÓRIO até a Fase 5: leitura de confirmacoes fechada para todos. A Fase 5 gera a regra
+//   definitiva (leitura só dos noivos por UID, rsvp_index) com testes no emulador — briefing 5.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -27,7 +28,8 @@ service cloud.firestore {
     }
 
     match /confirmacoes/{id} {
-      allow read: if true;
+      // Leitura NUNCA é pública (briefing 5): nome e telefone de todos os convidados.
+      allow read: if false;
       allow create: if request.resource.data.keys().hasOnly(
                          ['nome', 'telefone', 'status', 'acompanhantes', 'convidadoPor', 'recado', 'criadoEm'])
                     && request.resource.data.keys().hasAll(

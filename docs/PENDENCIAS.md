@@ -42,11 +42,14 @@ valores das três cotas, foto do casal.
 | P7 | Sobrenomes, se quiserem no rodapé | Rodapé | Opcional: sem sobrenome, o rodapé usa só os nomes |
 | P8 | Lista de presentes nomeados, se houver além das cotas | `/presentear` | Só as três cotas |
 | P9 | Horário de término da festa | "Adicionar à agenda" (.ics e Google Agenda) | A agenda usa 6 horas a partir do início (`DURACAO_PLANO_B_HORAS` em `lib/ics.ts`) |
+| P10 | E-mails das duas contas de acesso a `/convidados` (Jaqueline e Diorlando) | Login dos noivos (briefing 6.6) | Contas criadas à mão no console do Firebase; na demonstração, login de exemplo |
 
 ## Pendências técnicas (do time, não do cliente)
 
 | # | Item | Quando |
 |---|------|--------|
-| T1 | Testar `firestore.rules` no emulador do Firebase (exige Java + Firebase CLI). Hoje há uma guarda estática em `scripts/regras-firestore.test.ts`. | Antes de publicar com o Firestore |
-| T2 | Decidir a privacidade dos telefones em `confirmacoes` (risco registrado em DECISOES, Fase 1). | Antes da Fase 6 |
+| T1 | Teste das regras com `@firebase/rules-unit-testing` no emulador — **obrigatório** pelo briefing 5. Exige Java 11+ e firebase-tools (não instalados nesta máquina). Hoje há só a guarda estática. | Fase 5 |
+| T2 | ~~Privacidade dos telefones~~ — resolvido pelo briefing (leitura só dos noivos). Leitura de `confirmacoes` já fechada no `firestore.rules` provisório. | Resolvido |
+| T4 | UIDs das contas dos noivos em `.env`, injetados na regra por geração do arquivo. | Fase 5 |
+| T5 | `NEXT_PUBLIC_RSVP_SALT` (sal do hash do telefone) e Firebase App Check (chave reCAPTCHA) para mitigar o risco residual do `rsvp_index`. | Fase 5 |
 | T3 | Criar o projeto Firebase do casal e preencher `.env.local` (modelo em `.env.example`). Sem isso, o build de produção recusa rodar, a não ser com `NEXT_PUBLIC_MODO_DEMONSTRACAO=1` (preview para o casal). | Antes de publicar |

@@ -264,10 +264,45 @@ Os dois estados são visualmente distintos: "a confirmar" em `--champanhe` com t
 - **motion** (framer-motion) para animação · **lucide-react** para ícones
 - **react-hook-form + zod** para formulários · **sonner** para toasts
 - **Firebase (Firestore)** como backend do RSVP e dos presentes — client SDK, sem servidor.
-  Coleções: `confirmacoes`, `presentes_reservados`. Regras do Firestore em `firestore.rules`:
-  `create` liberado com validação de formato; `read` liberado só em `confirmacoes`;
-  `update`/`delete` bloqueados para todos. **Nunca** colocar chave de serviço no cliente.
-  As chaves públicas do Firebase vão em `.env.local` (`NEXT_PUBLIC_*`) com `.env.example` versionado.
+  **Nunca** colocar chave de serviço no cliente. As chaves públicas do Firebase vão em
+  `.env.local` (`NEXT_PUBLIC_*`) com `.env.example` versionado.
+
+  ### Modelo de dados e regras — leitura NUNCA é pública
+  > Correção de uma falha da versão anterior deste briefing, que liberava `read` em
+  > `confirmacoes`. Isso deixava nome e telefone de todos os convidados legíveis por
+  > qualquer visitante, bastando abrir o console do navegador. Não é risco teórico: é
+  > exposição de dado pessoal de centenas de pessoas, e o PIN de `/convidados` não
+  > protegia nada, porque a regra do Firestore é o que vale, não a interface.
+
+  **`confirmacoes/{autoId}`** — todo o dado pessoal (nome, telefone, acompanhantes, recado).
+  - `create`: liberado, **com validação de formato na própria regra** (tipos, tamanho máximo
+    de cada campo, telefone com 10 ou 11 dígitos, no máximo N acompanhantes, recado ≤ 240,
+    nenhum campo além dos previstos, `criadoEm == request.time`).
+  - `read`, `update`, `delete`: **somente os noivos** —
+    `request.auth != null && request.auth.uid in [UID_JAQUELINE, UID_DIORLANDO]`.
+    Os UIDs vêm de `.env` e entram na regra por geração do arquivo, nunca escritos à mão.
+
+  **`rsvp_index/{sha256(telefone + SALT)}`** — só para o aviso "você já confirmou".
+  - Contém **exclusivamente** `{ em: timestamp }`. Nenhum nome, nenhum telefone, nenhum
+    status. Mesmo lido, não identifica ninguém.
+  - `get`: liberado. **`list`: bloqueado** — isso é o que impede alguém baixar a coleção.
+  - Honestidade sobre o limite: com o salt no cliente, quem souber um telefone específico
+    consegue descobrir se aquela pessoa confirmou. Não vaza *quem* confirmou, mas confirma
+    um palpite. Mitigar com **Firebase App Check** e aceitar o resto como risco residual,
+    registrado em `DECISOES.md`. Se isso incomodar, a alternativa é não ter o aviso.
+
+  **`presentes_reservados/{idDaCota}`** — `read` público (não tem dado pessoal), `create`
+  liberado com validação, `update`/`delete` bloqueados.
+
+  **Nunca** conceder `update` a visitante: "atualizar a resposta" grava um novo documento
+  em `confirmacoes` com `atualizaDe: <hash>`, e a lista mostra o mais recente por hash.
+  Assim ninguém consegue alterar nem apagar a resposta de outra pessoa.
+
+  **Teste obrigatório** com `@firebase/rules-unit-testing`, rodando no `pnpm test`:
+  visitante anônimo consegue `create` válido, é **negado** em `read`/`list` de
+  `confirmacoes`, é negado em `list` de `rsvp_index`, é negado em `update` e `delete`;
+  usuário autenticado fora da lista de UIDs é negado em tudo; os noivos leem. Regra sem
+  teste não conta como regra.
 - **PIX gerado no cliente**: implementar o payload **BR Code (EMV)** em `lib/pix.ts`
   — função pura `gerarPayloadPix({ chave, nome, cidade, valor, txid })` com **CRC16-CCITT (0x1021)**,
   coberta por teste unitário comparando com um payload conhecido. QR via `qrcode` (canvas/SVG).
@@ -358,8 +393,9 @@ Formulário em **três passos** com barra de progresso em filete dourado:
 Regras de UX obrigatórias:
 - Validação em `onBlur`, mensagem de erro humana ("Faltou o telefone pra gente te avisar de mudanças").
 - Botão de envio com estado `carregando` e proteção contra duplo clique.
-- **Idempotência**: se o mesmo telefone já confirmou, mostrar "Você já confirmou em 00/00.
-  Quer atualizar sua resposta?" e permitir sobrescrever.
+- **Idempotência**: consultar `rsvp_index/{hash do telefone}` com um `get` (nunca listar
+  `confirmacoes`) e, se existir, mostrar "Você já confirmou em 00/00. Quer atualizar sua
+  resposta?". Atualizar grava um documento novo com `atualizaDe`, nunca sobrescreve.
 - Campo honeypot escondido + limite simples por `sessionStorage` contra spam.
 - Erro de rede: manter os dados preenchidos e oferecer "Tentar de novo".
 - Sucesso → `/agradecimento?nome=...` (só o primeiro nome, nada sensível na URL).
@@ -384,9 +420,13 @@ Regras de UX obrigatórias:
   ordenação por nome/data, 25 por página.
 - **Agrupamento opcional** por "quem convidou", com subtotal por grupo.
 - **Exportar CSV** (gerado no cliente, `;` como separador, UTF-8 com BOM para abrir no Excel).
-- **Privacidade**: telefone exibido mascarado (`(98) 9****-**94`) por padrão, com um botão
-  "Mostrar telefones" protegido por um PIN simples vindo de `NEXT_PUBLIC_PIN_NOIVOS`.
-  Deixar claro em `docs/DECISOES.md` que isso é dissuasão, não segurança real.
+- **Acesso restrito aos noivos.** A rota inteira exige login (Firebase Auth, e-mail e senha,
+  duas contas criadas à mão no console — não há cadastro público). Visitante sem sessão vê
+  uma tela de login sóbria com o monograma, nunca a lista nem os contadores.
+  A proteção real está na regra do Firestore (seção 5); a tela de login é só a porta.
+- Telefone exibido mascarado (`(98) 9****-**94`) mesmo depois do login, com um botão
+  "Mostrar telefones" — aqui sim como camada de discrição, para a tela não ficar cheia de
+  número exposto quando alguém olha por cima do ombro ou quando os noivos tiram um print.
 - **Atualizar**: botão com ícone de refresh + `onSnapshot` do Firestore para chegar sozinho.
 - **Estados**: carregando (skeletons com o shimmer dourado), vazio ("Ninguém confirmou ainda.
   Compartilhe o convite 💛" — sem emoji: usar o ícone próprio de aliança), e erro com "Tentar de novo".
@@ -484,6 +524,8 @@ teste que valida o payload PIX da tela contra `lib/pix.ts`.
 
 ### Fase 5 — `/confirmar-presenca` e `/agradecimento`
 Formulário em 3 passos, acompanhantes, idempotência, honeypot, erros, confete.
+**Esta fase escreve o `firestore.rules` definitivo da seção 5**, com os testes de regra.
+Nada vai para produção com leitura pública em `confirmacoes`.
 **Fechamento:** E2E do caminho feliz, do caminho "não vou", do telefone repetido e da
 falha de rede (mock); teste de teclado do início ao fim sem mouse.
 

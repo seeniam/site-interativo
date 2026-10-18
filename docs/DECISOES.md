@@ -149,3 +149,34 @@ anel em `--ouro-escuro` (~4,7:1). Decisão do casal/briefing.
 **Nota de nomenclatura:** a "camada `lib/firebase`" do briefing é `src/lib/dados/` (Firestore + demonstração local atrás da mesma interface).
 
 **Revisão automática de segurança:** apontou o mesmo risco já registrado — telefones legíveis por qualquer visitante com `read` público em `confirmacoes`. Mantido como decisão pendente do cliente (T2) porque contraria a seção 5 do briefing; recomendação no relatório da fase.
+
+---
+
+## Briefing atualizado após a Fase 1 (2026-10-17) — privacidade dos convidados
+
+O cliente reescreveu a seção 5: **leitura de `confirmacoes` nunca é pública**. Só os noivos
+leem (Firebase Auth, UIDs na regra); o aviso "você já confirmou" usa `rsvp_index/{sha256(telefone + SALT)}`
+com `get` liberado e `list` bloqueado; teste de regras obrigatório com `@firebase/rules-unit-testing`.
+A regra definitiva é escrita na Fase 5.
+
+- **Risco da Fase 1 resolvido no briefing.** A exposição de telefones deixa de ser decisão pendente.
+- **Feito agora (sem adiantar a Fase 5):** `firestore.rules` fecha a leitura de `confirmacoes` para todos
+  até a regra definitiva, e a guarda estática reprova qualquer `read: if true` ali. Nenhuma tela lê a coleção hoje.
+- **F2 confirmada pelo briefing:** atualizar resposta = documento novo (`atualizaDe`), nunca `update`.
+- **F3 incorporada ao briefing:** `presentes_reservados` com leitura pública.
+
+### Lacunas do texto novo, para fechar antes ou durante a Fase 5
+1. **Escrita em `rsvp_index`:** o briefing define `get`/`list`, mas não `create`/`update`. Proposta: `create`
+   só se o documento não existir, com `em == request.time`; reconfirmação atualiza `em` só para `request.time`
+   (o campo não identifica ninguém); `delete` bloqueado.
+2. **Atomicidade:** a resposta e o índice devem ir num *batch*, com a regra de `confirmacoes` exigindo
+   `existsAfter(rsvp_index/...)` — senão uma falha no meio deixa resposta sem índice (aviso não aparece) ou o inverso.
+3. **Agrupamento por pessoa:** "mais recente por hash" pede o hash em **toda** resposta (não só nas que têm
+   `atualizaDe`). Proposta: campo `chave` (o hash) em todo documento de `confirmacoes`.
+4. **Emulador para o teste obrigatório:** exige Java 11+ e firebase-tools, que não estão nesta máquina.
+   Proposta: script `test:regras` com `firebase emulators:exec`, incluído no `qa:fase`; o `pnpm test`
+   comum continua sem dependência de Java.
+5. **Demonstração local:** sem Firebase, `/convidados` precisa de um login de demonstração (credencial fixa
+   documentada), para o roteiro de 2 minutos do casal funcionar.
+6. **SHA-256 no navegador** (`crypto.subtle`) só existe em contexto seguro (https ou localhost) — a demonstração
+   aberta por IP da rede local não teria o aviso de "já confirmou".
