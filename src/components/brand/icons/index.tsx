@@ -79,6 +79,17 @@ export function IconeTalheres(props: IconeProps) {
   );
 }
 
+/** Envelope fechado com um coração no lacre — o carinho que vai junto quando não dá para ir. */
+export function IconeCarta(props: IconeProps) {
+  return (
+    <IconeBase {...props}>
+      <rect x="3" y="6" width="18" height="13" rx="1.5" />
+      <path d="M3.5 6.75 12 13l8.5-6.25" />
+      <path d="M12 17.1c-1.6-1-2.3-1.8-2.3-2.6 0-.65.5-1.1 1.1-1.1.5 0 .9.3 1.2.7.3-.4.7-.7 1.2-.7.6 0 1.1.45 1.1 1.1 0 .8-.7 1.6-2.3 2.6z" />
+    </IconeBase>
+  );
+}
+
 /** Ícones referenciáveis pelo config (ex.: o ícone de cada cota de presente). */
 export const ICONES_POR_NOME = {
   alianca: IconeAlianca,
@@ -87,6 +98,7 @@ export const ICONES_POR_NOME = {
   buque: IconeBuque,
   presente: IconePresente,
   talheres: IconeTalheres,
+  carta: IconeCarta,
 } as const;
 
 export type NomeIconeMarca = keyof typeof ICONES_POR_NOME;
@@ -98,4 +110,5 @@ export const ICONES_DA_MARCA = [
   { nome: "Buquê", Icone: IconeBuque },
   { nome: "Presente", Icone: IconePresente },
   { nome: "Talheres", Icone: IconeTalheres },
+  { nome: "Carta", Icone: IconeCarta },
 ] as const;

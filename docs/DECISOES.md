@@ -342,3 +342,50 @@ o mapa; screenshots e decisões desatualizados. Também foi pego na revisão vis
 - Revisão visual: no celular o código copia-e-cola mostra só a primeira linha com fade (de propósito — o botão é a
   ação; o código inteiro está no DOM e selecionável).
 - Ficou de fora: Route Handlers (Fase 5); presentes nomeados (não há nenhum no config — a grade só aparece quando houver).
+
+---
+
+## Fase 5 — `/confirmar-presenca`, `/agradecimento` e as Route Handlers
+
+### O que foi feito
+1. **Route Handlers** (seção 5), finas em `src/app/api/*` sobre funções puras em `src/lib/api/` (testáveis sem subir o
+   Next): `POST /api/rsvp`, `POST /api/rsvp/verificar`, `GET /api/presentes`, `POST /api/presentes/[id]/reservar`,
+   `POST /api/entrar`, `POST /api/sair`, `GET /api/convidados`.
+2. Testes obrigatórios contra o `db/schema.sql` real no pg-mem (`src/lib/api/api.test.ts`): anônimo grava RSVP válido;
+   payload inválido → 400 sem gravar e sem ecoar o que chegou; `/api/convidados` sem sessão, com cookie forjado,
+   assinado com outro segredo, malformado ou vencido → 401 sem dado; `verificar` devolve exatamente
+   `{ jaConfirmou, em? }` (nem telefone, nem nome, nem hash). Guardas estáticas: só `api/convidados` lê a lista, e
+   toda rota de API existente está listada no teste.
+3. `/confirmar-presenca`: três passos com progresso em filete dourado, `react-hook-form` + o mesmo esquema zod do
+   servidor, validação no `onBlur`, máscara de telefone, aviso "Você já confirmou em dd/mm", stepper de
+   acompanhantes, "Quem convidou?" com toque nos nomes dos noivos ou digitação (datalist), recado com contador,
+   honeypot, limite por `sessionStorage`, "Tentar de novo" em falha de rede. Foco vai para o título de cada passo.
+4. `/agradecimento`: "Obrigado, {primeiro nome}!", confete dourado só em CSS, os dois caminhos e a agenda; para
+   "não poderei ir", texto caloroso sem confete.
+
+### Decisões
+| # | Decisão | Motivo |
+|---|---------|--------|
+| R1 | `atualiza_de` recebe o `telefone_hash` quando já havia resposta daquele telefone; `null` na primeira. | O briefing diz "hash da resposta que esta substitui"; as respostas de uma pessoa são identificadas pelo hash do telefone, e vale sempre a mais recente. Nunca há `update`. |
+| R2 | Limites por IP, em memória por instância: RSVP 3/min (briefing), verificar 10/min, reservar 10/min, entrar 5/min. IP = primeiro item do `x-forwarded-for` (preenchido pela Vercel). | O briefing pede limite em `verificar` sem número; 10 cobre quem corrige o telefone algumas vezes e impede varrer números. O login tem a senha como única porta. |
+| R3 | Honeypot preenchido responde `{ ok: true }` e não grava. | Não ensinar o robô a desviar. |
+| R4 | A URL de `/agradecimento` leva o primeiro nome e, só para quem não vem, `resposta=nao`. O nome passa de novo pelo filtro `primeiroNome` na página. | O briefing pede o texto diferente para "não"; a resposta sim/não não é dado sensível. Nome estranho na URL nunca vira conteúdo (teste). |
+| R5 | Agenda em `/agradecimento` só para quem vem. | Não faz sentido convidar para a agenda quem avisou que não vai. |
+| R6 | **Acessibilidade (corrigido na hora):** a barra inferior do celular passou de 88% para 95% de opacidade. | Com um botão preto passando por trás, o rótulo em `--fumaca` caía para 4,17:1 (axe pegou no formulário). A 95% o pior caso fica em ~4,9:1. |
+| R7 | **Dado pessoal (corrigido na hora):** o botão de envio fica desabilitado até a hidratação, e o formulário tem `method="post"`. | Antes da hidratação o formulário era HTML puro sem `action`: um Enter rápido faria um GET nativo com `?nome=…&telefone=…` — telefone na URL, no histórico e nos logs. Teste confere o HTML do servidor. |
+| R8 | `/agradecimento` é pré-carregada quando o convidado chega ao passo 3. | Depois do envio, a troca é imediata; num servidor frio a primeira renderização chegou a 7 s nesta máquina. |
+| R9 | Os nomes dos noivos em "Quem convidou?" não tiram o foco do campo anterior no toque (`pointerdown` sem foco). | Revisão visual pegou: o blur mostrava um erro, a página descia entre o toque e a soltura e o toque se perdia. Teste de regressão. |
+| R10 | O orçamento de JS da home separa a própria home (≤190 KB) do total com o pré-carregamento das rotas vizinhas (≤260 KB). | Com `/confirmar-presenca` existindo, o roteador pré-carrega o JS do formulário depois da carga, em baixa prioridade — é o que faz o botão abrir na hora. Medir junto confundia peso da home com prefetch. |
+| R11 | `GET /api/convidados` devolve a resposta que vale por pessoa (`respostasValendo`), com `atualizada` e sem o hash. | A lista dos noivos (Fase 6) mostra uma linha por pessoa; o hash não serve aos noivos. |
+| R12 | Ícone novo da marca, `IconeCarta` (envelope com coração no lacre), para "Não poderei ir". | Cada opção com seu ícone; a taça é do "sim". Desenhado na mesma grade e traço dos demais. |
+
+### Fora do escopo
+- Tela `/convidados` (login, lista, filtros, CSV): Fase 6. As rotas que ela usa já existem e estão testadas.
+
+### Fechamento da Fase 5 (2026-10-18)
+- Screenshots: `docs/qa/fase-5/` — formulário (passo 1 com o aviso de "já confirmou", passo 2, passo 3) e
+  agradecimento (sim e não) em 390, 768 e 1440.
+- E2E: caminho feliz (com conferência pela rota dos noivos), "não vou", telefone repetido (grava como atualização),
+  falha de rede (requisição abortada, dados mantidos, "Tentar de novo"), teclado do início ao fim, validação no
+  blur, limite da sessão, honeypot fora do Tab, HTML do servidor sem envio possível, axe nos três passos e no
+  agradecimento, confete ausente com movimento reduzido.

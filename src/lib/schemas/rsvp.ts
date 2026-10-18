@@ -29,7 +29,7 @@ const nome = z
       .refine((v) => contarLetras(v) >= 3, { error: erros.nomeCurto }),
   );
 
-const telefone = z
+export const esquemaTelefone = z
   .string()
   .trim()
   .min(1, { error: erros.telefoneObrigatorio, abort: true })
@@ -47,7 +47,7 @@ export function criarEsquemaRsvp(maxAcompanhantes: number) {
   return z
     .object({
       nome,
-      telefone,
+      telefone: esquemaTelefone,
       status: z.enum(["confirmado", "recusou"], { error: erros.statusObrigatorio }),
       // Objetos (não strings) porque é o formato do useFieldArray do react-hook-form.
       // Sem validação aqui: quem responde "não" pula o passo 3 e não pode ficar preso nele.

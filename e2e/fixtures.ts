@@ -4,7 +4,7 @@ import { expect, test as base } from "@playwright/test";
  * Rotas que os links já apontam mas que só existem em fases futuras (DECISOES L4).
  * O prefetch delas responde 404 — tolerado só para estas. Remover cada uma quando a fase chegar.
  */
-const ROTAS_FUTURAS = ["/confirmar-presenca", "/convidados", "/favicon.ico"];
+const ROTAS_FUTURAS = ["/convidados", "/favicon.ico"];
 
 const ehRotaFutura = (url: string) => {
   const caminho = new URL(url).pathname;

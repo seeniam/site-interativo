@@ -45,3 +45,4 @@ Nenhum item.
 | T1 | Criar o Postgres pelo Marketplace da Vercel e rodar `db/schema.sql` uma vez. | Antes de publicar |
 | T2 | Definir `SENHA_NOIVOS`, `SESSAO_SECRET` e `RSVP_SALT` na Vercel (modelo em `.env.example`). | Antes de publicar |
 | T3 | Medir o Lighthouse mobile no **PageSpeed Insights** com o site publicado (meta ≥ 95 em Performance, Acessibilidade e Boas Práticas). Localmente a nota oscila com a CPU da máquina (DECISOES H13, fechamento da Fase 3). | Logo após o primeiro deploy |
+| T4 | Os limites por IP (RSVP 3/min, login 5/min) vivem na memória de cada instância (DECISOES R2), como o briefing permite. Se aparecer abuso real, ativar uma regra de limite no Firewall da Vercel. | Só se necessário |

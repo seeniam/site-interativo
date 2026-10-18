@@ -1,34 +1,14 @@
-import fs from "node:fs";
-import path from "node:path";
-import { newDb } from "pg-mem";
 import { describe, expect, it } from "vitest";
 import { RegistroInvalido } from "@/lib/schemas/dominio";
 import { LIMITES } from "@/lib/schemas/limites";
+import { bancoDeTeste } from "./banco-de-teste";
 import { AmbienteInvalido, DEMONSTRACAO, lerAmbiente } from "./ambiente";
 import { hashTelefone } from "./hash";
 import { criarRepositorioMemoria, seedDemonstracao } from "./memoria";
-import { criarRepositorioPostgres, type Executor } from "./postgres";
+import { criarRepositorioPostgres } from "./postgres";
 import type { RegistroDeConfirmacao, RepositorioCasamento } from "./repositorio";
 
-const SCHEMA = fs.readFileSync(path.resolve(import.meta.dirname, "../../../db/schema.sql"), "utf8");
 const SAL = "sal-de-teste-com-16+";
-
-/** Postgres em memória rodando o db/schema.sql de verdade. */
-function bancoDeTeste(): { executar: Executor; consultas: string[] } {
-  const db = newDb();
-  db.public.none(SCHEMA);
-  const { Pool } = db.adapters.createPg();
-  const pool = new Pool();
-  const consultas: string[] = [];
-  return {
-    consultas,
-    executar: async (texto, parametros) => {
-      consultas.push(texto);
-      const resultado = await pool.query(texto, [...parametros]);
-      return resultado.rows as Record<string, unknown>[];
-    },
-  };
-}
 
 function registro(telefone: string, extra: Partial<RegistroDeConfirmacao> = {}): RegistroDeConfirmacao {
   return {
