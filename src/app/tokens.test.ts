@@ -188,3 +188,15 @@ describe("selos do vocabulário (briefing 4)", () => {
     expect(selo("selo-estado--a-definir")).not.toBe(selo("selo-estado--a-confirmar"));
   });
 });
+
+describe("números em ouro (texto-ouro) — 7.2: acessibilidade vence o token", () => {
+  it("toda parada do gradiente de texto tem pelo menos 3:1 sobre branco e papel (texto grande)", () => {
+    const bloco = css.slice(css.indexOf("@utility texto-ouro"), css.indexOf("}", css.indexOf("@utility texto-ouro")));
+    const paradas = [...bloco.matchAll(/#[0-9a-fA-F]{6}/g)].map((m) => m[0].toUpperCase());
+    expect(paradas.length).toBeGreaterThanOrEqual(2);
+    for (const hex of paradas) {
+      expect(contraste(hex, token("branco")), hex).toBeGreaterThanOrEqual(3);
+      expect(contraste(hex, token("papel")), hex).toBeGreaterThanOrEqual(3);
+    }
+  });
+});

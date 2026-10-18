@@ -25,10 +25,11 @@ export const casamento = {
     imagem: imagemCasal,
     alt: "Jaqueline e Diorlando abraçados num jardim à noite, iluminados por luzes quentes; ela de vestido azul-claro, ele de terno azul-marinho.",
     detalhe: {
-      alt: "Detalhe da mão de Jaqueline sobre o peito de Diorlando.",
-      // Recorte fechado da mesma foto (briefing 3.7): enquadramento e zoom da faixa 21:9.
-      posicao: "44% 29%",
-      escala: 2.6,
+      alt: "Detalhe das mãos do casal: a de Diorlando, com a aliança, na cintura de Jaqueline.",
+      // Recorte fechado da mesma foto (briefing 3.7). Nesta foto a mão dela não mostra anel;
+      // a aliança visível é a dele — o recorte fica nas duas mãos (DECISOES H3).
+      posicao: "60% 43%",
+      escala: 1.8,
     },
   },
 
@@ -101,7 +102,10 @@ export const casamento = {
   trajes: {
     titulo: "Traje social",
     descricao: pendente("Orientação de traje"),
-    paleta: ["#C9A227", "#FFFFFF"],
+    paleta: [
+      { hex: "#C9A227", nome: "Dourado" },
+      { hex: "#FFFFFF", nome: "Branco" },
+    ],
   },
 
   // Escrito a partir dos dados confirmados, sem fato novo (DECISOES V6).

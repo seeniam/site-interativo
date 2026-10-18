@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from "react";
 
-type Variante = "primario" | "contorno" | "texto";
+/** "claro": contorno sobre a foto escura do herói (texto branco, filete ouro-claro — DECISOES H5). */
+type Variante = "primario" | "contorno" | "texto" | "claro";
 type Tamanho = "padrao" | "grande";
 
 interface Aparencia {

@@ -250,3 +250,58 @@ contínua da Fase 1 (retrabalho) até a última fase, com portão e commit por f
 - Barra inferior recriada por rota (`key`) em vez de `setState` no corpo do efeito (regra do React Compiler).
 - A fixture do E2E passou a reprovar **qualquer resposta HTTP ≥ 400** fora de uma lista explícita de rotas futuras (`e2e/fixtures.ts`), que encolhe a cada fase.
 - Assinatura do rodapé em 25px no celular para não quebrar no "&".
+
+---
+
+## Fase 3 — `/` o convite
+
+### O que vai ser feito
+As seções da 6.1, nesta ordem: abertura (Fase 2) · **herói** · **contagem regressiva** (3 estados) ·
+**nossa história** (só aparece com os marcos — hoje não aparece) · **recorte de detalhe 21:9** ·
+**quando e onde** (card único; dois se `cerimoniaNoMesmoLocal` virar `false`) com "Ver no mapa",
+"Copiar endereço", "Adicionar à agenda" (.ics + Google Agenda) e mapa que só carrega no clique ·
+**trajes** · **presentes (teaser)** · **dúvidas frequentes** (`<details>`) · **faixa do RSVP** · rodapé.
+
+### Decisões
+| # | Decisão | Motivo |
+|---|---------|--------|
+| H1 | **Foto em exatamente dois lugares** no `/`: herói inteiro e o recorte 21:9 da mão. Teste E2E conta as imagens. | Briefing 3.7, "Economia da foto única". |
+| H2 | Herói: no celular, foto em tela cheia (`100dvh`); no desktop, quadro 16:10 dentro do container de 1120px, com raio de 24px. | A foto tem 960px de largura: em tela cheia de 1440px ficaria visivelmente esticada. No container, a ampliação é pequena e o quadro mantém o 16:10 pedido. |
+| H3 | Recorte 21:9 tratado como **textura**: zoom moderado (1,8×) nas **duas mãos — a dele, com a aliança, na cintura dela**, vinheta quente, grão sutil e filete dourado; no desktop a faixa fica contida em 760px. Abre do centro por `clip-path` uma vez. *(Revisada: nesta foto a mão dela, sobre o peito dele, não mostra anel; a única aliança visível é a dele. O briefing pede "a mão dela … com a aliança", impossível com esta foto — registrado.)* | Ampliar um trecho de uma foto de 960px perde nitidez; assumir a textura (em vez de fingir nitidez) é o que faz "ninguém perceber que é a mesma imagem". |
+| H4 | Contagem: antes da cerimônia → dias/horas/minutos/segundos; **no dia 21/12 inteiro** (horário de Brasília) → "Hoje é o dia"; depois → "Casados desde 21.12.2026". A contagem é só no navegador (o servidor não sabe a hora de quem abre) e reserva o espaço para não haver salto de layout. | Briefing 6.1 item 3. "Quando a data passar" interpretado como "quando o dia chegar". |
+| H5 | Botão de contorno sobre a foto usa texto branco e filete `--ouro-claro`. | `--ouro-escuro` sobre a foto escura não tem contraste (7.2: acessibilidade vence o token). |
+| H6 | Paleta dos trajes com nome de cada cor no config ("Dourado", "Branco"). | O briefing pede "círculos com o nome da cor"; o nome é conteúdo, então mora no config. |
+| H8 | Números em ouro (`texto-ouro`) usam um gradiente só com tons ≥ 3:1 (`#8C6B2F → #A9822A`), não o gradiente oficial. | O oficial passa por `#E8D08A`, ~1,5:1 sobre branco: ilegível como texto (7.2). Filetes, monograma e bordas seguem com o oficial. |
+| H9 | Títulos em Cormorant evitam ê, ô e â ("Você vem?" virou "Vem com a gente?"). | O circunflexo da Cormorant é alto e estreito e parece descolado da letra nos tamanhos de título. |
+| H7 | Toasts com `sonner` (`aria-live` próprio) para "Endereço copiado". | Briefing 5 e 7.6. |
+| H10 | **Os nomes do herói são contornos SVG da Cormorant Light**, extraídos pelo mesmo script do monograma (`scripts/extrair-glifos.ts`), com o texto real em `sr-only`. | Aparecem na tipografia certa no primeiro quadro, sem trocar de fonte no 4G ruim — e deixam de depender da Cormorant para a pintura principal. |
+| H11 | Só a **Cormorant itálica** (versículo, o maior texto da primeira dobra) e a **Jost** são pré-carregadas; a camada da abertura é 98% opaca, não 100%. | Pré-carregar tudo disputava banda com a primeira dobra; com a camada 100% opaca o Chromium adiava a pintura do herói por baixo. |
+| H12 | **O Pinyon Script não é baixado**: o "&" e a assinatura do rodapé — seus únicos usos (3.3) — são contornos SVG da própria fonte. Fontes variáveis (Jost e Cormorant) em vez de um arquivo por peso. | De 7 arquivos de fonte (~220 KB) para 4 (~119 KB). A regra da 3.3 continua cumprida: o desenho é o do Pinyon. |
+| H13 | **Orçamento de performance determinístico** no E2E (JS ≤ 190 KB, ≤ 4 fontes e ≤ 140 KB, imagem ≤ 300 KB, CLS ≈ 0) como portão local, no lugar da nota do Lighthouse. A nota ≥ 95 fica para o PageSpeed Insights após o deploy. | Nesta máquina (Ryzen 5 3500U com o Chrome do usuário aberto) o Lighthouse avisa que a CPU é mais lenta do que ele calibra, e a nota oscila de 53 a 76 com o mesmo build. |
+
+### Fechamento da Fase 3 (2026-10-18)
+
+**Portão:** lint, typecheck, Vitest, build e Playwright verdes (todos os E2E do convite, layout, design system e orçamento).
+Screenshots em `docs/qa/fase-3/`.
+
+**Lighthouse mobile — portão NÃO atingido nesta máquina.** Mediana de 5 rodadas (código final):
+Performance **72** (rodadas: 60, 74, 72, 53, 76), Acessibilidade **100**, Boas Práticas **96**, SEO **100**, CLS **0**.
+Relatório em `docs/qa/fase-3/lighthouse-mobile-mediana.html`. Boas Práticas perde só pelos 404 de prefetch das rotas
+das Fases 4–6 e do favicon (Fase 7).
+- O que foi feito pela nota: nomes e assinatura em contornos (sem esperar fonte), Pinyon fora, fontes variáveis
+  (7 → 4 arquivos), sprite do monograma, toasts carregados depois da hidratação, revelação do herói sem opacidade,
+  camada da abertura que não bloqueia a pintura, orçamento no E2E.
+- Diagnóstico: o LCP simulado (~4 s) acompanha a rede do 4G simulado e o JavaScript base do Next/React (~170 KB);
+  o TBT oscila com a CPU desta máquina. Com a CPU a 2× o LCP não melhorou, então não é só CPU.
+- **Discordância registrada:** ≥ 95 em Performance com Next.js App Router + React pode não ser alcançável sem
+  abrir mão de interatividade (contagem, barra, toasts). A verificação real é no PageSpeed Insights (PENDENCIAS T3).
+
+**Revisão adversarial** (2 lentes + verificadores): 16 achados confirmados, 4 descartados. Corrigidos:
+herói cobrindo rostos e mãos entre 768–1023px (alta); recorte sem a aliança (agora as duas mãos com a aliança dele) e
+ampliação excessiva no desktop (faixa contida + textura assumida); barra inferior piscando sobre o herói no primeiro
+quadro; dígitos e indicador de rolagem animando com movimento reduzido; CTA principal apagada sobre a foto; ritmo
+monótono de títulos (variantes "discreto" e "lateral", filete avulso removido); frase do RSVP quebrada pelo
+placeholder; "SEGUNDOS" colado no divisor; download do .ics no Safari/iOS; salto de layout no estado do dia;
+leitura instável do relógio; agenda errada no modo de dois cards (agora uma só, fora dos cards); foco perdido ao abrir
+o mapa; screenshots e decisões desatualizados. Também foi pego na revisão visual (antes dela) um monograma cortado pelo
+`<use>` do sprite — hoje coberto por teste de geometria.

@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { MonogramaSprite } from "@/components/brand/MonogramaSprite";
 import { SCRIPT_ABERTURA } from "@/components/layout/AberturaConvite";
+import { NotificacoesPreguicosas } from "@/components/layout/NotificacoesPreguicosas";
 import { casamento } from "@/config/casamento";
 import { textos } from "@/config/textos";
 import { COR_PAPEL } from "@/lib/tokens";
-import { cormorant, jost, pinyon } from "./fontes";
+import { cormorant, cormorantItalico, jost } from "./fontes";
 import "./globals.css";
 
 const { titulo } = casamento.noivos;
@@ -27,15 +29,21 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // suppressHydrationWarning: o script da abertura marca o <html> antes da hidratação (DECISOES L1).
-    <html lang="pt-BR" className={`${cormorant.variable} ${jost.variable} ${pinyon.variable}`} suppressHydrationWarning>
+    <html
+      lang="pt-BR"
+      className={`${cormorant.variable} ${cormorantItalico.variable} ${jost.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_ABERTURA }} />
       </head>
       <body className="min-h-dvh">
+        <MonogramaSprite />
         <a href="#conteudo" className="pular-conteudo">
           {textos.navegacao.pularParaConteudo}
         </a>
         {children}
+        <NotificacoesPreguicosas />
       </body>
     </html>
   );

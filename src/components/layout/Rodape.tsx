@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileteDourado } from "@/components/brand/FileteDourado";
 import { Monograma } from "@/components/brand/Monograma";
+import { AssinaturaEmTracos } from "@/components/brand/NomeEmTracos";
 import { textos } from "@/config/textos";
 
 /** Rodapé: monograma, assinatura em Pinyon, link discreto para /convidados, créditos (briefing 6.1). */
@@ -11,8 +12,11 @@ export function Rodape({ nomeDoCasal }: { nomeDoCasal: string }) {
       <div className="conteiner flex flex-col items-center gap-6 text-center">
         <FileteDourado />
         <Monograma decorativo className="h-auto w-24 text-tinta" />
-        <p className="font-script text-25 leading-tight text-balance text-ouro-escuro sm:text-31">
-          {rodape.assinatura(nomeDoCasal)}
+        {/* Contornos do Pinyon Script (DECISOES H12): o texto real fica para o leitor de tela. */}
+        <p className="rodape__assinatura">
+          <span className="sr-only">{rodape.assinatura(nomeDoCasal)}</span>
+          <AssinaturaEmTracos parte="abertura" />
+          <AssinaturaEmTracos parte="casal" />
         </p>
         <div className="flex flex-col items-center gap-1 text-12 text-fumaca">
           <Link href="/convidados" className="rodape__link">

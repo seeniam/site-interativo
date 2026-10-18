@@ -45,6 +45,8 @@ export const esquemaConfig = z.object({
     )
     .min(1)
     .refine((lista) => new Set(lista.map((p) => p.id)).size === lista.length, { error: "ids de presente repetidos" }),
-  trajes: z.object({ paleta: z.array(z.string().regex(/^#[0-9A-Fa-f]{6}$/)) }),
+  trajes: z.object({
+    paleta: z.array(z.object({ hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/), nome: z.string().min(1) })).min(1),
+  }),
   rsvp: z.object({ maxAcompanhantes: z.number().int().min(0).max(10) }),
 });

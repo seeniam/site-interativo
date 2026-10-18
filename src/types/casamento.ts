@@ -112,7 +112,7 @@ export interface ConfiguracaoCasamento {
   presentes: readonly Presente[];
   /** "A definir": sem os marcos, a seção inteira não é renderizada (briefing 6.1). */
   historia: Talvez<readonly MarcoHistoria[]>;
-  trajes: { titulo: string; descricao: Talvez<string>; paleta: readonly string[] };
+  trajes: { titulo: string; descricao: Talvez<string>; paleta: readonly { hex: string; nome: string }[] };
   faq: readonly PerguntaFrequente[];
   rsvp: { prazo: Talvez<string>; maxAcompanhantes: number };
   /** O motivo de cada dúvida, na voz de quem vai perguntar ao casal. */

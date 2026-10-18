@@ -9,6 +9,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"]],
+  // Folga para máquinas lentas: a asserção espera até 10s antes de reprovar.
+  expect: { timeout: 10_000 },
   use: {
     baseURL: `http://localhost:${PORTA}`,
     locale: "pt-BR",

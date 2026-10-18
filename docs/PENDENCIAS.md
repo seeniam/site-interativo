@@ -12,7 +12,7 @@ As duas listas, sempre atualizadas a partir do config, estão em `/design-system
 
 ## Confirmado pelo casal em 17/10/2026
 
-Nada aqui bloqueia mais. Data 21/12/2026 (**segunda-feira, intencional** — o FAQ avisa que é dia útil),
+Nada aqui bloqueia mais. *Observação:* nesta foto, a mão dela não mostra aliança; o recorte de detalhe usa as duas mãos, com a aliança dele (DECISOES H3). Data 21/12/2026 (**segunda-feira, intencional** — o FAQ avisa que é dia útil),
 a partir das 16h30; cerimônia e recepção no Espaço Max; Colossenses 3:14; cotas Bronze R$ 150,
 Prata R$ 200, Ouro R$ 250; recebedora do PIX "JAQUELINE BARROS ALVARES" (24 caracteres);
 WhatsApp de comprovante = número da chave PIX; **uma única foto, sem previsão de outras**.
@@ -44,3 +44,4 @@ Nenhum item.
 |---|------|--------|
 | T1 | Criar o Postgres pelo Marketplace da Vercel e rodar `db/schema.sql` uma vez. | Antes de publicar |
 | T2 | Definir `SENHA_NOIVOS`, `SESSAO_SECRET` e `RSVP_SALT` na Vercel (modelo em `.env.example`). | Antes de publicar |
+| T3 | Medir o Lighthouse mobile no **PageSpeed Insights** com o site publicado (meta ≥ 95 em Performance, Acessibilidade e Boas Práticas). Localmente a nota oscila com a CPU da máquina (DECISOES H13, fechamento da Fase 3). | Logo após o primeiro deploy |

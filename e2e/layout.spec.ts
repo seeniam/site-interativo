@@ -13,6 +13,8 @@ test.describe("navegação", () => {
   test("celular: barra inferior com as três ações; sem cabeçalho", async ({ page }) => {
     test.skip(!ehCelular(page.viewportSize()?.width), "só no celular");
     await page.goto("/");
+    // Sobre o herói a barra fica escondida (6.1): rola até depois dele.
+    await page.locator("#quando-e-onde").scrollIntoViewIfNeeded();
     const barra = page.locator(".barra-inferior");
     await expect(barra).toBeVisible();
     await expect(barra).toHaveAttribute("data-visivel", "");
@@ -26,13 +28,20 @@ test.describe("navegação", () => {
   test("celular: a barra fica dentro da tela e com alvos de toque grandes", async ({ page }) => {
     test.skip(!ehCelular(page.viewportSize()?.width), "só no celular");
     await page.goto("/");
+    await page.locator("#quando-e-onde").scrollIntoViewIfNeeded();
+    await expect(page.locator(".barra-inferior")).toHaveAttribute("data-visivel", "");
     for (const link of await page.locator(".barra-inferior a").all()) {
       const caixa = await link.boundingBox();
       expect(caixa?.height ?? 0).toBeGreaterThanOrEqual(44);
       expect(caixa?.width ?? 0).toBeGreaterThanOrEqual(44);
     }
-    const barra = await page.locator(".barra-inferior").boundingBox();
-    expect((barra?.y ?? 0) + (barra?.height ?? 0)).toBeLessThanOrEqual(page.viewportSize()?.height ?? 0);
+    // Espera a transição de entrada (translateY) terminar antes de medir.
+    await expect
+      .poll(async () => {
+        const barra = await page.locator(".barra-inferior").boundingBox();
+        return (barra?.y ?? 0) + (barra?.height ?? 0);
+      })
+      .toBeLessThanOrEqual(page.viewportSize()?.height ?? 0);
   });
 
   test("desktop: cabeçalho com os links e o botão de confirmar; sem barra inferior", async ({ page }) => {
@@ -72,7 +81,7 @@ test.describe("navegação", () => {
 test.describe("rodapé", () => {
   test("monograma, assinatura, link discreto para /convidados e crédito da foto", async ({ page }) => {
     await page.goto("/");
-    const rodape = page.locator("footer");
+    const rodape = page.locator("footer.rodape");
     await expect(rodape).toContainText("com amor, Jaqueline & Diorlando");
     await expect(rodape.getByRole("link", { name: "Lista de convidados" })).toHaveAttribute("href", "/convidados");
     await expect(rodape).toContainText("Foto: arquivo do casal");
@@ -104,7 +113,7 @@ test.describe("404", () => {
     const resposta = await page.goto("/nao-existe-no-convite");
     expect(resposta?.status()).toBe(404);
     await expect(page.locator("h1")).toHaveText("Esta página não existe no nosso convite");
-    await expect(page.locator("svg[aria-hidden]").first()).toBeVisible();
+    await expect(page.locator("main svg").first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Voltar ao convite" })).toHaveAttribute("href", "/");
     const resultado = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
     expect(resultado.violations.map((v) => v.id)).toEqual([]);
@@ -150,5 +159,34 @@ test.describe("abertura do convite", () => {
       await expect(page.locator("html")).not.toHaveAttribute("data-abertura", /.*/);
       await expect(page.locator(".abertura")).toBeHidden();
     });
+  });
+});
+
+test.describe("monograma (sprite)", () => {
+  // Regressão real: o <use> sem a caixa do símbolo caía deslocado e o monograma aparecia cortado.
+  test("todo monograma desenha dentro e por inteiro na própria caixa", async ({ page }) => {
+    for (const rota of ["/", "/nao-existe", "/design-system"]) {
+      await page.goto(rota);
+      const caixas = await page.$$eval("svg:has(> use)", (svgs) =>
+        svgs
+          .map((svg) => {
+            const fora = svg.getBoundingClientRect();
+            const dentro = svg.querySelector("use")?.getBoundingClientRect();
+            return { fora, dentro };
+          })
+          .filter(({ fora }) => fora.width > 0 && fora.height > 0)
+          .map(({ fora, dentro }) => ({
+            cabe:
+              !!dentro &&
+              dentro.left >= fora.left - 1 &&
+              dentro.top >= fora.top - 1 &&
+              dentro.right <= fora.right + 1 &&
+              dentro.bottom <= fora.bottom + 1,
+            preenche: !!dentro && (dentro.width * dentro.height) / (fora.width * fora.height) > 0.9,
+          })),
+      );
+      expect(caixas.length, rota).toBeGreaterThan(0);
+      for (const caixa of caixas) expect(caixa, rota).toEqual({ cabe: true, preenche: true });
+    }
   });
 });

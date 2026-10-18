@@ -22,7 +22,7 @@ export function BarraInferior() {
 }
 
 function BarraDaRota({ caminho }: { caminho: string }) {
-  const [heroiNaTela, setHeroiNaTela] = useState(false);
+  const [heroiNaTela, setHeroiNaTela] = useState(caminho === "/");
 
   useEffect(() => {
     const heroi = document.getElementById(ID_HEROI);

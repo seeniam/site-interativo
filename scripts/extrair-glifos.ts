@@ -143,8 +143,98 @@ export const ECOMERCIAL = {
 } as const;
 `;
 
+/**
+ * Os nomes do herói em contornos da Cormorant Light (briefing 3.3: 300, letter-spacing .02em):
+ * aparecem na tipografia certa no primeiro quadro, sem esperar a fonte (DECISOES H10).
+ * A caixa vertical usa as métricas da fonte, para os dois nomes dividirem a mesma linha de base.
+ */
+function nomesDoConfig(): { ela: string; ele: string } {
+  const fonte = fs.readFileSync(path.join(process.cwd(), "src/config/casamento.ts"), "utf8");
+  const ela = /\bela:\s*"([^"]+)"/u.exec(fonte)?.[1];
+  const ele = /\bele:\s*"([^"]+)"/u.exec(fonte)?.[1];
+  if (!ela || !ele) {
+    console.error("Não achei noivos.ela / noivos.ele em src/config/casamento.ts");
+    process.exit(1);
+  }
+  return { ela, ele };
+}
+
+const ESPACAMENTO_NOMES = 0.02;
+const ASCENDENTE = cormorant.ascender;
+const DESCENDENTE = -cormorant.descender;
+
+function nomeEmTracos(texto: string) {
+  const opcoes = { letterSpacing: ESPACAMENTO_NOMES };
+  const caminho = cormorant.getPath(texto, 0, ASCENDENTE, 1000, opcoes);
+  const largura = cormorant.getAdvanceWidth(texto, 1000, opcoes);
+  const altura = ASCENDENTE + DESCENDENTE;
+  return { texto, largura: r(largura), altura: r(altura), d: caminho.toPathData(2) };
+}
+
+const nomes = nomesDoConfig();
+const saidaNomes = `
+/** Nomes do herói em contornos da Cormorant Light — uma unidade de fonte = 1/1000 em. */
+export const NOMES_EM_TRACOS = {
+${(["ela", "ele"] as const)
+  .map((quem) => {
+    const n = nomeEmTracos(nomes[quem]);
+    return `  ${quem}: {
+    texto: "${n.texto}",
+    viewBox: "0 0 ${n.largura} ${n.altura}",
+    larguraEm: ${r(n.largura / 1000)},
+    alturaEm: ${r(n.altura / 1000)},
+    d: "${n.d}",
+  },`;
+  })
+  .join("\n")}
+} as const;
+`;
+
+/**
+ * A assinatura do rodapé em contornos do Pinyon Script (DECISOES H12): com o "&" e a
+ * assinatura em SVG, o site não baixa a fonte Pinyon. Dois trechos, para quebrar linha no celular.
+ */
+function assinaturaDoConfig(): { abertura: string; casal: string } {
+  const textosFonte = fs.readFileSync(path.join(process.cwd(), "src/config/textos.ts"), "utf8");
+  const config = fs.readFileSync(path.join(process.cwd(), "src/config/casamento.ts"), "utf8");
+  const abertura = /assinatura:\s*\(casal: string\)\s*=>\s*`([^`$]*)\$\{casal\}`/u.exec(textosFonte)?.[1]?.trim();
+  const casal = /\btitulo:\s*"([^"]+)"/u.exec(config)?.[1];
+  if (!abertura || !casal) {
+    console.error("Não achei textos.rodape.assinatura ou noivos.titulo");
+    process.exit(1);
+  }
+  return { abertura, casal };
+}
+
+function trechoEmTracos(texto: string) {
+  const caminho = pinyon.getPath(texto, 0, pinyon.ascender, 1000);
+  const caixa = caminho.getBoundingBox();
+  const largura = Math.max(pinyon.getAdvanceWidth(texto, 1000), caixa.x2) + MARGEM;
+  const altura = pinyon.ascender - pinyon.descender;
+  return { texto, largura: r(largura), altura: r(altura), d: caminho.toPathData(2) };
+}
+
+const assinatura = assinaturaDoConfig();
+const saidaAssinatura = `
+/** Assinatura do rodapé em contornos do Pinyon Script — uma unidade de fonte = 1/1000 em. */
+export const ASSINATURA_EM_TRACOS = {
+${(["abertura", "casal"] as const)
+  .map((parte) => {
+    const t = trechoEmTracos(assinatura[parte]);
+    return `  ${parte}: {
+    texto: ${JSON.stringify(t.texto)},
+    viewBox: "0 0 ${t.largura} ${t.altura}",
+    larguraEm: ${r(t.largura / 1000)},
+    alturaEm: ${r(t.altura / 1000)},
+    d: "${t.d}",
+  },`;
+  })
+  .join("\n")}
+} as const;
+`;
+
 const destino = path.join(process.cwd(), "src/components/brand/monograma-glifos.ts");
-fs.writeFileSync(destino, saida + saidaE);
+fs.writeFileSync(destino, saida + saidaE + saidaNomes + saidaAssinatura);
 console.log(
   `Gravado ${path.relative(process.cwd(), destino)} — viewBox ${r(minX)} ${r(minY)} ${r(maxX - minX)} ${r(maxY - minY)}`,
 );

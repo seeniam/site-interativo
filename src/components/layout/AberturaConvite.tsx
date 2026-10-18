@@ -10,9 +10,11 @@ const DURACAO_MS = 2000;
 /**
  * Roda no <head>, antes da primeira pintura (DECISOES L1): só na home, uma vez por sessão,
  * nunca com movimento reduzido. Sem JavaScript, simplesmente não há abertura.
+ * `?abertura=0` pula a abertura (medições de performance e screenshots de QA).
  */
 export const SCRIPT_ABERTURA = `(function(){try{
 if(location.pathname!=="/")return;
+if(location.search.indexOf("abertura=0")>-1)return;
 if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
 if(sessionStorage.getItem("${CHAVE_SESSAO}"))return;
 sessionStorage.setItem("${CHAVE_SESSAO}","1");

@@ -143,7 +143,16 @@ async function main(): Promise<void> {
             .filter((el): el is HTMLElement => el instanceof HTMLElement)
             .filter((el) => {
               const r = el.getBoundingClientRect();
-              return r.width > 0 && r.height > 0 && (r.right > limite || r.left < -0.5);
+              if (r.width === 0 || r.height === 0 || (r.right <= limite && r.left >= -0.5)) return false;
+              // Recortado por um ancestral que cabe na tela (ex.: foto em zoom dentro do recorte) não vaza.
+              for (let pai = el.parentElement; pai; pai = pai.parentElement) {
+                const estilo = getComputedStyle(pai);
+                if (["hidden", "clip"].includes(estilo.overflowX) || estilo.clipPath !== "none") {
+                  const rp = pai.getBoundingClientRect();
+                  if (rp.right <= limite && rp.left >= -0.5) return false;
+                }
+              }
+              return true;
             }).length;
         });
         if (vazando > 0) {

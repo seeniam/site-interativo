@@ -14,6 +14,58 @@ export const textos = {
     ],
     confirmarPresenca: "Confirmar presença",
   },
+  convite: {
+    heroi: {
+      rolar: "Role para ver o convite",
+      presentear: "Presentear",
+    },
+    contagem: {
+      titulo: "Contando os dias",
+      unidades: { dias: "dias", horas: "horas", minutos: "minutos", segundos: "segundos" },
+      leitorDeTela: (dias: number) => `Faltam ${dias} dia${dias === 1 ? "" : "s"} para o casamento.`,
+      hoje: "Hoje é o dia",
+      hojeDetalhe: (hora: string) => `A gente se encontra às ${hora}.`,
+      casadosDesde: (data: string) => `Casados desde ${data}`,
+    },
+    historia: {
+      titulo: "Nossa história",
+    },
+    local: {
+      titulo: "Quando e onde",
+      cerimoniaERecepcao: "Cerimônia e recepção",
+      rotuloQuando: "Quando",
+      rotuloEndereco: "Endereço",
+      cerimonia: "Cerimônia",
+      recepcao: "Recepção",
+      verNoMapa: "Ver no mapa",
+      copiarEndereco: "Copiar endereço",
+      enderecoCopiado: "Endereço copiado",
+      copiaFalhou: "Não deu para copiar. Toque e segure o endereço para copiar.",
+      adicionarAgenda: "Adicionar à agenda",
+      baixarIcs: "Baixar para o celular (.ics)",
+      googleAgenda: "Google Agenda",
+      mostrarMapa: "Mostrar mapa aqui",
+      tituloMapa: (local: string) => `Mapa: ${local}`,
+      abreEmNovaAba: "(abre em nova aba)",
+    },
+    trajes: {
+      titulo: "Trajes",
+      paleta: "Cores que combinam com o dia",
+    },
+    presentes: {
+      titulo: "Presentes",
+      texto: "Sua presença já é o presente. Se quiser nos ajudar a começar a vida a dois, escolha uma cota.",
+      verLista: "Ver lista completa",
+    },
+    duvidas: {
+      titulo: "Dúvidas frequentes",
+    },
+    rsvp: {
+      titulo: "Vem com a gente?",
+      confirmeAte: "Confirme até",
+      botao: "Confirmar presença",
+    },
+  },
   rodape: {
     assinatura: (casal: string) => `com amor, ${casal}`,
     convidados: "Lista de convidados",

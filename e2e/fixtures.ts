@@ -4,9 +4,12 @@ import { expect, test as base } from "@playwright/test";
  * Rotas que os links já apontam mas que só existem em fases futuras (DECISOES L4).
  * O prefetch delas responde 404 — tolerado só para estas. Remover cada uma quando a fase chegar.
  */
-const ROTAS_FUTURAS = ["/presentear", "/confirmar-presenca", "/convidados", "/favicon.ico"];
+const ROTAS_FUTURAS = ["/presentear", "/confirmar-presenca", "/convidados", "/favicon.ico", "/confirmar-presente/*"];
 
-const ehRotaFutura = (url: string) => ROTAS_FUTURAS.some((rota) => new URL(url).pathname === rota);
+const ehRotaFutura = (url: string) => {
+  const caminho = new URL(url).pathname;
+  return ROTAS_FUTURAS.some((rota) => (rota.endsWith("/*") ? caminho.startsWith(rota.slice(0, -1)) : caminho === rota));
+};
 
 /**
  * Todo teste falha se a página lançar erro (ex.: hidratação, React #418), logar erro no console,

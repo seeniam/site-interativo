@@ -1,0 +1,1 @@
+Lighthouse mobile (5 rodadas, mediana = rodada 3): Performance 72 · Acessibilidade 100 · Boas Práticas 96 · SEO 100 | LCP 4.2 s · TBT 470 ms · CLS 0 | Performance de cada rodada: 60, 74, 72, 53, 76 | benchmarkIndex da máquina: 1446, 1385, 743, 1286, 1333

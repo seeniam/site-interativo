@@ -1,7 +1,6 @@
-import { useId } from "react";
 import { casamento } from "@/config/casamento";
-import { GradienteOuroSvg } from "./GradienteOuroSvg";
-import { MONOGRAMA_GLIFOS, MONOGRAMA_VIEWBOX } from "./monograma-glifos";
+import { MONOGRAMA_CAIXA, MONOGRAMA_VIEWBOX } from "./monograma-glifos";
+import { ID_SIMBOLO_MONOGRAMA } from "./MonogramaSprite";
 
 interface MonogramaProps {
   className?: string;
@@ -11,26 +10,28 @@ interface MonogramaProps {
   decorativo?: boolean;
 }
 
-/** Monograma estático (sem JavaScript). A versão que se desenha é `MonogramaAnimado`. */
+/**
+ * Monograma estático (sem JavaScript), desenhado a partir do <symbol> do `MonogramaSprite`
+ * (no layout raiz). A versão que se desenha é `MonogramaAnimado`.
+ */
 export function Monograma({ className, tom = "tinta", decorativo = false }: MonogramaProps) {
-  const id = useId();
-  const gradiente = `ouro-${id}`;
-
   return (
     <svg
       viewBox={MONOGRAMA_VIEWBOX}
       className={className}
-      fill={tom === "branco" ? "#FFFFFF" : "currentColor"}
+      style={tom === "branco" ? { color: "#FFFFFF" } : undefined}
       {...(decorativo
         ? { "aria-hidden": true, focusable: false }
         : { role: "img", "aria-label": casamento.noivos.titulo })}
     >
-      <defs>
-        <GradienteOuroSvg id={gradiente} />
-      </defs>
-      <path d={MONOGRAMA_GLIFOS.primeira} />
-      <path d={MONOGRAMA_GLIFOS.ecomercial} fill={`url(#${gradiente})`} />
-      <path d={MONOGRAMA_GLIFOS.segunda} />
+      {/* O <use> recebe a caixa do símbolo: sem isso ele cai em (0,0) desse viewBox, deslocado. */}
+      <use
+        href={`#${ID_SIMBOLO_MONOGRAMA}`}
+        x={MONOGRAMA_CAIXA.x}
+        y={MONOGRAMA_CAIXA.y}
+        width={MONOGRAMA_CAIXA.largura}
+        height={MONOGRAMA_CAIXA.altura}
+      />
     </svg>
   );
 }
