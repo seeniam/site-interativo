@@ -6,9 +6,33 @@ import { z } from "zod";
 import { telefoneValido } from "@/lib/format";
 import { LIMITES } from "./limites";
 
-/** Só Date de verdade ou texto ISO — `null`, número e booleano não viram 1970. */
+/**
+ * `timestamptz` em texto, como o Postgres escreve: "2026-10-18 12:00:00.123456+00" (espaço no
+ * lugar do T, fuso sem minutos). Vira ISO antes de virar Date.
+ */
+const TIMESTAMPTZ_POSTGRES = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})(\.\d+)?([+-]\d{2})(?::?(\d{2}))?$/;
+
+export function lerTimestamptz(texto: string): Date | null {
+  const partes = TIMESTAMPTZ_POSTGRES.exec(texto);
+  if (!partes) return null;
+  const [, dia, hora, fracao = "", fuso, minutosFuso = "00"] = partes;
+  const data = new Date(`${dia}T${hora}${fracao.slice(0, 4)}${fuso}:${minutosFuso}`);
+  return Number.isNaN(data.getTime()) ? null : data;
+}
+
+/**
+ * Só Date de verdade, texto ISO ou o texto do Postgres — `null`, número e booleano não viram 1970.
+ * (O driver costuma devolver Date; se um dia devolver texto, a lista dos noivos não pode esvaziar.)
+ */
 const data = z
-  .union([z.date(), z.iso.datetime({ offset: true }).transform((texto) => new Date(texto))])
+  .union([
+    z.date(),
+    z.iso.datetime({ offset: true }).transform((texto) => new Date(texto)),
+    z
+      .string()
+      .transform((texto) => lerTimestamptz(texto))
+      .pipe(z.date()),
+  ])
   .refine((d) => !Number.isNaN(d.getTime()));
 
 const telefone = z

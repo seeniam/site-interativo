@@ -16,7 +16,7 @@ import { criarLimitador, type Limitador } from "./limite";
 import { entrar, listarConvidados, sair } from "./noivos";
 import { listarPresentesReservados, reservarPresente } from "./presentes";
 import { registrarRsvp, verificarRsvp } from "./rsvp";
-import { COOKIE_SESSAO, DURACAO_SESSAO_MS, criarTokenSessao } from "./sessao";
+import { COOKIE_SESSAO, DURACAO_SESSAO_MS, chaveDaSessao, criarTokenSessao } from "./sessao";
 
 const SAL = "sal-de-teste-com-16+";
 const SENHA = "senha-dos-noivos";
@@ -189,7 +189,13 @@ describe("sessão dos noivos e GET /api/convidados", () => {
     limitador,
     agora: () => AGORA,
   });
-  const depsConvidados = (agora = AGORA) => ({ repositorio, segredoSessao: SEGREDO, agora: () => agora });
+  const depsConvidados = (agora = AGORA, senhaNoivos = SENHA) => ({
+    repositorio,
+    segredoSessao: SEGREDO,
+    senhaNoivos,
+    agora: () => agora,
+  });
+  const CHAVE = chaveDaSessao(SEGREDO, SENHA);
   const get = (cookie?: string) =>
     new Request("http://localhost/api/convidados", { headers: cookie ? { cookie } : {} });
 
@@ -209,14 +215,22 @@ describe("sessão dos noivos e GET /api/convidados", () => {
       `${COOKIE_SESSAO}=${criarTokenSessao("outro-segredo-qualquer-com-32-caract", AGORA)}`,
     ],
     ["malformado", `${COOKIE_SESSAO}=qualquer-coisa`],
+    ["com percent-encoding quebrado", `${COOKIE_SESSAO}=%zz`],
+    ["assinado só com o segredo (sem a senha)", `${COOKIE_SESSAO}=${criarTokenSessao(SEGREDO, AGORA)}`],
   ])("cookie %s: 401", async (_caso, cookie) => {
     expect((await listarConvidados(get(cookie), depsConvidados())).status).toBe(401);
   });
 
   it("cookie vencido (depois de 30 dias): 401", async () => {
-    const cookie = `${COOKIE_SESSAO}=${criarTokenSessao(SEGREDO, AGORA)}`;
+    const cookie = `${COOKIE_SESSAO}=${criarTokenSessao(CHAVE, AGORA)}`;
     expect((await listarConvidados(get(cookie), depsConvidados(AGORA + DURACAO_SESSAO_MS - 1))).status).toBe(200);
     expect((await listarConvidados(get(cookie), depsConvidados(AGORA + DURACAO_SESSAO_MS + 1))).status).toBe(401);
+  });
+
+  it("trocar a senha dos noivos derruba as sessões antigas", async () => {
+    const cookie = `${COOKIE_SESSAO}=${criarTokenSessao(CHAVE, AGORA)}`;
+    expect((await listarConvidados(get(cookie), depsConvidados())).status).toBe(200);
+    expect((await listarConvidados(get(cookie), depsConvidados(AGORA, "senha-nova-dos-noivos"))).status).toBe(401);
   });
 
   it("senha errada: 401 sem cookie", async () => {

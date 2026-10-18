@@ -113,7 +113,23 @@ describe("adaptador postgres: SQL", () => {
       `insert into confirmacoes (nome, telefone, telefone_hash, vai_comparecer) values ('X', 'lixo', 'abc', true)`,
       [],
     );
-    expect(await repo.listarConfirmacoes()).toHaveLength(1);
+    const original = console.error;
+    const avisos: string[] = [];
+    console.error = (mensagem: string) => avisos.push(mensagem);
+    try {
+      expect(await repo.listarConfirmacoes()).toHaveLength(1);
+    } finally {
+      console.error = original;
+    }
+    // Não some calado: a contagem vai ao log — e nada do conteúdo da linha.
+    expect(avisos).toEqual(["[confirmacoes] 1 linha(s) fora do formato descartada(s)"]);
+  });
+
+  it("confere o registro antes de gravar, como o adaptador em memória", async () => {
+    const { executar } = bancoDeTeste();
+    const repo = criarRepositorioPostgres(executar);
+    await expect(repo.registrarConfirmacao(registro("98999676346", { nome: "Jo" }))).rejects.toThrow(RegistroInvalido);
+    expect(await executar("select id from confirmacoes", [])).toEqual([]);
   });
 });
 

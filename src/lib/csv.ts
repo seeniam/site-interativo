@@ -3,7 +3,7 @@
  * UTF-8 com BOM, para o Excel em português abrir com acentos e colunas certas.
  */
 import type { RespostaConvidado } from "@/lib/convidados";
-import { formatarDataHoraPlanilha, formatarTelefone } from "@/lib/format";
+import { exibirTelefone, formatarDataHoraPlanilha } from "@/lib/format";
 
 const BOM = "\uFEFF";
 const SEPARADOR = ";";
@@ -31,14 +31,6 @@ export const COLUNAS_CSV = [
   "Respondeu em",
 ] as const;
 
-function telefoneLegivel(telefone: string): string {
-  try {
-    return formatarTelefone(telefone);
-  } catch {
-    return telefone;
-  }
-}
-
 export function gerarCsvConvidados(respostas: readonly RespostaConvidado[]): string {
   const linhas = respostas.map((r) => [
     r.nome,
@@ -46,7 +38,7 @@ export function gerarCsvConvidados(respostas: readonly RespostaConvidado[]): str
     r.acompanhantes.length,
     r.acompanhantes.join(", "),
     r.convidadoPor,
-    telefoneLegivel(r.telefone),
+    exibirTelefone(r.telefone, true),
     r.recado,
     formatarDataHoraPlanilha(r.respondidoEm),
   ]);

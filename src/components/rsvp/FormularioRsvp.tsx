@@ -16,36 +16,14 @@ import {
   primeiroNome,
   telefoneValido,
 } from "@/lib/format";
+import { armazenamentoDaAba, atingiuLimiteDeEnvios, contarEnvio } from "@/lib/envios-da-sessao";
 import { useHidratado } from "@/lib/hooks/useHidratado";
-import { LIMITE_RECADO, criarEsquemaRsvp, type DadosRsvp, type EntradaRsvp } from "@/lib/schemas/rsvp";
+import { LIMITE_RECADO, criarEsquemaRsvp, passoDoCampo, type DadosRsvp, type EntradaRsvp } from "@/lib/schemas/rsvp";
 
 const { rsvp } = textos;
 
 type Passo = 1 | 2 | 3;
 type Envio = "parado" | "enviando" | "falhou" | "muitas-tentativas" | "limite-da-sessao";
-
-/** Limite simples contra spam (briefing 6.4): poucos envios por aba. */
-const CHAVE_ENVIOS = "convite:rsvp-envios";
-const ENVIOS_POR_SESSAO = 3;
-
-function enviosDaSessao(): number {
-  try {
-    return Number(sessionStorage.getItem(CHAVE_ENVIOS) ?? "0") || 0;
-  } catch {
-    return 0;
-  }
-}
-
-function contarEnvio() {
-  try {
-    sessionStorage.setItem(CHAVE_ENVIOS, String(enviosDaSessao() + 1));
-  } catch {
-    // Sem sessionStorage (modo privado antigo): o limite do servidor continua valendo.
-  }
-}
-
-const PASSO_DO_CAMPO = (campo: string): Passo =>
-  campo === "nome" || campo === "telefone" ? 1 : campo === "status" ? 2 : 3;
 
 interface FormularioRsvpProps {
   maxAcompanhantes: number;
@@ -157,7 +135,7 @@ export function FormularioRsvp({ maxAcompanhantes, noivos, linkWhatsApp }: Formu
   }
 
   async function enviar(dados: DadosRsvp) {
-    if (enviosDaSessao() >= ENVIOS_POR_SESSAO) {
+    if (atingiuLimiteDeEnvios(armazenamentoDaAba())) {
       setEnvio("limite-da-sessao");
       return;
     }
@@ -175,7 +153,7 @@ export function FormularioRsvp({ maxAcompanhantes, noivos, linkWhatsApp }: Formu
     }
 
     if (resposta.ok) {
-      contarEnvio();
+      contarEnvio(armazenamentoDaAba());
       // Na URL, só o primeiro nome — nada sensível (briefing 6.4).
       const parametros = new URLSearchParams({ nome: primeiroNome(dados.nome) });
       if (dados.status === "recusou") parametros.set("resposta", "nao");
@@ -191,7 +169,7 @@ export function FormularioRsvp({ maxAcompanhantes, noivos, linkWhatsApp }: Formu
       const campos = Object.entries(corpo?.campos ?? {});
       for (const [campo, mensagem] of campos) setError(campo as FieldPath<EntradaRsvp>, { message: mensagem });
       const primeiro = campos[0]?.[0];
-      if (primeiro) irPara(PASSO_DO_CAMPO(primeiro));
+      if (primeiro) irPara(passoDoCampo(primeiro));
       setEnvio(campos.length ? "parado" : "falhou");
       return;
     }

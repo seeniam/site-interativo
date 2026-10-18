@@ -37,8 +37,17 @@ export function sessaoValida(token: string | undefined, segredo: string, agora: 
 }
 
 /** A sessão vale agora? (O relógio fica aqui, fora da renderização dos componentes.) */
-export function sessaoValidaAgora(token: string | undefined, segredo: string): boolean {
-  return sessaoValida(token, segredo, Date.now());
+export function sessaoValidaAgora(token: string | undefined, chave: string): boolean {
+  return sessaoValida(token, chave, Date.now());
+}
+
+/**
+ * A chave que assina o cookie: o `SESSAO_SECRET` amarrado à senha atual. Trocar a senha dos noivos
+ * derruba na hora toda sessão antiga (um cookie copiado deixa de valer) — sem tabela de sessões.
+ */
+export function chaveDaSessao(segredo: string, senha: string): string {
+  if (!segredo) return "";
+  return createHmac("sha256", segredo).update(`sessao-dos-noivos:${senha}`).digest("base64url");
 }
 
 /**
@@ -59,7 +68,12 @@ export function lerCookie(request: Request, nome: string): string | undefined {
   const cabecalho = request.headers.get("cookie") ?? "";
   for (const parte of cabecalho.split(";")) {
     const [chave, ...valor] = parte.trim().split("=");
-    if (chave === nome) return decodeURIComponent(valor.join("="));
+    if (chave !== nome) continue;
+    try {
+      return decodeURIComponent(valor.join("="));
+    } catch {
+      return undefined; // "%zz" e afins: cookie quebrado = sem cookie (401, nunca 500).
+    }
   }
   return undefined;
 }

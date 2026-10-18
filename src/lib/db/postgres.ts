@@ -5,7 +5,7 @@
  *
  * Colunas sempre explícitas: nada de `select *` (briefing 5).
  */
-import { esquemaLinhaConfirmacao } from "@/lib/schemas/dominio";
+import { esquemaLinhaConfirmacao, esquemaRegistro, garantirGravavel } from "@/lib/schemas/dominio";
 import type { Confirmacao } from "@/types/dominio";
 import type { RegistroDeConfirmacao, RepositorioCasamento } from "./repositorio";
 
@@ -37,7 +37,9 @@ export function criarRepositorioPostgres(executar: Executor): RepositorioCasamen
   return {
     origem: "postgres",
 
-    async registrarConfirmacao(r: RegistroDeConfirmacao) {
+    async registrarConfirmacao(registro: RegistroDeConfirmacao) {
+      // Nunca gravar o que a leitura descartaria (DECISOES, "perda silenciosa").
+      const r = garantirGravavel(esquemaRegistro, registro);
       await executar(
         `insert into confirmacoes
            (nome, telefone, telefone_hash, vai_comparecer, acompanhantes, quem_convidou, recado, atualiza_de)
@@ -71,10 +73,14 @@ export function criarRepositorioPostgres(executar: Executor): RepositorioCasamen
         `select ${COLUNAS_CONFIRMACAO} from confirmacoes order by criado_em desc, id desc`,
         [],
       );
-      return linhas.flatMap((linha) => {
+      const confirmacoes = linhas.flatMap((linha) => {
         const confirmacao = paraConfirmacao(linha);
         return confirmacao ? [confirmacao] : [];
       });
+      // Linha fora do formato não derruba a tela, mas não some calada: só a contagem vai ao log.
+      const descartadas = linhas.length - confirmacoes.length;
+      if (descartadas > 0) console.error(`[confirmacoes] ${descartadas} linha(s) fora do formato descartada(s)`);
+      return confirmacoes;
     },
 
     async listarReservados() {

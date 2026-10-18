@@ -81,6 +81,12 @@ export function criarEsquemaRsvp(maxAcompanhantes: number) {
 export type EntradaRsvp = z.input<ReturnType<typeof criarEsquemaRsvp>>;
 export type DadosRsvp = z.output<ReturnType<typeof criarEsquemaRsvp>>;
 
+/** Em que passo do formulário (1, 2 ou 3) mora cada campo — para levar a pessoa ao erro que o servidor apontou. */
+export function passoDoCampo(campo: string): 1 | 2 | 3 {
+  const raiz = campo.split(".")[0];
+  return raiz === "nome" || raiz === "telefone" ? 1 : raiz === "status" ? 2 : 3;
+}
+
 /** Robô: preencheu o campo que pessoas não veem. */
 export function pareceRobo(dados: Pick<DadosRsvp, "site">): boolean {
   return dados.site.trim().length > 0;

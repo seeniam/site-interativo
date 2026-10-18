@@ -6,7 +6,7 @@ import { EsqueletoLista } from "@/components/convidados/EsqueletoLista";
 import { LoginNoivos } from "@/components/convidados/LoginNoivos";
 import { PainelConvidados } from "@/components/convidados/PainelConvidados";
 import { textos } from "@/config/textos";
-import { COOKIE_SESSAO, sessaoValidaAgora } from "@/lib/api/sessao";
+import { COOKIE_SESSAO, chaveDaSessao, sessaoValidaAgora } from "@/lib/api/sessao";
 import { obterAmbiente } from "@/lib/db";
 import { senhaVisivelNoLogin } from "@/lib/db/ambiente";
 
@@ -25,7 +25,7 @@ async function Porta() {
   // Por pedido de verdade (nem o pré-carregamento parcial): a validade da sessão depende da hora atual.
   await connection();
   const ambiente = obterAmbiente();
-  if (!sessaoValidaAgora(token, ambiente.segredoSessao)) {
+  if (!sessaoValidaAgora(token, chaveDaSessao(ambiente.segredoSessao, ambiente.senhaNoivos))) {
     return <LoginNoivos senhaDeDemonstracao={senhaVisivelNoLogin(ambiente)} />;
   }
   return <PainelConvidados />;

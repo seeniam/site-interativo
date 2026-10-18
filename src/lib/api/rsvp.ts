@@ -3,11 +3,11 @@
  * A validação é o mesmo esquema zod do formulário, repetida aqui no servidor.
  */
 import { z } from "zod";
-import type { RepositorioCasamento } from "@/lib/db/repositorio";
 import { hashTelefone } from "@/lib/db/hash";
-import { criarEsquemaRsvp, esquemaTelefone, paraNovaConfirmacao, pareceRobo } from "@/lib/schemas/rsvp";
+import type { RepositorioCasamento } from "@/lib/db/repositorio";
 import { RegistroInvalido } from "@/lib/schemas/dominio";
-import { CorpoInvalido, ipDoPedido, json, lerJson, respostaDeCorpoInvalido } from "./comum";
+import { criarEsquemaRsvp, esquemaTelefone, paraNovaConfirmacao, pareceRobo } from "@/lib/schemas/rsvp";
+import { barrarExcesso, indisponivel, json, lerCorpo } from "./comum";
 import type { Limitador } from "./limite";
 
 export interface DependenciasRsvp {
@@ -29,35 +29,19 @@ function errosPorCampo(erro: z.ZodError): ErrosPorCampo {
   return erros;
 }
 
-function muitasTentativas(tentarEmSegundos: number): Response {
-  return json({ ok: false, erro: "muitas-tentativas" }, 429, { "Retry-After": String(tentarEmSegundos) });
-}
-
-function indisponivel(onde: string, erro: unknown): Response {
-  // Só o tipo do erro vai para o log: nunca o corpo do pedido (tem nome e telefone).
-  console.error(`[${onde}] falha ao acessar o banco:`, erro instanceof Error ? erro.name : typeof erro);
-  return json({ ok: false, erro: "indisponivel" }, 503);
-}
-
 export async function registrarRsvp(request: Request, deps: DependenciasRsvp): Promise<Response> {
-  const vez = deps.limitador.tentar(ipDoPedido(request));
-  if (!vez.permitido) return muitasTentativas(vez.tentarEmSegundos);
+  const barrado = barrarExcesso(deps.limitador, request);
+  if (barrado) return barrado;
+  const lido = await lerCorpo(request);
+  if (!lido.ok) return lido.resposta;
 
-  let corpo: unknown;
-  try {
-    corpo = await lerJson(request);
-  } catch (erro) {
-    if (erro instanceof CorpoInvalido) return respostaDeCorpoInvalido(erro);
-    throw erro;
-  }
-
-  const lido = criarEsquemaRsvp(deps.maxAcompanhantes).safeParse(corpo);
-  if (!lido.success) return json({ ok: false, erro: "dados-invalidos", campos: errosPorCampo(lido.error) }, 400);
+  const dados = criarEsquemaRsvp(deps.maxAcompanhantes).safeParse(lido.corpo);
+  if (!dados.success) return json({ ok: false, erro: "dados-invalidos", campos: errosPorCampo(dados.error) }, 400);
 
   // Robô no honeypot: responde como sucesso e não grava (não ensina o robô a desviar).
-  if (pareceRobo(lido.data)) return json({ ok: true });
+  if (pareceRobo(dados.data)) return json({ ok: true });
 
-  const confirmacao = paraNovaConfirmacao(lido.data);
+  const confirmacao = paraNovaConfirmacao(dados.data);
   const telefoneHash = hashTelefone(confirmacao.telefone, deps.sal);
   try {
     const anterior = await deps.repositorio.ultimaRespostaDoHash(telefoneHash);
@@ -82,22 +66,16 @@ export async function verificarRsvp(
   request: Request,
   deps: Pick<DependenciasRsvp, "repositorio" | "sal" | "limitador">,
 ): Promise<Response> {
-  const vez = deps.limitador.tentar(ipDoPedido(request));
-  if (!vez.permitido) return muitasTentativas(vez.tentarEmSegundos);
+  const barrado = barrarExcesso(deps.limitador, request);
+  if (barrado) return barrado;
+  const lido = await lerCorpo(request);
+  if (!lido.ok) return lido.resposta;
 
-  let corpo: unknown;
-  try {
-    corpo = await lerJson(request);
-  } catch (erro) {
-    if (erro instanceof CorpoInvalido) return respostaDeCorpoInvalido(erro);
-    throw erro;
-  }
-
-  const lido = esquemaVerificacao.safeParse(corpo);
-  if (!lido.success) return json({ ok: false, erro: "dados-invalidos" }, 400);
+  const dados = esquemaVerificacao.safeParse(lido.corpo);
+  if (!dados.success) return json({ ok: false, erro: "dados-invalidos" }, 400);
 
   try {
-    const em = await deps.repositorio.ultimaRespostaDoHash(hashTelefone(lido.data.telefone, deps.sal));
+    const em = await deps.repositorio.ultimaRespostaDoHash(hashTelefone(dados.data.telefone, deps.sal));
     return json(em ? { jaConfirmou: true, em: em.toISOString() } : { jaConfirmou: false });
   } catch (erro) {
     return indisponivel("rsvp/verificar", erro);

@@ -4,9 +4,11 @@ import { obterAmbiente, obterRepositorio } from "@/lib/api/servidor";
 
 export async function GET(request: Request) {
   await connection();
+  const ambiente = obterAmbiente();
   return listarConvidados(request, {
     repositorio: obterRepositorio(),
-    segredoSessao: obterAmbiente().segredoSessao,
+    segredoSessao: ambiente.segredoSessao,
+    senhaNoivos: ambiente.senhaNoivos,
     agora: Date.now,
   });
 }

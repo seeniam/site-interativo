@@ -92,6 +92,18 @@ export function ocultarTelefone(texto: string): string {
   return `(${d.slice(0, 2)}) ${d.slice(2, 3)}${asteriscosAntes}-${asteriscosDepois}${d.slice(-2)}`;
 }
 
+/**
+ * Telefone para a lista dos noivos: inteiro ("(98) 99967-6346") ou com a máscara de discrição.
+ * Número fora do padrão nunca quebra a tela: aparece cru quando visível, e escondido quando não.
+ */
+export function exibirTelefone(texto: string, visivel: boolean): string {
+  try {
+    return visivel ? formatarTelefone(texto) : ocultarTelefone(texto);
+  } catch {
+    return visivel ? texto : "••••";
+  }
+}
+
 // ── Datas (fuso de Brasília, independente do relógio de quem abre) ───────────
 
 /**

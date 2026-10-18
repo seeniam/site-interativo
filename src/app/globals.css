@@ -941,8 +941,16 @@ html[data-abertura] .heroi-foto-revela {
   .contagem {
     display: grid;
     max-width: 640px;
-    grid-template-columns: repeat(4, 1fr);
+    /* Em 320px, colunas do tamanho do conteúdo e a sobra entre elas: "SEGUNDOS" não encosta em "MINUTOS". */
+    grid-template-columns: repeat(4, auto);
+    justify-content: space-between;
+    column-gap: 4px;
     margin-inline: auto;
+  }
+  @media (min-width: 360px) {
+    .contagem {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
   .contagem__bloco {
     display: flex;
@@ -968,9 +976,14 @@ html[data-abertura] .heroi-foto-revela {
       min-height: 140px;
     }
   }
-  /* "SEGUNDOS" cabe no bloco de 1/4 da tela em 320px. */
+  /* "SEGUNDOS" cabe no bloco de 1/4 da tela: em 320px sobram ~70px por coluna (QA da Fase 7). */
   .contagem__bloco .versalete {
-    letter-spacing: 0.12em;
+    letter-spacing: 0.04em;
+  }
+  @media (min-width: 360px) {
+    .contagem__bloco .versalete {
+      letter-spacing: 0.12em;
+    }
   }
   @media (min-width: 640px) {
     .contagem__bloco .versalete {
@@ -983,10 +996,16 @@ html[data-abertura] .heroi-foto-revela {
     justify-content: center;
     overflow: hidden;
     font-family: var(--font-display);
-    font-size: var(--text-49);
+    /* 320px: um degrau abaixo, para os quatro números não se encostarem. */
+    font-size: var(--text-39);
     font-weight: 300;
     line-height: 1.1;
     color: var(--tinta);
+  }
+  @media (min-width: 360px) {
+    .contagem__numero {
+      font-size: var(--text-49);
+    }
   }
   @media (min-width: 768px) {
     .contagem__numero {

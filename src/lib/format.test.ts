@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { casamento } from "@/config/casamento";
 import {
+  exibirTelefone,
   formatarBRL,
   formatarDataPontuada,
   formatarDataPorExtenso,
@@ -194,5 +195,17 @@ describe("nomes", () => {
 
   it("nunca passa de 30 caracteres", () => {
     expect(primeiroNome("A".repeat(80)).length).toBe(30);
+  });
+});
+
+describe("exibirTelefone", () => {
+  it("inteiro quando visível, com a máscara de discrição quando não", () => {
+    expect(exibirTelefone("98999676346", true)).toBe("(98) 99967-6346");
+    expect(exibirTelefone("98999676346", false)).toBe("(98) 9****-**46");
+  });
+
+  it("número fora do padrão nunca quebra a tela", () => {
+    expect(exibirTelefone("123", true)).toBe("123");
+    expect(exibirTelefone("123", false)).toBe("••••");
   });
 });

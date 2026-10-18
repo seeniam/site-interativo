@@ -426,3 +426,53 @@ o mapa; screenshots e decisões desatualizados. Também foi pego na revisão vis
   (sem acento, por acompanhante), chips e agrupamento, CSV (BOM, `;`, só o filtrado), tabela com ordenação no
   desktop, **confirmar presença numa aba → aparece sozinho na lista aberta em outra**, sair, estados vazio e de
   erro, axe na porta e no painel.
+
+---
+
+## Fase 7 — Polimento, QA final e entrega
+
+### O que foi feito
+1. **QA exploratório** em 320, 390, 768, 1024 e 1440 (`docs/qa/fase-7/` tem as larguras que as fases anteriores
+   não cobriam: 320 e 1024). Teste automático de rolagem horizontal em todas as rotas e larguras (`e2e/qa-final.spec.ts`).
+   Achado e corrigido: em 320 px os rótulos "MINUTOS" e "SEGUNDOS" da contagem se encostavam (colunas do tamanho
+   do conteúdo abaixo de 360 px, com teste).
+2. **PROIBIDOS (seção 9), tela a tela:**
+   - Sem fundo dourado chapado nem botão com gradiente: o primário é tinta com filete interno.
+   - Sem emoji em nó da página: teste de higiene; a única exceção é a mensagem do WhatsApp.
+   - Bordas de 1 px. O máximo é 2 px, no cartão marcado de "Você vem?".
+   - Cards com hierarquia: a Ouro elevada e o QR em destaque. Os três contadores iguais são pedido da 6.6.
+   - Movimento só em momentos: a abertura, a foto e o "Copiar". Nada de fade+slide por elemento ao rolar.
+   - Voz do casal, botões dizem o que acontecem.
+   - Fonte script só no "&" e na assinatura (em contornos).
+   - Nenhum `<select>`: teste.
+   - Tabela densa, alinhada e com estados.
+   - Dado fictício só no modo demonstração, com nomes claramente inventados. Placeholder parece placeholder e
+     está em `PENDENCIAS.md`.
+3. **Code review do diff inteiro** (revisor independente, só leitura). Achados reais, todos corrigidos com teste:
+   - **Lista dos noivos podia esvaziar calada:** se o driver devolvesse `criado_em` no formato texto do Postgres,
+     a validação estrita descartaria todas as linhas. Agora o formato é aceito e linha descartada vai ao log
+     (só a contagem).
+   - **O adaptador Postgres não conferia o registro antes de gravar** (o de memória conferia). Agora confere.
+   - **Endereço ou cookie com percent-encoding quebrado davam 500:** agora dão 404 e 401.
+   - **Sessão não era revogável:** a chave do cookie agora amarra `SESSAO_SECRET` à senha. Trocar
+     `SENHA_NOIVOS` derruba toda sessão antiga.
+   - **Duplicação nas rotas** (corpo, 429, 503) e **regras em componentes** (limite da aba, passo do campo,
+     exibição do telefone) foram para `src/lib/`, com testes.
+   - O revisor confirmou que não há `select *`, segredo com `NEXT_PUBLIC_`, `console.log`, nem dado pessoal em
+     URL, log ou cache.
+4. **SEO e compartilhamento:**
+   - Cartão do WhatsApp 1200×630 com a foto, o monograma, os nomes em contornos e a data.
+   - Manifest, favicon do monograma (SVG) com apple-icon, `robots.txt` (fora: `/convidados`, `/api/`,
+     `/design-system`) e `sitemap.xml` só com as páginas públicas.
+   - `noindex` em `/convidados`, `/agradecimento`, nas telas de PIX e no `/design-system`.
+5. `README.md` com como rodar, variáveis, como editar o conteúdo, como publicar (onde rodar o `db/schema.sql`)
+   e o roteiro de 2 minutos.
+
+### Decisões
+| # | Decisão | Motivo |
+|---|---------|--------|
+| E1 | O cartão do WhatsApp é desenhado com `next/og` por um script (`pnpm gerar:imagens`) e salvo como **JPEG estático** (`src/app/opengraph-image.jpg`, ~70 KB), em vez de uma rota `opengraph-image.tsx`. *(Desvio do texto, registrado.)* | O `next/og` só gera PNG: com a foto, o arquivo passa de 1 MB, e o WhatsApp costuma descartar prévia acima de ~300 KB. O cartão é o primeiro contato (seção 8), então ele precisa aparecer. |
+| E2 | No cartão, a data usa a fonte sem serifa padrão do `next/og`. Nomes e monograma estão em contornos das fontes da marca. | Os contornos já existem para os nomes; a data em Jost exigiria baixar a fonte no script. Legível e discreta. |
+| E3 | Endereço público via `VERCEL_PROJECT_PRODUCTION_URL` (variável de sistema da Vercel). | Links absolutos do OG e do sitemap sem acrescentar variável às cinco do briefing. |
+| E4 | Confete só em CSS, desenhado no servidor (zero JS), em vez de `dynamic(() => …, { ssr: false })`. O QR é carregado sob demanda no cliente (`import("qrcode")`) e o mapa só depois do clique. *(Desvio do texto, registrado.)* | O objetivo da seção 8 é não pesar no carregamento. Confete sem JavaScript nenhum pesa menos que um componente carregado depois. |
+| E5 | `sharp` entrou como dependência de desenvolvimento (só para o script de imagens). | Antes vinha "emprestado" do Next; explícito é mais honesto e o tipo funciona. |

@@ -3,7 +3,7 @@ import { casamento } from "@/config/casamento";
 import { textos } from "@/config/textos";
 import { esquemaConfig } from "./config";
 import { esquemaLinhaConfirmacao, esquemaRegistro } from "./dominio";
-import { criarEsquemaRsvp, paraNovaConfirmacao, pareceRobo, type EntradaRsvp } from "./rsvp";
+import { criarEsquemaRsvp, paraNovaConfirmacao, pareceRobo, passoDoCampo, type EntradaRsvp } from "./rsvp";
 
 const esquema = criarEsquemaRsvp(casamento.rsvp.maxAcompanhantes);
 const erros = textos.rsvp.erros;
@@ -133,6 +133,14 @@ describe("linhas lidas do banco", () => {
     expect(esquemaLinhaConfirmacao.parse({ ...linha, id: 12, criado_em: new Date() }).id).toBe(12);
   });
 
+  it.each([
+    ["2026-10-17 12:00:00+00", "2026-10-17T12:00:00.000Z"],
+    ["2026-10-17 09:00:00.123456-03", "2026-10-17T12:00:00.123Z"],
+    ["2026-10-17 17:30:00+05:30", "2026-10-17T12:00:00.000Z"],
+  ])("aceita a data no formato texto do Postgres (%s)", (texto, iso) => {
+    expect(esquemaLinhaConfirmacao.parse({ ...linha, criado_em: texto }).criado_em.toISOString()).toBe(iso);
+  });
+
   it.each<[string, Record<string, unknown>]>([
     ["telefone com máscara", { telefone: "(98) 99967-6346" }],
     ["telefone que o app não formataria", { telefone: "0000000000" }],
@@ -258,5 +266,15 @@ describe("config: chave e recebedor do PIX", () => {
     ["nome do recebedor com acento", (c) => ({ ...c, pix: { ...c.pix, nomeRecebedor: "JOSÉ" } })],
   ])("recusa %s", (_rotulo, alterar) => {
     expect(esquemaConfig.safeParse(alterar(casamento)).success).toBe(false);
+  });
+});
+
+describe("passoDoCampo", () => {
+  it("leva cada campo ao passo onde ele mora", () => {
+    expect(passoDoCampo("nome")).toBe(1);
+    expect(passoDoCampo("telefone")).toBe(1);
+    expect(passoDoCampo("status")).toBe(2);
+    expect(passoDoCampo("acompanhantes.0.nome")).toBe(3);
+    expect(passoDoCampo("recado")).toBe(3);
   });
 });

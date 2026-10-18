@@ -19,7 +19,7 @@ import {
   type RespostaConvidado,
 } from "@/lib/convidados";
 import { gerarCsvConvidados, nomeArquivoCsv } from "@/lib/csv";
-import { formatarHora, formatarTelefone, ocultarTelefone } from "@/lib/format";
+import { exibirTelefone, formatarHora } from "@/lib/format";
 import { CardConvidado } from "./CardConvidado";
 import { ContadoresConvidados } from "./ContadoresConvidados";
 import { EsqueletoLista } from "./EsqueletoLista";
@@ -33,14 +33,6 @@ const FILTROS: { valor: FiltroStatus; rotulo: string }[] = [
   { valor: "confirmado", rotulo: convidados.filtros.confirmados },
   { valor: "recusou", rotulo: convidados.filtros.naoVao },
 ];
-
-function telefoneSeguro(telefone: string, mostrar: boolean): string {
-  try {
-    return mostrar ? formatarTelefone(telefone) : ocultarTelefone(telefone);
-  } catch {
-    return mostrar ? telefone : "••••";
-  }
-}
 
 function baixarCsv(respostas: readonly RespostaConvidado[]) {
   const arquivo = new Blob([gerarCsvConvidados(respostas)], { type: "text/csv;charset=utf-8" });
@@ -124,7 +116,7 @@ export function PainelConvidados() {
   );
   const grupos = agrupar ? agruparPorQuemConvidou(filtradas) : null;
   const paginacao = paginar(filtradas, pagina);
-  const telefoneDe = (r: RespostaConvidado) => telefoneSeguro(r.telefone, mostrarTelefones);
+  const telefoneDe = (r: RespostaConvidado) => exibirTelefone(r.telefone, mostrarTelefones);
 
   const cartoes = (lista: readonly RespostaConvidado[], nivel: "h2" | "h3") => (
     <ul className="flex flex-col gap-3 lg:hidden">
