@@ -17,7 +17,6 @@ const base = (extra: Partial<Confirmacao>): Confirmacao => ({
   telefone: "98900000001",
   telefoneHash: "a".repeat(64),
   status: "confirmado",
-  acompanhantes: [],
   convidadoPor: "Jaqueline",
   recado: "",
   atualizaDe: null,
@@ -51,7 +50,6 @@ const r = (extra: Partial<RespostaConvidado>): RespostaConvidado => ({
   nome: "Ana",
   telefone: "98900000001",
   status: "confirmado",
-  acompanhantes: [],
   convidadoPor: "Jaqueline",
   recado: "",
   respondidoEm: "2026-10-01T12:00:00.000Z",
@@ -60,14 +58,14 @@ const r = (extra: Partial<RespostaConvidado>): RespostaConvidado => ({
 });
 
 const LISTA = [
-  r({ id: "1", nome: "Júlia Ávila", acompanhantes: ["Marcos"], convidadoPor: "Jaqueline" }),
+  r({ id: "1", nome: "Júlia Ávila", convidadoPor: "Jaqueline" }),
   r({ id: "2", nome: "bruno lima", convidadoPor: "Diorlando", respondidoEm: "2026-10-03T12:00:00.000Z" }),
   r({ id: "3", nome: "Carla", status: "recusou", convidadoPor: "", respondidoEm: "2026-10-02T12:00:00.000Z" }),
-  r({ id: "4", nome: "Davi", acompanhantes: ["Eva", "Fábio"], convidadoPor: "Diorlando" }),
+  r({ id: "4", nome: "Davi Fábio", convidadoPor: "Diorlando" }),
 ];
 
 describe("tela dos noivos", () => {
-  it("busca ignora acento, caixa e espaços; acha também pelo nome do acompanhante", () => {
+  it("busca ignora acento, caixa e espaços", () => {
     expect(normalizarBusca("  Júlia   ÁVILA ")).toBe("julia avila");
     const busca = (termo: string) => filtrarRespostas(LISTA, { busca: termo, status: "todos" }).map((x) => x.id);
     expect(busca("julia avila")).toEqual(["1"]);
@@ -83,16 +81,16 @@ describe("tela dos noivos", () => {
     expect(ids("confirmado")).toEqual(["1", "2", "4"]);
   });
 
-  it("contadores: confirmados somam acompanhantes; não vão; respostas no total", () => {
-    expect(contarRespostas(LISTA)).toEqual({ pessoasConfirmadas: 6, naoVao: 1, respostas: 4 });
-    expect(contarRespostas([])).toEqual({ pessoasConfirmadas: 0, naoVao: 0, respostas: 0 });
+  it("contadores: uma confirmação = uma pessoa; não vão; respostas no total", () => {
+    expect(contarRespostas(LISTA)).toEqual({ confirmados: 3, naoVao: 1, respostas: 4 });
+    expect(contarRespostas([])).toEqual({ confirmados: 0, naoVao: 0, respostas: 0 });
   });
 
   it("agrupamento com subtotal; “não informado” por último", () => {
     const grupos = agruparPorQuemConvidou(LISTA);
-    expect(grupos.map((g) => [g.convidadoPor, g.respostas.length, g.contadores.pessoasConfirmadas])).toEqual([
-      ["Diorlando", 2, 4],
-      ["Jaqueline", 1, 2],
+    expect(grupos.map((g) => [g.convidadoPor, g.respostas.length, g.contadores.confirmados])).toEqual([
+      ["Diorlando", 2, 2],
+      ["Jaqueline", 1, 1],
       ["", 1, 0],
     ]);
   });
@@ -101,7 +99,7 @@ describe("tela dos noivos", () => {
     expect(ordenarRespostas(LISTA, "nome", "asc").map((x) => x.nome)).toEqual([
       "bruno lima",
       "Carla",
-      "Davi",
+      "Davi Fábio",
       "Júlia Ávila",
     ]);
     expect(ordenarRespostas(LISTA, "data", "desc").map((x) => x.id)[0]).toBe("2");

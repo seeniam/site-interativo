@@ -24,7 +24,8 @@ async function entrar(page: Page) {
   await page.getByLabel("Senha").fill("demo");
   await page.getByRole("button", { name: "Entrar" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Lista de convidados" })).toBeVisible();
-  await expect(page.getByRole("status").filter({ hasText: /respostas?$/ })).toBeVisible();
+  // Depois do login o servidor redesenha a página: num servidor frio e com a máquina cheia, passa de 10s.
+  await expect(page.getByRole("status").filter({ hasText: /respostas?$/ })).toBeVisible({ timeout: 20_000 });
 }
 
 /** Nomes visíveis na lista (cartões no celular, tabela no desktop). */
@@ -75,6 +76,8 @@ test.describe("/convidados com a sessão dos noivos", () => {
     expect(confirmados).toBeGreaterThan(0);
     expect(naoVao).toBeGreaterThan(0);
     expect(total).toBeGreaterThanOrEqual(12);
+    // Convite individual: cada resposta é uma pessoa, então os dois primeiros somam o total.
+    expect((confirmados ?? 0) + (naoVao ?? 0)).toBe(total);
     expect(await nomesVisiveis(page)).toContain("Ana Exemplo da Silva");
 
     const telefones = page.locator("[data-telefone]:visible");
@@ -85,12 +88,12 @@ test.describe("/convidados com a sessão dos noivos", () => {
     await expect(telefones.first()).not.toContainText("*");
   });
 
-  test("busca sem botão: por nome, sem acento, e pelo nome de quem vem junto", async ({ page }) => {
+  test("busca sem botão: por nome, sem acento e sem diferenciar maiúsculas", async ({ page }) => {
     await entrar(page);
     const busca = page.getByLabel("Buscar por nome");
     await busca.fill("dora demonstracao");
     await expect.poll(() => nomesVisiveis(page)).toEqual(["Dora Demonstração"]);
-    await busca.fill("fabio");
+    await busca.fill("DEMONSTRAÇÃO");
     await expect.poll(() => nomesVisiveis(page)).toEqual(["Dora Demonstração"]);
     await expect(page.getByRole("status").filter({ hasText: "1 resposta" })).toBeVisible();
     await busca.fill("ninguém com esse nome");
@@ -111,7 +114,8 @@ test.describe("/convidados com a sessão dos noivos", () => {
     for (const grupo of ["Diorlando", "Jaqueline"]) {
       await expect(page.getByRole("heading", { level: 2, name: grupo })).toBeVisible();
     }
-    await expect(page.getByText(/pessoas? confirmadas?, \d+ respostas?/).first()).toBeVisible();
+    // Subtotal por grupo: uma confirmação = uma pessoa.
+    await expect(page.getByText(/^\d+ confirmados?, \d+ respostas?$/).first()).toBeVisible();
   });
 
   test("exportar CSV: UTF-8 com BOM, ponto e vírgula e as respostas filtradas", async ({ page }) => {
@@ -125,9 +129,7 @@ test.describe("/convidados com a sessão dos noivos", () => {
     const conteudo = fs.readFileSync((await arquivo.path()) ?? "", "utf8");
     expect(conteudo.charCodeAt(0)).toBe(0xfeff);
     const linhas = conteudo.slice(1).trim().split("\r\n");
-    expect(linhas[0]).toBe(
-      "Nome;Status;Acompanhantes;Nomes dos acompanhantes;Quem convidou;Telefone;Recado;Respondeu em",
-    );
+    expect(linhas[0]).toBe("Nome;Status;Quem convidou;Telefone;Recado;Respondeu em");
     expect(linhas).toHaveLength(2);
     expect(linhas[1]).toMatch(/^Ana Exemplo da Silva;(Confirmado|Não vai);/);
   });
@@ -167,7 +169,7 @@ test.describe("/convidados com a sessão dos noivos", () => {
 
     // Sem tocar em nada na primeira aba: a revalidação automática traz a resposta nova.
     await page.bringToFront();
-    await expect.poll(() => nomesVisiveis(page), { timeout: 25_000 }).toContain(nome);
+    await expect.poll(() => nomesVisiveis(page), { timeout: 35_000 }).toContain(nome); // até 15s do ciclo + a busca, com folga para máquina carregada
   });
 
   test("sair volta para a porta", async ({ page }) => {

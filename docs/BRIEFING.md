@@ -19,10 +19,16 @@ substitua por `lib/db/` com adaptador em memória quando não houver `DATABASE_U
 também o `firestore.rules` e seus testes.
 
 **MUDANÇA DE ARTE.** Não existe mais seção de galeria. O cliente tem UMA foto e não terá
-outras. Leia "Economia da foto única" na seção 3.7: a foto aparece em exatamente dois
-enquadramentos (herói inteiro + um recorte fechado da mão dela com a aliança, numa faixa
-21:9 entre seções). "Nossa história" virou tipografia pura, sem foto. Não repita a mesma
-imagem em mais lugares e não baixe foto de banco com casal aleatório.
+outras. Leia "A foto única" na seção 3.7: a foto aparece **só no herói**. Não existe recorte
+de detalhe (o arquivo tem 960×1280 e qualquer corte fechado fica borrado no celular).
+"Nossa história" virou tipografia pura, sem foto. Não repita a imagem em outros lugares e
+não baixe foto de banco com casal aleatório.
+
+**CONVITE INDIVIDUAL — NÃO EXISTEM ACOMPANHANTES.** Cada convite é para uma pessoa. Nada de
+pergunta "quantas pessoas vêm com você", stepper, campos de nome de acompanhante, coluna
+no banco, "+2" na lista ou FAQ "posso levar acompanhantes?". Uma confirmação = uma pessoa.
+(Correção do cliente em 18/10/2026: o requisito de acompanhantes desta versão do briefing
+estava errado e chegou a ir ao ar.)
 
 **SEU PAPEL — cinco papéis acumulados, e você responde por todos em cada entrega:**
 - **FRONTEND STAFF ENGINEER:** arquitetura limpa, TypeScript strict, zero `any`, componentes
@@ -67,8 +73,8 @@ Fora disso, decida, registre a premissa em `DECISOES.md` e siga.
 - WhatsApp de comprovante = mesmo número da chave PIX.
 - Cerimônia e recepção no Espaço Max, a partir das 16h30.
 
-**AINDA "A DEFINIR" — só três, nenhuma trava você:** marcos de "nossa história" (só texto),
-traje e prazo do RSVP. Sem os marcos, a seção inteira NÃO é renderizada — nada de marco
+**AINDA "A DEFINIR" — só dois, nenhum trava você:** marcos de "nossa história" (só texto)
+e prazo do RSVP. (Traje foi definido em 18/10/2026: ver 6.1, item 6.) Sem os marcos, a seção inteira NÃO é renderizada — nada de marco
 inventado. Use o vocabulário da seção 4 ("a confirmar" × "a definir", com estados visuais
 distintos) e mantenha `PENDENCIAS.md` em dia. A única foto é `public/images/casal.jpg`.
 
@@ -121,7 +127,7 @@ com 4G ruim, e decide em 10 segundos se aquilo parece especial.
 | `/` | sim | Convite: herói com foto do casal, nomes, versículo, data/hora, contagem regressiva, local, CTAs "Presentear" e "Confirmar presença", nossa história, trajes, dúvidas frequentes |
 | `/presentear` | sim | Lista de presentes (cotas em PIX + presentes nomeados) |
 | `/confirmar-presente/[id]` | sim | Tela do PIX: QR Code gerado na hora, código copia-e-cola, botão "Copiar", botão "Enviar comprovante" (WhatsApp) |
-| `/confirmar-presenca` | sim | Formulário de RSVP (nome, telefone, vai comparecer, quem convidou, acompanhantes) |
+| `/confirmar-presenca` | sim | Formulário de RSVP (nome, telefone, vai comparecer, quem convidou, recado). Convite individual: sem acompanhantes |
 | `/agradecimento` | sim | Confirmação com celebração sutil (confete dourado) e próximos passos |
 | `/convidados` | sim, mas cru | **Lista de quem confirmou presença** — é a rota que o cliente pediu para existir "de verdade": contadores, busca, filtros, agrupamento, exportar CSV |
 | `/*` (404) | sim | Página não encontrada, com a mesma identidade e caminho de volta |
@@ -212,8 +218,6 @@ Momentos orquestrados (os que valem a pena):
    recebe um flash de `--champanhe` que desaparece em 600ms.
 5. **RSVP enviado:** transição para `/agradecimento` com confete dourado (canvas leve,
    ~2.5s, no máximo 120 partículas, para sozinho) e o monograma pulsando uma vez.
-6. **Recorte de detalhe:** ao entrar na viewport, a faixa 21:9 revela com um
-   `clip-path` que abre do centro (~600ms), uma vez só.
 
 Regras: nada de parallax pesado, nada de hover que levanta todos os cards, nada de
 contador animando em todo lugar. **Respeitar `prefers-reduced-motion`**: nesse caso,
@@ -234,21 +238,17 @@ tudo vira fade simples de 150ms e o confete não roda.
 - `next/image` com AVIF/WebP, `priority` só no herói, `placeholder="blur"`, `sizes` corretos.
 - Proporções fixas: herói 3:4 no celular e 16:10 no desktop (crop pelo `object-position`).
 
-**Economia da foto única (restrição confirmada pelo cliente).** Existe UMA foto, e não
-haverá outras. Ela aparece em exatamente **dois lugares**, com enquadramentos que não se
-parecem:
-1. **Herói** — a foto inteira, respiração completa, é o primeiro impacto.
-2. **Um recorte fechado de detalhe** — a mão dela sobre o peito dele, com a aliança —
-   usado uma única vez, como textura entre duas seções (faixa larga e baixa, tipo 21:9).
-   É o mesmo arquivo, mas ninguém percebe que é a mesma imagem.
-Mais que isso cansa e denuncia a escassez. A OG image reusa o herói, o que não conta
-porque vive fora do site.
+**A foto única (restrição confirmada pelo cliente).** Existe UMA foto, e não haverá outras.
+Ela aparece **só no herói** — a foto inteira, respiração completa, é o primeiro impacto.
+**Não use recorte de detalhe** (nem faixa 21:9, nem close de mãos ou aliança): o arquivo tem
+960×1280, e qualquer corte fechado o bastante para parecer um detalhe fica borrado em tela
+de celular. A OG image reusa a foto, o que não conta porque vive fora do site.
 **Não existe seção de galeria.** Seis quadrados da mesma foto é pior do que não ter
 seção. Em vez dela, o lugar que sobra no `/` é ocupado pelo que temos de verdade:
 contagem regressiva, história e dúvidas frequentes respiram mais.
-- Faltando outras fotos: usar **apenas** a do casal em composições diferentes e registrar
-  em `docs/PENDENCIAS.md` o que o cliente precisa enviar. **Nunca** usar foto de banco de
-  imagem com casal aleatório.
+- Faltando outras fotos: **não** reaproveitar a do casal fora do herói (nem em outro
+  enquadramento) e registrar em `docs/PENDENCIAS.md` o que o cliente precisa enviar. **Nunca**
+  usar foto de banco de imagem com casal aleatório.
 
 ---
 
@@ -308,10 +308,13 @@ export const casamento = {
   ],
 
   historia: [ /* ⚠️ A DEFINIR: 3 a 5 marcos, SÓ TEXTO (ano + título + uma frase) */ ],
-  // Sem galeria: existe uma única foto. Ver "Economia da foto única" na seção 3.7.
-  trajes: { titulo: "Traje social", descricao: "TODO", paleta: ["#C9A227", "#FFFFFF"] }, // ⚠️
+  // Sem galeria: existe uma única foto, usada só no herói. Ver "A foto única" na seção 3.7.
+  trajes: {
+    titulo: "Traje social",
+    orientacao: "A escolha das cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à noiva.",
+  }, // definido em 18/10/2026 — sem amostras de cor (ver 6.1, item 6)
   faq: [ /* ⚠️ PENDENTE */ ],
-  rsvp: { prazo: "TODO", maxAcompanhantes: 4 }, // ⚠️
+  rsvp: { prazo: "TODO" }, // ⚠️ — convite individual: não existe limite de acompanhantes
 } as const;
 ```
 
@@ -321,7 +324,7 @@ interface como um placeholder elegante (nunca "undefined", nunca quebrado).
 **Vocabulário obrigatório (vale no código, nos selos da interface e no `PENDENCIAS.md`):**
 - **"a confirmar"** = o dado chegou, mas há dúvida sobre ele (ano, referência do versículo,
   de-para das cotas, nome do recebedor do PIX, número do WhatsApp, local da cerimônia).
-- **"a definir"** = o dado ainda não existe (nossa história, trajes, prazo do RSVP).
+- **"a definir"** = o dado ainda não existe (nossa história, prazo do RSVP).
 Os dois estados são visualmente distintos: "a confirmar" em `--champanhe` com texto
 `--ouro-escuro`; "a definir" em `--linho` com texto `--fumaca`. Nunca usar um termo pelo outro.
 
@@ -353,7 +356,6 @@ Os dois estados são visualmente distintos: "a confirmar" em `--champanhe` com t
     telefone      text        not null,
     telefone_hash text        not null,          -- sha256(telefone + RSVP_SALT do servidor)
     vai_comparecer boolean    not null,
-    acompanhantes jsonb       not null default '[]'::jsonb,
     quem_convidou text,
     recado        text,
     atualiza_de   text,                          -- hash da resposta que esta substitui
@@ -446,7 +448,11 @@ Ordem das seções (mobile-first, tudo em coluna no celular):
    cliente + link do Google Calendar. Mapa embedado só carrega depois do clique
    (`lite mode`), para não pesar o LCP. O endereço precisa ser **copiável com um toque**
    (botão "Copiar endereço") — é o que o convidado manda para o motorista de aplicativo.
-6. **Trajes**: descrição curta + amostras de cor (círculos dourado/branco com o nome da cor).
+6. **Trajes**: só texto. Título "Trajes", destaque "Traje social" e a linha "A escolha das
+   cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à
+   noiva." **Sem amostras de cor**: dourado e branco são as cores do evento (decoração e
+   cerimônia), não código de vestimenta — mostrá-las como paleta convidava a ir de branco,
+   cor reservada à noiva.
 7. **Presentes (teaser)**: três cotas em destaque + botão "Ver lista completa".
 8. **Dúvidas frequentes**: acordeão acessível (`<details>` estilizado ou Radix), 4 a 6 perguntas.
 9. **RSVP (teaser)**: faixa com prazo ("Confirme até 00/00") e botão grande.
@@ -491,9 +497,9 @@ Formulário em **três passos** com barra de progresso em filete dourado:
    telefone com máscara `(99) 99999-9999` e `inputMode="tel"`.
 2. **Você vem?**: dois cartões grandes e tocáveis — "Sim, estarei lá" / "Não poderei ir"
    (nunca um `select` cinza). Se "não", pula direto para a mensagem.
-3. **Detalhes**: quantos acompanhantes (stepper grande −/+, limite do config) com um campo
-   de nome por acompanhante; "Quem convidou?" (autocomplete entre noivo/noiva, com opção
-   de digitar); recado opcional para o casal (máx. 240 caracteres com contador).
+3. **Detalhes**: "Quem convidou?" (autocomplete entre noivo/noiva, com opção de digitar);
+   recado opcional para o casal (máx. 240 caracteres com contador). **Não pergunte por
+   acompanhantes**: o convite é individual.
 
 Regras de UX obrigatórias:
 - Validação em `onBlur`, mensagem de erro humana ("Faltou o telefone pra gente te avisar de mudanças").
@@ -515,13 +521,13 @@ Regras de UX obrigatórias:
 ### 6.6 `/convidados` — a lista de quem confirmou  ★ rota pedida pelo cliente
 É a tela mais "produto" do site. Mobile-first de verdade.
 
-- **Três contadores** no topo, em cards com filete dourado: *Confirmados* (pessoas, somando
-  acompanhantes), *Não poderão ir*, *Respostas no total*. Números em Cormorant, com um
+- **Três contadores** no topo, em cards com filete dourado: *Confirmados* (uma confirmação
+  = uma pessoa), *Não poderão ir*, *Respostas no total*. Números em Cormorant, com um
   contador que anima **uma única vez** ao entrar.
 - **Busca** por nome (com `useDeferredValue`, sem botão) e **filtros em chips**:
   Todos · Confirmados · Não vão · Por quem convidou.
 - **Visualização dupla**: no celular, **lista de cartões** (nome, selo de status com ponto +
-  texto, acompanhantes como "+2", quem convidou, data da confirmação). No desktop ≥1024px,
+  texto, quem convidou, data da confirmação). No desktop ≥1024px,
   **tabela** densa e bem tratada: cabeçalho fixo, zebra em `--papel`, números à direita,
   ordenação por nome/data, 25 por página.
 - **Agrupamento opcional** por "quem convidou", com subtotal por grupo.
@@ -621,7 +627,7 @@ A animação de abertura do convite (3.5.1) com `sessionStorage`.
 **Fechamento:** screenshots do layout vazio nas 3 larguras + teste de navegação (Playwright).
 
 ### Fase 3 — `/` o convite
-Todas as seções da 6.1. Contagem regressiva com os 3 estados. Recorte de detalhe 21:9.
+Todas as seções da 6.1. Contagem regressiva com os 3 estados.
 Acordeão acessível. "Adicionar à agenda" funcionando.
 **Fechamento:** Lighthouse mobile ≥ 95; screenshots revisados; teste E2E da rolagem e dos CTAs.
 
@@ -631,7 +637,7 @@ Grade de presentes, estados, QR gerado na hora, copiar código, WhatsApp.
 teste que valida o payload PIX da tela contra `lib/pix.ts`.
 
 ### Fase 5 — `/confirmar-presenca` e `/agradecimento`
-Formulário em 3 passos, acompanhantes, idempotência, honeypot, erros, confete.
+Formulário em 3 passos, idempotência, honeypot, erros, confete.
 **Esta fase escreve as Route Handlers e o schema da seção 5**, com os testes de autorização.
 Nada vai para produção com dado pessoal saindo de rota pública.
 **Fechamento:** E2E do caminho feliz, do caminho "não vou", do telefone repetido e da
@@ -670,5 +676,5 @@ no Espaço Max às 16h30, e **uma única foto disponível, sem previsão de outr
 
 **Bloqueiam a Fase 3 mas têm plano B (placeholder honesto):**
 - [ ] 3 a 5 marcos de "nossa história" (ano + título + uma frase). **Só texto.**
-- [ ] Traje / dress code.
-- [ ] Prazo para confirmação de presença e limite de acompanhantes.
+- [x] Traje / dress code — definido em 18/10/2026: traje social, branco reservado à noiva.
+- [ ] Prazo para confirmação de presença.

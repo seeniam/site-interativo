@@ -20,23 +20,12 @@ export function celulaCsv(valor: string | number): string {
 
 const STATUS = { confirmado: "Confirmado", recusou: "Não vai" } as const;
 
-export const COLUNAS_CSV = [
-  "Nome",
-  "Status",
-  "Acompanhantes",
-  "Nomes dos acompanhantes",
-  "Quem convidou",
-  "Telefone",
-  "Recado",
-  "Respondeu em",
-] as const;
+export const COLUNAS_CSV = ["Nome", "Status", "Quem convidou", "Telefone", "Recado", "Respondeu em"] as const;
 
 export function gerarCsvConvidados(respostas: readonly RespostaConvidado[]): string {
   const linhas = respostas.map((r) => [
     r.nome,
     STATUS[r.status],
-    r.acompanhantes.length,
-    r.acompanhantes.join(", "),
     r.convidadoPor,
     exibirTelefone(r.telefone, true),
     r.recado,

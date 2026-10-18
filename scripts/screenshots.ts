@@ -144,7 +144,7 @@ async function main(): Promise<void> {
             .filter((el) => {
               const r = el.getBoundingClientRect();
               if (r.width === 0 || r.height === 0 || (r.right <= limite && r.left >= -0.5)) return false;
-              // Recortado por um ancestral que cabe na tela (ex.: foto em zoom dentro do recorte) não vaza.
+              // Cortado por um ancestral que cabe na tela (ex.: imagem em zoom dentro de uma moldura) não vaza.
               for (let pai = el.parentElement; pai; pai = pai.parentElement) {
                 const estilo = getComputedStyle(pai);
                 if (["hidden", "clip"].includes(estilo.overflowX) || estilo.clipPath !== "none") {

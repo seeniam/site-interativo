@@ -48,7 +48,7 @@ async function respostasDosNoivos(request: APIRequestContext) {
 }
 
 test.describe("/confirmar-presenca", () => {
-  test("caminho feliz: vem com um acompanhante → agradecimento com confete e agenda", async ({ page, request }) => {
+  test("caminho feliz: confirma presença → agradecimento com confete e agenda", async ({ page, request }) => {
     const telefone = telefoneNovo();
     await abrirFormulario(page);
     await expect(page.locator("h1")).toHaveText("Confirmar presença");
@@ -60,9 +60,9 @@ test.describe("/confirmar-presenca", () => {
     await page.getByRole("button", { name: "Continuar" }).click();
     await expect(page.getByRole("heading", { level: 2, name: "Os detalhes" })).toBeFocused();
 
-    await page.getByRole("button", { name: "Adicionar um acompanhante" }).click();
-    await expect(page.locator("output")).toHaveText("Você e mais 1 pessoa");
-    await page.getByLabel("Nome de quem vem (1)").fill("Bruno Exemplo");
+    // Convite individual: o passo 3 tem só "quem convidou" e o recado.
+    await expect(page.locator("form").getByRole("combobox")).toHaveCount(1); // quem convidou (com sugestões)
+    await expect(page.locator("form").getByRole("textbox")).toHaveCount(1); // o recado
     await page.getByRole("button", { name: "Jaqueline" }).click();
     await expect(page.getByLabel("Quem convidou você?")).toHaveValue("Jaqueline");
     await page.getByLabel("Recado para o casal (opcional)").fill("Felicidades!");
@@ -75,9 +75,9 @@ test.describe("/confirmar-presenca", () => {
       nome: "ana maria exemplo",
       telefone: telefone.digitos,
       status: "confirmado",
-      acompanhantes: [{ nome: "Bruno Exemplo" }],
       convidadoPor: "Jaqueline",
     });
+    expect(corpo).not.toHaveProperty("acompanhantes");
 
     // Na URL, só o primeiro nome.
     await expect(page).toHaveURL(/\/agradecimento\?nome=Ana$/, DEPOIS_DO_ENVIO);
@@ -97,7 +97,6 @@ test.describe("/confirmar-presenca", () => {
     await page.getByText("Não poderei ir").click();
     await page.getByRole("button", { name: "Continuar" }).click();
     await expect(page.getByRole("heading", { level: 2, name: "Um recado para os noivos" })).toBeFocused();
-    await expect(page.getByRole("button", { name: "Adicionar um acompanhante" })).toHaveCount(0);
     await expect(page.getByLabel("Quem convidou você?")).toHaveCount(0);
     await page.getByLabel("Recado para o casal (opcional)").fill("Estarei com vocês em pensamento.");
     await page.getByRole("button", { name: "Enviar resposta" }).click();
@@ -178,10 +177,6 @@ test.describe("/confirmar-presenca", () => {
     await page.keyboard.press("Enter");
     await expect(page.getByRole("heading", { level: 2, name: "Os detalhes" })).toBeFocused();
 
-    await tabAte(page.getByRole("button", { name: "Adicionar um acompanhante" }));
-    await page.keyboard.press("Enter");
-    await tabAte(page.getByLabel("Nome de quem vem (1)"));
-    await page.keyboard.type("Elias Teclado");
     await tabAte(page.getByRole("button", { name: "Diorlando" }));
     await page.keyboard.press("Enter");
     await expect(page.getByLabel("Quem convidou você?")).toHaveValue("Diorlando");
@@ -190,15 +185,14 @@ test.describe("/confirmar-presenca", () => {
     await expect(page).toHaveURL(/\/agradecimento\?nome=Dora$/, DEPOIS_DO_ENVIO);
   });
 
-  test("tocar em “Jaqueline” logo depois de um campo vazio: o erro aparece e o toque não se perde", async ({
+  test("tocar em “Jaqueline” com o campo de “quem convidou” em foco: o toque preenche e não se perde", async ({
     page,
   }) => {
     await abrirFormulario(page);
     await preencherPasso1(page, "Gil Toque", telefoneNovo().digitado);
     await page.getByText("Sim, estarei lá").click();
     await page.getByRole("button", { name: "Continuar" }).click();
-    await page.getByRole("button", { name: "Adicionar um acompanhante" }).click();
-    await page.getByLabel("Nome de quem vem (1)").focus();
+    await page.getByLabel("Quem convidou você?").focus();
     await page.getByRole("button", { name: "Jaqueline" }).click();
     await expect(page.getByLabel("Quem convidou você?")).toHaveValue("Jaqueline");
     await expect(page.getByRole("button", { name: "Jaqueline" })).toHaveAttribute("aria-pressed", "true");
@@ -271,7 +265,7 @@ test.describe("/confirmar-presenca", () => {
     expect((await axe()).violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
     await page.getByText("Sim, estarei lá").click();
     await page.getByRole("button", { name: "Continuar" }).click();
-    await page.getByRole("button", { name: "Adicionar um acompanhante" }).click();
+    await expect(page.getByLabel("Quem convidou você?")).toBeVisible();
     expect((await axe()).violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
   });
 });

@@ -12,10 +12,17 @@ As duas listas, sempre atualizadas a partir do config, estão em `/design-system
 
 ## Confirmado pelo casal em 17/10/2026
 
-Nada aqui bloqueia mais. *Observação:* nesta foto, a mão dela não mostra aliança; o recorte de detalhe usa as duas mãos, com a aliança dele (DECISOES H3). Data 21/12/2026 (**segunda-feira, intencional** — o FAQ avisa que é dia útil),
+Nada aqui bloqueia mais. Data 21/12/2026 (**segunda-feira, intencional** — o FAQ avisa que é dia útil),
 a partir das 16h30; cerimônia e recepção no Espaço Max; Colossenses 3:14; cotas Bronze R$ 150,
 Prata R$ 200, Ouro R$ 250; recebedora do PIX "JAQUELINE BARROS ALVARES" (24 caracteres);
-WhatsApp de comprovante = número da chave PIX; **uma única foto, sem previsão de outras**.
+WhatsApp de comprovante = número da chave PIX; **uma única foto, sem previsão de outras** (usada
+só no herói).
+
+## Definido pelo casal em 18/10/2026
+
+- **Trajes:** traje social. "A escolha das cores fica a critério de cada convidado. Pedimos
+  apenas que o branco seja reservado à noiva." Sem amostras de cor (DECISOES A2).
+- **Convite individual:** não existem acompanhantes (DECISOES A1).
 
 ## A confirmar
 
@@ -26,14 +33,15 @@ Nenhum item.
 | # | Item | Onde entra | Enquanto não chega |
 |---|------|------------|--------------------|
 | D1 | 3 a 5 marcos de "nossa história" — **só texto** (ano, título, uma frase) | Seção "Nossa história" | A seção inteira **não é renderizada**. Nada de marco inventado. |
-| D2 | Traje / dress code (a orientação; o título "Traje social" veio no briefing) | Seção "Trajes" | Placeholder "a definir" na descrição |
 | D3 | Prazo para confirmar presença | Faixa do RSVP, FAQ | Placeholder "a definir" no "Confirme até" e na resposta do FAQ |
 
 ## Histórico (resolvido)
 
-- C1–C7 (ano, de-para das cotas, recebedor do PIX, WhatsApp, local da cerimônia, versículo,
-  acompanhantes) — confirmados pelo casal em 17/10/2026.
-- Galeria e fotos adicionais — **não existirão** (briefing 3.7, "Economia da foto única").
+- C1–C6 (ano, de-para das cotas, recebedor do PIX, WhatsApp, local da cerimônia, versículo) —
+  confirmados pelo casal em 17/10/2026. O antigo C7 (limite de acompanhantes) deixou de existir:
+  o convite é individual (18/10/2026).
+- D2 — traje: definido pelo casal em 18/10/2026 (acima).
+- Galeria, fotos adicionais e recorte de detalhe — **não existirão** (briefing 3.7, "A foto única").
 - Frases das cotas — o briefing traz descrição vazia: as cotas não têm frase.
 - Privacidade dos telefones — resolvida pela troca de arquitetura: o navegador nunca fala com
   o banco; só os Route Handlers, e a lista exige a sessão dos noivos.

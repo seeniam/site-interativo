@@ -28,13 +28,19 @@ test.describe("o convite", () => {
     await expect(foto).toHaveAttribute("loading", "eager");
   });
 
-  test("economia da foto única: exatamente dois enquadramentos no convite (H1)", async ({ page }) => {
+  test("a foto do casal aparece uma vez só, no herói (DECISOES A3)", async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    const fotos = page.locator('main img[src*="casal"]');
-    await expect(fotos).toHaveCount(2);
+    await expect(page.locator('main img[src*="casal"]')).toHaveCount(1);
     await expect(page.locator("#heroi img")).toHaveCount(1);
-    await expect(page.locator("figure.recorte img")).toHaveCount(1);
+  });
+
+  test("convite individual: nenhuma menção a acompanhantes em nenhuma parte do convite (DECISOES A1)", async ({
+    page,
+  }) => {
+    await page.goto("/?abertura=0");
+    // As respostas do FAQ ficam no DOM mesmo fechadas: o texto inteiro da página é conferido.
+    expect(await page.locator("main").textContent()).not.toMatch(/acompanhante/i);
   });
 
   test("nossa história não é renderizada enquanto os marcos estão a definir", async ({ page }) => {
@@ -182,13 +188,18 @@ test.describe("quando e onde", () => {
 });
 
 test.describe("trajes, presentes, dúvidas e RSVP", () => {
-  test("trajes: título, orientação a definir e as cores com nome", async ({ page }) => {
+  test("trajes: só texto — traje social e o pedido de reservar o branco à noiva (DECISOES A2)", async ({ page }) => {
     await page.goto("/");
     const trajes = page.locator("#trajes");
+    await expect(trajes.getByRole("heading", { name: "Trajes" })).toBeVisible();
     await expect(trajes).toContainText("Traje social");
-    await expect(trajes.locator("[data-pendente]")).toContainText("Orientação de traje");
-    await expect(trajes).toContainText("Dourado");
-    await expect(trajes).toContainText("Branco");
+    await expect(trajes).toContainText(
+      "A escolha das cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à noiva.",
+    );
+    // Sem amostras de cor e sem placeholder: está definido.
+    await expect(trajes.locator("[data-pendente]")).toHaveCount(0);
+    await expect(trajes.locator("[style*='background']")).toHaveCount(0);
+    await expect(trajes).not.toContainText("Dourado");
   });
 
   test("presentes: as três cotas levam ao PIX de cada uma, e há a lista completa", async ({ page }) => {
@@ -238,16 +249,6 @@ test.describe("movimento e navegação no celular", () => {
     await expect(barra).not.toHaveAttribute("data-visivel", /.*/);
     await page.locator("#quando-e-onde").scrollIntoViewIfNeeded();
     await expect(barra).toHaveAttribute("data-visivel", "");
-  });
-
-  test("o recorte de detalhe abre do centro ao entrar na tela, uma vez", async ({ page }) => {
-    await page.goto("/");
-    const recorte = page.locator("figure.recorte");
-    await expect(recorte).not.toHaveAttribute("data-aberto", /.*/);
-    await recorte.scrollIntoViewIfNeeded();
-    await expect(recorte).toHaveAttribute("data-aberto", "");
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await expect(recorte).toHaveAttribute("data-aberto", "");
   });
 });
 

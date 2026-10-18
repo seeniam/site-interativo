@@ -1,11 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Minus, Plus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
-import { useFieldArray, useForm, useWatch, type FieldPath } from "react-hook-form";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useForm, useWatch, type FieldPath } from "react-hook-form";
 import { IconeCarta, IconeTaca } from "@/components/brand/icons";
 import { Botao } from "@/components/ui/Botao";
 import { textos } from "@/config/textos";
@@ -18,7 +18,7 @@ import {
 } from "@/lib/format";
 import { armazenamentoDaAba, atingiuLimiteDeEnvios, contarEnvio } from "@/lib/envios-da-sessao";
 import { useHidratado } from "@/lib/hooks/useHidratado";
-import { LIMITE_RECADO, criarEsquemaRsvp, passoDoCampo, type DadosRsvp, type EntradaRsvp } from "@/lib/schemas/rsvp";
+import { LIMITE_RECADO, esquemaRsvp, passoDoCampo, type DadosRsvp, type EntradaRsvp } from "@/lib/schemas/rsvp";
 
 const { rsvp } = textos;
 
@@ -26,7 +26,6 @@ type Passo = 1 | 2 | 3;
 type Envio = "parado" | "enviando" | "falhou" | "muitas-tentativas" | "limite-da-sessao";
 
 interface FormularioRsvpProps {
-  maxAcompanhantes: number;
   /** Nomes dos noivos para "Quem convidou você?". */
   noivos: readonly [string, string];
   /** wa.me dos noivos, para quem bateu no limite de envios da sessão. */
@@ -42,27 +41,24 @@ function Erro({ id, children }: { id: string; children?: ReactNode }) {
   );
 }
 
-export function FormularioRsvp({ maxAcompanhantes, noivos, linkWhatsApp }: FormularioRsvpProps) {
+export function FormularioRsvp({ noivos, linkWhatsApp }: FormularioRsvpProps) {
   const router = useRouter();
   const hidratado = useHidratado();
   const id = useId();
-  const esquema = useMemo(() => criarEsquemaRsvp(maxAcompanhantes), [maxAcompanhantes]);
   const {
     register,
     control,
     handleSubmit,
     trigger,
-
     setValue,
     setError,
     formState: { errors },
   } = useForm<EntradaRsvp, unknown, DadosRsvp>({
-    resolver: zodResolver(esquema),
+    resolver: zodResolver(esquemaRsvp),
     mode: "onBlur",
     reValidateMode: "onChange",
-    defaultValues: { nome: "", telefone: "", acompanhantes: [], convidadoPor: "", recado: "", site: "" },
+    defaultValues: { nome: "", telefone: "", convidadoPor: "", recado: "", site: "" },
   });
-  const acompanhantes = useFieldArray({ control, name: "acompanhantes" });
 
   const [passo, setPasso] = useState<Passo>(1);
   const [envio, setEnvio] = useState<Envio>("parado");
@@ -95,13 +91,7 @@ export function FormularioRsvp({ maxAcompanhantes, noivos, linkWhatsApp }: Formu
   function camposDoPasso(alvo: Passo): FieldPath<EntradaRsvp>[] {
     if (alvo === 1) return ["nome", "telefone"];
     if (alvo === 2) return ["status"];
-    if (!vem) return ["recado"];
-    return [
-      "acompanhantes",
-      ...acompanhantes.fields.map((_, i) => `acompanhantes.${i}.nome` as const),
-      "convidadoPor",
-      "recado",
-    ];
+    return vem ? ["convidadoPor", "recado"] : ["recado"];
   }
 
   async function avancar() {
@@ -187,7 +177,6 @@ export function FormularioRsvp({ maxAcompanhantes, noivos, linkWhatsApp }: Formu
     telefoneAjuda: `${id}-telefone-ajuda`,
     telefoneErro: `${id}-telefone-erro`,
     statusErro: `${id}-status-erro`,
-    acompanhantesAjuda: `${id}-acomp-ajuda`,
     convidadoPorAjuda: `${id}-convidou-ajuda`,
     convidadoPorErro: `${id}-convidou-erro`,
     sugestoes: `${id}-sugestoes`,
@@ -328,69 +317,6 @@ export function FormularioRsvp({ maxAcompanhantes, noivos, linkWhatsApp }: Formu
         <div className="flex flex-col gap-7">
           {vem && (
             <>
-              <fieldset className="campo" aria-describedby={ids.acompanhantesAjuda}>
-                <legend className="campo__rotulo">{rsvp.campos.acompanhantes}</legend>
-                <div className="stepper">
-                  <button
-                    type="button"
-                    className="stepper__botao"
-                    aria-label={rsvp.campos.tirarAcompanhante}
-                    aria-disabled={acompanhantes.fields.length === 0 || undefined}
-                    onClick={() => {
-                      if (acompanhantes.fields.length > 0) acompanhantes.remove(acompanhantes.fields.length - 1);
-                    }}
-                  >
-                    <Minus aria-hidden size={20} strokeWidth={1.5} />
-                  </button>
-                  <output aria-live="polite" className="stepper__valor">
-                    {rsvp.campos.contagemAcompanhantes(acompanhantes.fields.length)}
-                  </output>
-                  <button
-                    type="button"
-                    className="stepper__botao"
-                    aria-label={rsvp.campos.adicionarAcompanhante}
-                    aria-disabled={acompanhantes.fields.length >= maxAcompanhantes || undefined}
-                    onClick={() => {
-                      if (acompanhantes.fields.length < maxAcompanhantes) {
-                        acompanhantes.append({ nome: "" }, { shouldFocus: false });
-                      }
-                    }}
-                  >
-                    <Plus aria-hidden size={20} strokeWidth={1.5} />
-                  </button>
-                </div>
-                <p id={ids.acompanhantesAjuda} className="campo__ajuda">
-                  {rsvp.campos.acompanhantesAjuda(maxAcompanhantes)}
-                </p>
-                {acompanhantes.fields.length > 0 && (
-                  <div className="mt-2 flex flex-col gap-4">
-                    {acompanhantes.fields.map((campo, i) => {
-                      const erro = errors.acompanhantes?.[i]?.nome?.message;
-                      const idErro = `${id}-acomp-${i}-erro`;
-                      return (
-                        <div key={campo.id} className="campo">
-                          <label htmlFor={`${id}-acomp-${i}`} className="campo__rotulo">
-                            {rsvp.campos.nomeAcompanhante(i + 1)}
-                          </label>
-                          <input
-                            id={`${id}-acomp-${i}`}
-                            type="text"
-                            autoComplete="off"
-                            autoCapitalize="words"
-                            enterKeyHint="next"
-                            className="campo__entrada"
-                            aria-invalid={erro ? true : undefined}
-                            aria-describedby={descrito(erro && idErro)}
-                            {...register(`acompanhantes.${i}.nome`)}
-                          />
-                          <Erro id={idErro}>{erro}</Erro>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </fieldset>
-
               <div className="campo">
                 <label htmlFor={`${id}-convidou`} className="campo__rotulo">
                   {rsvp.campos.convidadoPor}

@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: rsvp.titulo };
 /** Confirmação de presença em três passos (briefing 6.4). A página é estática; o envio vai para /api/rsvp. */
 export default function ConfirmarPresenca() {
   const { data, diaDaSemana, hora } = partesDataPorExtenso(casamento.data);
-  const { prazo, maxAcompanhantes } = casamento.rsvp;
+  const { prazo } = casamento.rsvp;
 
   return (
     <div className="conteiner respiro-secao">
@@ -36,7 +36,6 @@ export default function ConfirmarPresenca() {
         </p>
       </header>
       <FormularioRsvp
-        maxAcompanhantes={maxAcompanhantes}
         noivos={[casamento.noivos.ela, casamento.noivos.ele]}
         linkWhatsApp={linkWhatsApp(casamento.whatsapp.numero, rsvp.mensagemLimite)}
       />

@@ -43,7 +43,6 @@ function entrada(extra: Partial<EntradaRsvp> = {}): EntradaRsvp {
     nome: "Maria da Conceição",
     telefone: "(98) 99967-6346",
     status: "confirmado",
-    acompanhantes: [{ nome: "João Pedro" }],
     convidadoPor: "Jaqueline",
     recado: "Felicidades!",
     site: "",
@@ -53,7 +52,7 @@ function entrada(extra: Partial<EntradaRsvp> = {}): EntradaRsvp {
 
 let banco: ReturnType<typeof bancoDeTeste>;
 let repositorio: RepositorioCasamento;
-const deps = (limitador = semLimite()) => ({ repositorio, sal: SAL, maxAcompanhantes: 4, limitador });
+const deps = (limitador = semLimite()) => ({ repositorio, sal: SAL, limitador });
 
 beforeEach(() => {
   banco = bancoDeTeste();
@@ -71,7 +70,7 @@ describe("POST /api/rsvp", () => {
       telefone: "98999676346",
       telefoneHash: hashTelefone("98999676346", SAL),
       status: "confirmado",
-      acompanhantes: ["João Pedro"],
+      convidadoPor: "Jaqueline",
       atualizaDe: null,
     });
   });
@@ -98,17 +97,24 @@ describe("POST /api/rsvp", () => {
   it.each([
     ["sem corpo de objeto", "[]"],
     ["status inventado", JSON.stringify(entrada({ status: "talvez" as never }))],
-    ["acompanhantes demais", JSON.stringify(entrada({ acompanhantes: Array(5).fill({ nome: "Ana Lima" }) }))],
     ["campo faltando", JSON.stringify({ nome: "Maria da Conceição", telefone: "98999676346" })],
   ])("rejeita %s", async (_caso, corpo) => {
     expect((await registrarRsvp(pedido(corpo), deps())).status).toBe(400);
     expect(await repositorio.listarConfirmacoes()).toEqual([]);
   });
 
-  it("quem não vai pode deixar lixo nos campos escondidos: grava sem acompanhantes nem 'quem convidou'", async () => {
-    const corpo = entrada({ status: "recusou", acompanhantes: [{ nome: "" }], convidadoPor: "" });
+  it("quem não vai pode deixar lixo no campo escondido: grava sem 'quem convidou'", async () => {
+    const corpo = entrada({ status: "recusou", convidadoPor: "x".repeat(500) });
     expect((await registrarRsvp(pedido(corpo), deps())).status).toBe(200);
-    expect((await repositorio.listarConfirmacoes())[0]).toMatchObject({ acompanhantes: [], convidadoPor: "" });
+    expect((await repositorio.listarConfirmacoes())[0]).toMatchObject({ convidadoPor: "" });
+  });
+
+  it("convite individual: acompanhantes enviados por fora não são gravados", async () => {
+    const corpo = { ...entrada(), acompanhantes: [{ nome: "Pessoa Extra" }] };
+    expect((await registrarRsvp(pedido(corpo), deps())).status).toBe(200);
+    const linhas = await banco.executar("select * from confirmacoes", []);
+    expect(Object.keys(linhas[0] ?? {})).not.toContain("acompanhantes");
+    expect(JSON.stringify(linhas)).not.toContain("Pessoa Extra");
   });
 
   it("honeypot preenchido: parece sucesso, mas não grava", async () => {
@@ -241,7 +247,7 @@ describe("sessão dos noivos e GET /api/convidados", () => {
 
   it("senha certa: cookie httpOnly, secure, sameSite=lax, 30 dias — e a lista sai com a resposta que vale", async () => {
     await registrarRsvp(pedido(entrada()), deps());
-    await registrarRsvp(pedido(entrada({ status: "recusou", acompanhantes: [], recado: "Mudou o plano" })), deps());
+    await registrarRsvp(pedido(entrada({ status: "recusou", recado: "Mudou o plano" })), deps());
 
     const resposta = await entrar(pedido({ senha: SENHA }), depsEntrar());
     expect(resposta.status).toBe(200);

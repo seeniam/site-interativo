@@ -13,7 +13,7 @@ import type { RegistroDeConfirmacao, RepositorioCasamento } from "./repositorio"
 export type Executor = (texto: string, parametros: readonly unknown[]) => Promise<Record<string, unknown>[]>;
 
 const COLUNAS_CONFIRMACAO =
-  "id, nome, telefone, telefone_hash, vai_comparecer, acompanhantes, quem_convidou, recado, atualiza_de, criado_em";
+  "id, nome, telefone, telefone_hash, vai_comparecer, quem_convidou, recado, atualiza_de, criado_em";
 
 function paraConfirmacao(linha: Record<string, unknown>): Confirmacao | null {
   const lido = esquemaLinhaConfirmacao.safeParse(linha);
@@ -25,7 +25,6 @@ function paraConfirmacao(linha: Record<string, unknown>): Confirmacao | null {
     telefone: l.telefone,
     telefoneHash: l.telefone_hash,
     status: l.vai_comparecer ? "confirmado" : "recusou",
-    acompanhantes: l.acompanhantes,
     convidadoPor: l.quem_convidou ?? "",
     recado: l.recado ?? "",
     atualizaDe: l.atualiza_de,
@@ -42,14 +41,13 @@ export function criarRepositorioPostgres(executar: Executor): RepositorioCasamen
       const r = garantirGravavel(esquemaRegistro, registro);
       await executar(
         `insert into confirmacoes
-           (nome, telefone, telefone_hash, vai_comparecer, acompanhantes, quem_convidou, recado, atualiza_de)
-         values ($1, $2, $3, $4, $5::jsonb, $6, $7, $8)`,
+           (nome, telefone, telefone_hash, vai_comparecer, quem_convidou, recado, atualiza_de)
+         values ($1, $2, $3, $4, $5, $6, $7)`,
         [
           r.nome,
           r.telefone,
           r.telefoneHash,
           r.status === "confirmado",
-          JSON.stringify(r.acompanhantes),
           r.convidadoPor || null,
           r.recado || null,
           r.atualizaDe,

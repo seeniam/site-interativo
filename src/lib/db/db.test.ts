@@ -1,7 +1,9 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { RegistroInvalido } from "@/lib/schemas/dominio";
 import { LIMITES } from "@/lib/schemas/limites";
-import { bancoDeTeste } from "./banco-de-teste";
+import { SCHEMA, bancoDeTeste } from "./banco-de-teste";
 import { AmbienteInvalido, DEMONSTRACAO, lerAmbiente, senhaVisivelNoLogin } from "./ambiente";
 import { hashTelefone } from "./hash";
 import { criarRepositorioMemoria, seedDemonstracao } from "./memoria";
@@ -10,13 +12,29 @@ import type { RegistroDeConfirmacao, RepositorioCasamento } from "./repositorio"
 
 const SAL = "sal-de-teste-com-16+";
 
+const MIGRACAO_SEM_ACOMPANHANTES = fs
+  .readFileSync(path.resolve(import.meta.dirname, "../../../db/migracoes/2026-10-18-remover-acompanhantes.sql"), "utf8")
+  .split("\n")
+  .filter((linha) => !linha.trim().startsWith("--"))
+  .join("\n")
+  .trim();
+
+/** O banco como ficou para quem rodou o db/schema.sql antigo, com a coluna acompanhantes. */
+function SCHEMA_ANTIGO() {
+  const comColuna = SCHEMA.replace(
+    "vai_comparecer boolean     not null,",
+    "vai_comparecer boolean     not null,\n  acompanhantes  jsonb       not null default '[]'::jsonb,",
+  );
+  if (comColuna === SCHEMA) throw new Error("schema mudou: ajuste o teste da migração");
+  return bancoDeTeste(comColuna);
+}
+
 function registro(telefone: string, extra: Partial<RegistroDeConfirmacao> = {}): RegistroDeConfirmacao {
   return {
     nome: "Maria da Conceição",
     telefone,
     telefoneHash: hashTelefone(telefone, SAL),
     status: "confirmado",
-    acompanhantes: ["João Pedro"],
     convidadoPor: "Jaqueline",
     recado: "Felicidades!",
     atualizaDe: null,
@@ -38,7 +56,6 @@ describe.each(adaptadores)("repositório %s", (_nome, criar) => {
       nome: "Maria da Conceição",
       telefone: "98999676346",
       status: "confirmado",
-      acompanhantes: ["João Pedro"],
       convidadoPor: "Jaqueline",
       recado: "Felicidades!",
       atualizaDe: null,
@@ -48,9 +65,7 @@ describe.each(adaptadores)("repositório %s", (_nome, criar) => {
 
   it("quem não vai: vazio vira vazio (sem 'quem convidou' nem recado)", async () => {
     const repo = criar();
-    await repo.registrarConfirmacao(
-      registro("98999676346", { status: "recusou", acompanhantes: [], convidadoPor: "", recado: "" }),
-    );
+    await repo.registrarConfirmacao(registro("98999676346", { status: "recusou", convidadoPor: "", recado: "" }));
     expect((await repo.listarConfirmacoes())[0]).toMatchObject({ status: "recusou", convidadoPor: "", recado: "" });
   });
 
@@ -67,9 +82,7 @@ describe.each(adaptadores)("repositório %s", (_nome, criar) => {
     const repo = criar();
     const hash = hashTelefone("98999676346", SAL);
     await repo.registrarConfirmacao(registro("98999676346"));
-    await repo.registrarConfirmacao(
-      registro("98999676346", { status: "recusou", acompanhantes: [], convidadoPor: "", atualizaDe: hash }),
-    );
+    await repo.registrarConfirmacao(registro("98999676346", { status: "recusou", convidadoPor: "", atualizaDe: hash }));
     const linhas = await repo.listarConfirmacoes();
     expect(linhas).toHaveLength(2);
     expect(linhas.map((l) => l.atualizaDe)).toContain(hash);
@@ -97,12 +110,17 @@ describe("adaptador postgres: SQL", () => {
     for (const sql of consultas) expect(sql).not.toMatch(/select\s+\*/i);
   });
 
-  it("guarda acompanhantes em jsonb e devolve como lista", async () => {
-    const { executar } = bancoDeTeste();
-    const repo = criarRepositorioPostgres(executar);
-    await repo.registrarConfirmacao(registro("98999676346", { acompanhantes: ["Ana", "Zé d'Ávila"] }));
-    const linhas = await executar("select acompanhantes from confirmacoes", []);
-    expect(linhas[0]?.acompanhantes).toEqual(["Ana", "Zé d'Ávila"]);
+  it("banco criado com o schema antigo (com acompanhantes): funciona antes e depois da migração", async () => {
+    // O site novo é publicado antes do ALTER TABLE: tem de gravar e ler com a coluna ainda lá.
+    const antigo = SCHEMA_ANTIGO();
+    const repo = criarRepositorioPostgres(antigo.executar);
+    await repo.registrarConfirmacao(registro("98999676346"));
+    expect(await repo.listarConfirmacoes()).toHaveLength(1);
+
+    await antigo.executar(MIGRACAO_SEM_ACOMPANHANTES, []);
+    await repo.registrarConfirmacao(registro("98999676347"));
+    expect(await repo.listarConfirmacoes()).toHaveLength(2);
+    await expect(antigo.executar("select acompanhantes from confirmacoes", [])).rejects.toThrow();
   });
 
   it("descarta linha corrompida na leitura em vez de quebrar a lista", async () => {
@@ -136,8 +154,8 @@ describe("adaptador postgres: SQL", () => {
 describe("adaptador em memória", () => {
   it("recusa gravar o que a leitura descartaria", async () => {
     const repo = criarRepositorioMemoria();
-    const longo = "A".repeat(LIMITES.nomeAcompanhante + 1);
-    await expect(repo.registrarConfirmacao(registro("98999676346", { acompanhantes: [longo] }))).rejects.toBeInstanceOf(
+    const longo = "A".repeat(LIMITES.convidadoPor + 1);
+    await expect(repo.registrarConfirmacao(registro("98999676346", { convidadoPor: longo }))).rejects.toBeInstanceOf(
       RegistroInvalido,
     );
     expect(await repo.listarConfirmacoes()).toEqual([]);
@@ -149,10 +167,12 @@ describe("adaptador em memória", () => {
     for (const [i, c] of seed.entries()) {
       expect(c.telefone).toBe(`989000000${String(i + 1).padStart(2, "0")}`);
       expect(c.telefoneHash).toBe(hashTelefone(c.telefone, SAL));
-      if (c.status === "recusou") expect(c.acompanhantes).toEqual([]);
+      if (c.status === "recusou") expect(c.convidadoPor).toBe("");
     }
     expect(seed.some((c) => c.status === "recusou")).toBe(true);
     expect(new Set(seed.map((c) => c.nome)).size).toBe(12);
+    // Convite individual: nenhum recado da demonstração fala em vir acompanhado.
+    expect(seed.map((c) => c.recado).join(" ")).not.toMatch(/estaremos|vamos com|crianças/i);
   });
 });
 

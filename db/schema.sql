@@ -8,7 +8,6 @@ create table confirmacoes (
   telefone       text        not null,
   telefone_hash  text        not null,          -- sha256(telefone + RSVP_SALT do servidor)
   vai_comparecer boolean     not null,
-  acompanhantes  jsonb       not null default '[]'::jsonb,
   quem_convidou  text,
   recado         text,
   atualiza_de    text,                          -- hash da resposta que esta substitui

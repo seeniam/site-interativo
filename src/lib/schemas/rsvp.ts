@@ -1,7 +1,7 @@
 /**
  * Formulário de confirmação de presença (briefing 6.4).
- * Mensagens humanas em `textos.rsvp.erros`; o limite de acompanhantes vem do config;
- * os limites de tamanho vêm de `limites.ts` (os mesmos da leitura e das regras do Firestore).
+ * Mensagens humanas em `textos.rsvp.erros`; os limites de tamanho vêm de `limites.ts` (os mesmos
+ * da gravação e da leitura do banco). O convite é individual: não há acompanhantes.
  */
 import { z } from "zod";
 import { textos } from "@/config/textos";
@@ -36,50 +36,32 @@ export const esquemaTelefone = z
   .refine(telefoneValido, { error: erros.telefoneInvalido })
   .transform(normalizarTelefone);
 
-/** Nome de quem vem junto — validado só quando a pessoa confirma presença. */
-function nomeAcompanhanteValido(valor: string): boolean {
-  return valor.length <= LIMITES.nomeAcompanhante && contarLetras(valor) >= 2 && SO_LETRAS.test(valor);
-}
+/** O esquema do formulário — o mesmo no navegador e, repetido, no servidor. */
+export const esquemaRsvp = z
+  .object({
+    nome,
+    telefone: esquemaTelefone,
+    status: z.enum(["confirmado", "recusou"], { error: erros.statusObrigatorio }),
+    // Sem validação aqui: quem responde "não" pula o passo 3 e não pode ficar preso nele.
+    convidadoPor: z.string().transform(limparNome),
+    recado: z
+      .string()
+      .trim()
+      .max(LIMITES.recado, { error: erros.recadoLongo(LIMITES.recado) }),
+    /** Honeypot: escondido de pessoas; robô que preenche é descartado. */
+    site: z.string(),
+  })
+  .superRefine((dados, ctx) => {
+    if (dados.status !== "confirmado") return;
+    if (dados.convidadoPor.length < 2) {
+      ctx.addIssue({ code: "custom", path: ["convidadoPor"], message: erros.convidadoPorObrigatorio });
+    } else if (dados.convidadoPor.length > LIMITES.convidadoPor) {
+      ctx.addIssue({ code: "custom", path: ["convidadoPor"], message: erros.convidadoPorLongo });
+    }
+  });
 
-/** O esquema do formulário. `maxAcompanhantes` vem de `casamento.rsvp.maxAcompanhantes`. */
-export function criarEsquemaRsvp(maxAcompanhantes: number) {
-  const limite = Math.min(maxAcompanhantes, LIMITES.acompanhantes);
-  return z
-    .object({
-      nome,
-      telefone: esquemaTelefone,
-      status: z.enum(["confirmado", "recusou"], { error: erros.statusObrigatorio }),
-      // Objetos (não strings) porque é o formato do useFieldArray do react-hook-form.
-      // Sem validação aqui: quem responde "não" pula o passo 3 e não pode ficar preso nele.
-      acompanhantes: z.array(z.object({ nome: z.string().transform(limparNome) })),
-      convidadoPor: z.string().transform(limparNome),
-      recado: z
-        .string()
-        .trim()
-        .max(LIMITES.recado, { error: erros.recadoLongo(LIMITES.recado) }),
-      /** Honeypot: escondido de pessoas; robô que preenche é descartado. */
-      site: z.string(),
-    })
-    .superRefine((dados, ctx) => {
-      if (dados.status !== "confirmado") return;
-      if (dados.acompanhantes.length > limite) {
-        ctx.addIssue({ code: "custom", path: ["acompanhantes"], message: erros.acompanhantesDemais(limite) });
-      }
-      dados.acompanhantes.forEach((acompanhante, i) => {
-        if (!nomeAcompanhanteValido(acompanhante.nome)) {
-          ctx.addIssue({ code: "custom", path: ["acompanhantes", i, "nome"], message: erros.acompanhanteNome });
-        }
-      });
-      if (dados.convidadoPor.length < 2) {
-        ctx.addIssue({ code: "custom", path: ["convidadoPor"], message: erros.convidadoPorObrigatorio });
-      } else if (dados.convidadoPor.length > LIMITES.convidadoPor) {
-        ctx.addIssue({ code: "custom", path: ["convidadoPor"], message: erros.convidadoPorLongo });
-      }
-    });
-}
-
-export type EntradaRsvp = z.input<ReturnType<typeof criarEsquemaRsvp>>;
-export type DadosRsvp = z.output<ReturnType<typeof criarEsquemaRsvp>>;
+export type EntradaRsvp = z.input<typeof esquemaRsvp>;
+export type DadosRsvp = z.output<typeof esquemaRsvp>;
 
 /** Em que passo do formulário (1, 2 ou 3) mora cada campo — para levar a pessoa ao erro que o servidor apontou. */
 export function passoDoCampo(campo: string): 1 | 2 | 3 {
@@ -92,15 +74,13 @@ export function pareceRobo(dados: Pick<DadosRsvp, "site">): boolean {
   return dados.site.trim().length > 0;
 }
 
-/** Do formulário validado para o registro. Quem não vai não leva acompanhantes nem "quem convidou". */
+/** Do formulário validado para o registro. Quem não vai não informa "quem convidou". */
 export function paraNovaConfirmacao(dados: DadosRsvp): NovaConfirmacao {
-  const vai = dados.status === "confirmado";
   return {
     nome: dados.nome,
     telefone: dados.telefone,
     status: dados.status,
-    acompanhantes: vai ? dados.acompanhantes.map((a) => a.nome) : [],
-    convidadoPor: vai ? dados.convidadoPor : "",
+    convidadoPor: dados.status === "confirmado" ? dados.convidadoPor : "",
     recado: dados.recado,
   };
 }

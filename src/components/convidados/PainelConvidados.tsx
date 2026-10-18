@@ -125,7 +125,6 @@ export function PainelConvidados() {
           <CardConvidado
             nome={r.nome}
             status={r.status}
-            acompanhantes={r.acompanhantes.length}
             convidadoPor={r.convidadoPor}
             confirmadoEm={new Date(r.respondidoEm)}
             telefone={telefoneDe(r)}
@@ -165,16 +164,12 @@ export function PainelConvidados() {
                 autoComplete="off"
                 enterKeyHint="search"
                 className="campo__entrada"
-                aria-describedby={`${id}-busca-ajuda`}
                 value={busca}
                 onChange={(e) => {
                   setBusca(e.target.value);
                   setPagina(1);
                 }}
               />
-              <p id={`${id}-busca-ajuda`} className="campo__ajuda">
-                {convidados.buscaAjuda}
-              </p>
             </div>
 
             <div role="group" aria-label={convidados.filtros.rotulo} className="flex flex-wrap gap-2">
@@ -259,7 +254,7 @@ export function PainelConvidados() {
                         {grupo.convidadoPor || convidados.naoInformado}
                       </h2>
                       <p className="text-14 text-fumaca numeros">
-                        {convidados.subtotal(grupo.contadores.pessoasConfirmadas, grupo.contadores.respostas)}
+                        {convidados.subtotal(grupo.contadores.confirmados, grupo.contadores.respostas)}
                       </p>
                     </div>
                     {cartoes(grupo.respostas, "h3")}

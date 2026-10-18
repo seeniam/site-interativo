@@ -1,6 +1,5 @@
 import { Heroi } from "@/components/convite/Heroi";
 import { QuandoEOnde } from "@/components/convite/QuandoEOnde";
-import { RecorteDetalhe } from "@/components/convite/RecorteDetalhe";
 import {
   FaixaRsvp,
   SecaoContagem,
@@ -19,9 +18,6 @@ export default function Convite() {
       <Heroi />
       <SecaoContagem />
       <SecaoHistoria />
-      <div className="conteiner">
-        <RecorteDetalhe />
-      </div>
       <QuandoEOnde />
       <SecaoTrajes />
       <SecaoPresentes />

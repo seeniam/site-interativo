@@ -10,7 +10,6 @@ export interface RespostaConvidado {
   nome: string;
   telefone: string;
   status: StatusResposta;
-  acompanhantes: string[];
   convidadoPor: string;
   recado: string;
   /** ISO 8601. */
@@ -39,7 +38,6 @@ export function respostasValendo(confirmacoes: readonly Confirmacao[]): Resposta
       nome: atual.nome,
       telefone: atual.telefone,
       status: atual.status,
-      acompanhantes: [...atual.acompanhantes],
       convidadoPor: atual.convidadoPor,
       recado: atual.recado,
       respondidoEm: atual.criadoEm.toISOString(),
@@ -71,14 +69,13 @@ export function filtrarRespostas(respostas: readonly RespostaConvidado[], filtro
   const termo = normalizarBusca(filtro.busca);
   return respostas.filter(
     (r) =>
-      (filtro.status === "todos" || r.status === filtro.status) &&
-      (!termo || normalizarBusca([r.nome, ...r.acompanhantes].join(" ")).includes(termo)),
+      (filtro.status === "todos" || r.status === filtro.status) && (!termo || normalizarBusca(r.nome).includes(termo)),
   );
 }
 
 export interface Contadores {
-  /** Pessoas que vêm: cada confirmação conta 1 + os acompanhantes. */
-  pessoasConfirmadas: number;
+  /** Quem vem. O convite é individual: uma confirmação é uma pessoa. */
+  confirmados: number;
   naoVao: number;
   respostas: number;
 }
@@ -87,13 +84,9 @@ export function contarRespostas(respostas: readonly RespostaConvidado[]): Contad
   return respostas.reduce<Contadores>(
     (total, r) =>
       r.status === "confirmado"
-        ? {
-            ...total,
-            pessoasConfirmadas: total.pessoasConfirmadas + 1 + r.acompanhantes.length,
-            respostas: total.respostas + 1,
-          }
+        ? { ...total, confirmados: total.confirmados + 1, respostas: total.respostas + 1 }
         : { ...total, naoVao: total.naoVao + 1, respostas: total.respostas + 1 },
-    { pessoasConfirmadas: 0, naoVao: 0, respostas: 0 },
+    { confirmados: 0, naoVao: 0, respostas: 0 },
   );
 }
 

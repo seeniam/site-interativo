@@ -5,9 +5,6 @@
  */
 export const LIMITES = {
   nome: 120,
-  /** Teto técnico de itens; o limite real por convidado vem de `casamento.rsvp.maxAcompanhantes`. */
-  acompanhantes: 10,
-  nomeAcompanhante: 120,
   convidadoPor: 60,
   recado: 240,
   presenteId: 40,

@@ -58,21 +58,21 @@ export function criarRepositorioMemoria({
  */
 export function seedDemonstracao(sal: string, base: Date, convidadoPor: readonly [string, string]): Confirmacao[] {
   const [ela, ele] = convidadoPor;
-  const pessoas: readonly [string, boolean, readonly string[], string, string][] = [
-    ["Ana Exemplo da Silva", true, ["Bruno Exemplo"], ela, "Que alegria! Estaremos lá."],
-    ["Carlos Fictício Souza", true, [], ele, ""],
-    ["Dora Demonstração", true, ["Elias Demonstração", "Fábio Demonstração"], ela, "Vamos com as crianças."],
-    ["Gustavo Modelo Lima", false, [], ele, "Infelizmente vou estar viajando. Felicidades!"],
-    ["Helena Teste Rocha", true, ["Igor Teste"], ela, ""],
-    ["Júlia Inventada Costa", true, [], ela, "Mal posso esperar!"],
-    ["Kauã Exemplar Dias", false, [], ele, ""],
-    ["Laura Amostra Nunes", true, ["Marcos Amostra"], ele, ""],
-    ["Nina Protótipo Melo", true, [], ela, "Contem comigo para a pista."],
-    ["Otávio Simulado Reis", true, ["Paula Simulada", "Quim Simulado", "Rita Simulada"], ele, ""],
-    ["Sara Fictícia Alves", false, [], ela, "Estarei com vocês em pensamento."],
-    ["Tiago Exemplo Prado", true, [], ele, ""],
+  const pessoas: readonly [string, boolean, string, string][] = [
+    ["Ana Exemplo da Silva", true, ela, "Que alegria! Estarei lá."],
+    ["Carlos Fictício Souza", true, ele, ""],
+    ["Dora Demonstração", true, ela, "Não perco por nada."],
+    ["Gustavo Modelo Lima", false, ele, "Infelizmente vou estar viajando. Felicidades!"],
+    ["Helena Teste Rocha", true, ela, ""],
+    ["Júlia Inventada Costa", true, ela, "Mal posso esperar!"],
+    ["Kauã Exemplar Dias", false, ele, ""],
+    ["Laura Amostra Nunes", true, ele, ""],
+    ["Nina Protótipo Melo", true, ela, "Contem comigo para a pista."],
+    ["Otávio Simulado Reis", true, ele, ""],
+    ["Sara Fictícia Alves", false, ela, "Estarei com vocês em pensamento."],
+    ["Tiago Exemplo Prado", true, ele, ""],
   ];
-  return pessoas.map(([nome, vai, acompanhantes, convidou, recado], i) => {
+  return pessoas.map(([nome, vai, convidou, recado], i) => {
     const telefone = `989000000${String(i + 1).padStart(2, "0")}`;
     return {
       id: String(i + 1),
@@ -80,7 +80,6 @@ export function seedDemonstracao(sal: string, base: Date, convidadoPor: readonly
       telefone,
       telefoneHash: hashTelefone(telefone, sal),
       status: vai ? "confirmado" : "recusou",
-      acompanhantes: vai ? acompanhantes : [],
       convidadoPor: vai ? convidou : "",
       recado,
       atualizaDe: null,

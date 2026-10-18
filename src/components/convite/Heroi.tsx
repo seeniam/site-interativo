@@ -12,8 +12,8 @@ const { ela, ele } = casamento.noivos;
 
 /**
  * O primeiro impacto (briefing 6.1, item 2). Celular: a foto em tela cheia (dvh).
- * Desktop: quadro 16:10 dentro do container (DECISOES H2). É um dos dois únicos lugares
- * onde a foto aparece (H1).
+ * Desktop: quadro 16:10 dentro do container (DECISOES H2). É o único lugar onde a foto
+ * aparece (DECISOES A3).
  */
 export function Heroi() {
   const { data, diaDaSemana, hora } = partesDataPorExtenso(casamento.data);

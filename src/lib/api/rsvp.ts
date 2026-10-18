@@ -6,18 +6,17 @@ import { z } from "zod";
 import { hashTelefone } from "@/lib/db/hash";
 import type { RepositorioCasamento } from "@/lib/db/repositorio";
 import { RegistroInvalido } from "@/lib/schemas/dominio";
-import { criarEsquemaRsvp, esquemaTelefone, paraNovaConfirmacao, pareceRobo } from "@/lib/schemas/rsvp";
+import { esquemaRsvp, esquemaTelefone, paraNovaConfirmacao, pareceRobo } from "@/lib/schemas/rsvp";
 import { barrarExcesso, indisponivel, json, lerCorpo } from "./comum";
 import type { Limitador } from "./limite";
 
 export interface DependenciasRsvp {
   repositorio: RepositorioCasamento;
   sal: string;
-  maxAcompanhantes: number;
   limitador: Limitador;
 }
 
-/** Erros por campo (`acompanhantes.0.nome` → mensagem). Só as nossas mensagens — nada do que chegou volta. */
+/** Erros por campo (`convidadoPor` → mensagem). Só as nossas mensagens — nada do que chegou volta. */
 export type ErrosPorCampo = Record<string, string>;
 
 function errosPorCampo(erro: z.ZodError): ErrosPorCampo {
@@ -35,7 +34,7 @@ export async function registrarRsvp(request: Request, deps: DependenciasRsvp): P
   const lido = await lerCorpo(request);
   if (!lido.ok) return lido.resposta;
 
-  const dados = criarEsquemaRsvp(deps.maxAcompanhantes).safeParse(lido.corpo);
+  const dados = esquemaRsvp.safeParse(lido.corpo);
   if (!dados.success) return json({ ok: false, erro: "dados-invalidos", campos: errosPorCampo(dados.error) }, 400);
 
   // Robô no honeypot: responde como sucesso e não grava (não ensina o robô a desviar).

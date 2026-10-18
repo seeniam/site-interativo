@@ -76,15 +76,12 @@ export type CampoAConfirmar =
   | "pix.nomeRecebedor"
   | "whatsapp.numero"
   | "local.cerimoniaNoMesmoLocal"
-  | "versiculo.referencia"
-  | "rsvp.maxAcompanhantes";
+  | "versiculo.referencia";
 
-/** A foto única, em seus dois enquadramentos (briefing 3.7, "Economia da foto única"). */
+/** A foto única do casal, usada só no herói (DECISOES A3). */
 export interface FotoCasal {
   imagem: StaticImageData;
   alt: string;
-  /** Recorte fechado da mão dela com a aliança, para a faixa 21:9. */
-  detalhe: { alt: string; posicao: string; escala: number };
 }
 
 export interface ConfiguracaoCasamento {
@@ -112,9 +109,9 @@ export interface ConfiguracaoCasamento {
   presentes: readonly Presente[];
   /** "A definir": sem os marcos, a seção inteira não é renderizada (briefing 6.1). */
   historia: Talvez<readonly MarcoHistoria[]>;
-  trajes: { titulo: string; descricao: Talvez<string>; paleta: readonly { hex: string; nome: string }[] };
+  trajes: { titulo: string; orientacao: string };
   faq: readonly PerguntaFrequente[];
-  rsvp: { prazo: Talvez<string>; maxAcompanhantes: number };
+  rsvp: { prazo: Talvez<string> };
   /** O motivo de cada dúvida, na voz de quem vai perguntar ao casal. */
   aConfirmar: Readonly<Partial<Record<CampoAConfirmar, string>>>;
 }

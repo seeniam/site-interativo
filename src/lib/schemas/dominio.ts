@@ -48,20 +48,18 @@ export const esquemaRegistro = z.object({
   telefone,
   telefoneHash: hash,
   status: z.enum(["confirmado", "recusou"]),
-  acompanhantes: z.array(z.string().min(1).max(LIMITES.nomeAcompanhante)).max(LIMITES.acompanhantes),
   convidadoPor: z.string().max(LIMITES.convidadoPor),
   recado: z.string().max(LIMITES.recado),
   atualizaDe: hash.nullable(),
 });
 
-/** Uma linha de `confirmacoes` como o banco devolve (bigint chega como texto, jsonb já decodificado). */
+/** Uma linha de `confirmacoes` como o banco devolve (bigint chega como texto). */
 export const esquemaLinhaConfirmacao = z.object({
   id: z.union([z.string().regex(/^\d+$/), z.number().int()]),
   nome: z.string().min(1).max(LIMITES.nome),
   telefone,
   telefone_hash: hash,
   vai_comparecer: z.boolean(),
-  acompanhantes: z.array(z.string().max(LIMITES.nomeAcompanhante)).max(LIMITES.acompanhantes),
   quem_convidou: z.string().max(LIMITES.convidadoPor).nullable(),
   recado: z.string().max(LIMITES.recado).nullable(),
   atualiza_de: hash.nullable(),

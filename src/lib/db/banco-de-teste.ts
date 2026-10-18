@@ -7,11 +7,12 @@ import path from "node:path";
 import { newDb } from "pg-mem";
 import type { Executor } from "./postgres";
 
-const SCHEMA = fs.readFileSync(path.resolve(import.meta.dirname, "../../../db/schema.sql"), "utf8");
+export const SCHEMA = fs.readFileSync(path.resolve(import.meta.dirname, "../../../db/schema.sql"), "utf8");
 
-export function bancoDeTeste(): { executar: Executor; consultas: string[] } {
+/** `schema`: outro SQL de criação, para testar bancos criados com versões antigas do schema. */
+export function bancoDeTeste(schema = SCHEMA): { executar: Executor; consultas: string[] } {
   const db = newDb();
-  db.public.none(SCHEMA);
+  db.public.none(schema);
   const { Pool } = db.adapters.createPg();
   const pool = new Pool();
   const consultas: string[] = [];

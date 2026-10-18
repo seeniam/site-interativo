@@ -9,16 +9,15 @@ const { contadores: rotulos } = textos.convidados;
  * vez, quando o painel aparece — só CSS (`@property` + `counter()`), sem JS. O número real está
  * no texto para leitores de tela; o animado é decorativo.
  */
-function Contador({ rotulo, valor, apoio }: { rotulo: string; valor: number; apoio?: string }) {
+function Contador({ rotulo, valor }: { rotulo: string; valor: number }) {
   return (
     <div className="contador">
       <dt className="text-14 font-normal text-tinta">{rotulo}</dt>
-      <dd className="flex flex-col gap-1">
+      <dd>
         <span aria-hidden className="contador__numero" style={{ "--valor": valor } as CSSProperties} />
         <span className="sr-only" data-contador="">
           {valor}
         </span>
-        {apoio && <span className="text-12 text-fumaca">{apoio}</span>}
       </dd>
     </div>
   );
@@ -27,7 +26,7 @@ function Contador({ rotulo, valor, apoio }: { rotulo: string; valor: number; apo
 export function ContadoresConvidados({ contadores }: { contadores: Contadores }) {
   return (
     <dl className="contadores">
-      <Contador rotulo={rotulos.confirmados} valor={contadores.pessoasConfirmadas} apoio={rotulos.confirmadosApoio} />
+      <Contador rotulo={rotulos.confirmados} valor={contadores.confirmados} />
       <Contador rotulo={rotulos.naoVao} valor={contadores.naoVao} />
       <Contador rotulo={rotulos.respostas} valor={contadores.respostas} />
     </dl>

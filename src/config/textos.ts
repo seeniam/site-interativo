@@ -50,7 +50,6 @@ export const textos = {
     },
     trajes: {
       titulo: "Trajes",
-      paleta: "Cores que combinam com o dia",
     },
     presentes: {
       titulo: "Presentes",
@@ -121,12 +120,6 @@ export const textos = {
       nome: "Nome completo",
       telefone: "Telefone com DDD",
       telefoneAjuda: "Para avisar de alguma mudança. Só os noivos veem.",
-      acompanhantes: "Quantas pessoas vêm com você?",
-      acompanhantesAjuda: (max: number) => `Até ${max} por convite.`,
-      contagemAcompanhantes: (n: number) => (n === 0 ? "Só você" : `Você e mais ${n} pessoa${n === 1 ? "" : "s"}`),
-      tirarAcompanhante: "Tirar um acompanhante",
-      adicionarAcompanhante: "Adicionar um acompanhante",
-      nomeAcompanhante: (n: number) => `Nome de quem vem (${n})`,
       convidadoPor: "Quem convidou você?",
       convidadoPorAjuda: "Toque num nome ou escreva.",
       recado: "Recado para o casal (opcional)",
@@ -160,8 +153,6 @@ export const textos = {
       telefoneObrigatorio: "Faltou o telefone pra gente te avisar de mudanças.",
       telefoneInvalido: "Confira o telefone: DDD + número, como (98) 99967-6346.",
       statusObrigatorio: "Conta pra gente: você vem?",
-      acompanhanteNome: "Escreva o nome de quem vem com você.",
-      acompanhantesDemais: (max: number) => `Dá para trazer até ${max} acompanhante${max === 1 ? "" : "s"}.`,
       convidadoPorObrigatorio: "Conta pra gente quem te convidou.",
       convidadoPorLongo: "Esse nome ficou longo demais.",
       recadoLongo: (max: number) => `O recado pode ter até ${max} caracteres.`,
@@ -207,7 +198,6 @@ export const textos = {
       recusou: "Não vai",
     },
     rotulos: {
-      acompanhantes: "Acompanhantes",
       convidadoPor: "Convidado por",
       respondeuEm: "Respondeu em",
     },
@@ -227,12 +217,10 @@ export const textos = {
     },
     contadores: {
       confirmados: "Confirmados",
-      confirmadosApoio: "pessoas, contando acompanhantes",
       naoVao: "Não poderão ir",
       respostas: "Respostas no total",
     },
     busca: "Buscar por nome",
-    buscaAjuda: "Acha também pelo nome de quem vem junto.",
     filtros: {
       rotulo: "Filtrar respostas",
       todos: "Todos",
@@ -241,8 +229,8 @@ export const textos = {
       porQuemConvidou: "Por quem convidou",
     },
     naoInformado: "Quem não vem (não informa)",
-    subtotal: (pessoas: number, respostas: number) =>
-      `${pessoas} ${pessoas === 1 ? "pessoa confirmada" : "pessoas confirmadas"}, ${respostas} ${respostas === 1 ? "resposta" : "respostas"}`,
+    subtotal: (confirmados: number, respostas: number) =>
+      `${confirmados} ${confirmados === 1 ? "confirmado" : "confirmados"}, ${respostas} ${respostas === 1 ? "resposta" : "respostas"}`,
     resultado: (n: number) =>
       n === 0 ? "Nenhuma resposta com esse filtro." : `${n} ${n === 1 ? "resposta" : "respostas"}`,
     mostrarTelefones: "Mostrar telefones",
@@ -256,12 +244,10 @@ export const textos = {
     tentarDeNovo: "Tentar de novo",
     mudouResposta: "mudou a resposta",
     carregando: "Carregando a lista…",
-    comAcompanhantes: (nomes: string) => `com ${nomes}`,
     tabela: {
       legenda: "Respostas dos convidados",
       nome: "Nome",
       status: "Status",
-      acompanhantes: "Acompanhantes",
       convidadoPor: "Convidado por",
       telefone: "Telefone",
       recado: "Recado",

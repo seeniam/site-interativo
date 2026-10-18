@@ -3,16 +3,15 @@ import { casamento } from "@/config/casamento";
 import { textos } from "@/config/textos";
 import { esquemaConfig } from "./config";
 import { esquemaLinhaConfirmacao, esquemaRegistro } from "./dominio";
-import { criarEsquemaRsvp, paraNovaConfirmacao, pareceRobo, passoDoCampo, type EntradaRsvp } from "./rsvp";
+import { esquemaRsvp, paraNovaConfirmacao, pareceRobo, passoDoCampo, type EntradaRsvp } from "./rsvp";
 
-const esquema = criarEsquemaRsvp(casamento.rsvp.maxAcompanhantes);
+const esquema = esquemaRsvp;
 const erros = textos.rsvp.erros;
 
 const VALIDO: EntradaRsvp = {
   nome: "  Maria   da Conceição ",
   telefone: "(98) 99967-6346",
   status: "confirmado",
-  acompanhantes: [{ nome: "João Pedro" }],
   convidadoPor: "Jaqueline",
   recado: "Felicidades!",
   site: "",
@@ -33,7 +32,7 @@ describe("formulário de RSVP", () => {
   });
 
   it("aceita quem não vai sem 'quem convidou'", () => {
-    expect(esquema.safeParse({ ...VALIDO, status: "recusou", convidadoPor: "", acompanhantes: [] }).success).toBe(true);
+    expect(esquema.safeParse({ ...VALIDO, status: "recusou", convidadoPor: "" }).success).toBe(true);
   });
 
   describe("nome", () => {
@@ -70,19 +69,10 @@ describe("formulário de RSVP", () => {
     expect(resultado.error?.issues[0]?.message).toBe(erros.statusObrigatorio);
   });
 
-  it("limita os acompanhantes ao máximo do config", () => {
-    const muitos = Array.from({ length: casamento.rsvp.maxAcompanhantes + 1 }, (_, i) => ({
-      nome: `Pessoa ${"a".repeat(i + 1)}`,
-    }));
-    expect(errosDe({ ...VALIDO, acompanhantes: muitos }, "acompanhantes")).toContain(
-      erros.acompanhantesDemais(casamento.rsvp.maxAcompanhantes),
-    );
-  });
-
-  it("recusa acompanhante sem nome", () => {
-    expect(errosDe({ ...VALIDO, acompanhantes: [{ nome: " " }] }, "acompanhantes.0.nome")).toContain(
-      erros.acompanhanteNome,
-    );
+  it("o convite é individual: acompanhantes enviados por fora são descartados, nunca chegam ao registro", () => {
+    const dados = esquema.parse({ ...VALIDO, acompanhantes: [{ nome: "João Pedro" }] });
+    expect(dados).not.toHaveProperty("acompanhantes");
+    expect(paraNovaConfirmacao(dados)).not.toHaveProperty("acompanhantes");
   });
 
   it("quem vai precisa dizer quem convidou", () => {
@@ -99,17 +89,16 @@ describe("formulário de RSVP", () => {
     expect(pareceRobo(esquema.parse({ ...VALIDO, site: "http://spam" }))).toBe(true);
   });
 
-  it("paraNovaConfirmacao descarta acompanhantes e 'quem convidou' de quem não vai", () => {
+  it("paraNovaConfirmacao descarta 'quem convidou' de quem não vai", () => {
     const naoVai = esquema.parse({ ...VALIDO, status: "recusou" });
     expect(paraNovaConfirmacao(naoVai)).toEqual({
       nome: "Maria da Conceição",
       telefone: "98999676346",
       status: "recusou",
-      acompanhantes: [],
       convidadoPor: "",
       recado: "Felicidades!",
     });
-    expect(paraNovaConfirmacao(esquema.parse(VALIDO)).acompanhantes).toEqual(["João Pedro"]);
+    expect(paraNovaConfirmacao(esquema.parse(VALIDO)).convidadoPor).toBe("Jaqueline");
   });
 });
 
@@ -120,7 +109,6 @@ describe("linhas lidas do banco", () => {
     telefone: "98999676346",
     telefone_hash: "a".repeat(64),
     vai_comparecer: true,
-    acompanhantes: ["João"],
     quem_convidou: "Jaqueline",
     recado: null,
     atualiza_de: null,
@@ -148,7 +136,6 @@ describe("linhas lidas do banco", () => {
     ["data inválida", { criado_em: "ontem" }],
     ["data nula (não vira 1970)", { criado_em: null }],
     ["data numérica (não vira 1970)", { criado_em: 0 }],
-    ["acompanhantes demais", { acompanhantes: Array.from({ length: 11 }, () => "X") }],
     ["recado longo", { recado: "a".repeat(241) }],
   ])("recusa %s", (_rotulo, alteracao) => {
     expect(esquemaLinhaConfirmacao.safeParse({ ...linha, ...alteracao }).success).toBe(false);
@@ -169,8 +156,27 @@ describe("config do casamento", () => {
     ["data sem fuso", (c) => ({ ...c, data: "2026-12-21T16:30:00" })],
     ["presentes com id repetido", (c) => ({ ...c, presentes: [c.presentes[0], c.presentes[0]] })],
     ["valor com fração de centavo", (c) => ({ ...c, presentes: [{ ...c.presentes[0], valor: 10.001 }] })],
+    ["traje sem a orientação", (c) => ({ ...c, trajes: { ...c.trajes, orientacao: "" } })],
   ])("recusa %s", (_rotulo, alterar) => {
     expect(esquemaConfig.safeParse(alterar(casamento)).success).toBe(false);
+  });
+});
+
+describe("o que o casal definiu em 18/10/2026", () => {
+  it("não existe acompanhante em lugar nenhum do config (nem no FAQ)", () => {
+    expect(JSON.stringify(casamento)).not.toMatch(/acompanhante/i);
+  });
+
+  it("trajes: texto definido, sem amostras de cor e sem placeholder", () => {
+    expect(casamento.trajes).toEqual({
+      titulo: "Traje social",
+      orientacao:
+        "A escolha das cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à noiva.",
+    });
+  });
+
+  it("a foto do casal tem um enquadramento só (o do herói)", () => {
+    expect(Object.keys(casamento.fotoCasal).sort()).toEqual(["alt", "imagem"]);
   });
 });
 
@@ -186,14 +192,9 @@ describe("uma mensagem por vez", () => {
 });
 
 describe("quem responde 'não' não fica preso no passo que pulou", () => {
-  it("acompanhante vazio e 'quem convidou' longo são ignorados e limpos", () => {
-    const dados = esquema.parse({
-      ...VALIDO,
-      status: "recusou",
-      acompanhantes: [{ nome: "" }],
-      convidadoPor: "x".repeat(61),
-    });
-    expect(paraNovaConfirmacao(dados)).toMatchObject({ acompanhantes: [], convidadoPor: "" });
+  it("'quem convidou' longo é ignorado e limpo", () => {
+    const dados = esquema.parse({ ...VALIDO, status: "recusou", convidadoPor: "x".repeat(61) });
+    expect(paraNovaConfirmacao(dados)).toMatchObject({ convidadoPor: "" });
   });
 });
 
@@ -210,14 +211,6 @@ describe("nomes digitados no celular", () => {
     expect(esquema.parse({ ...VALIDO, telefone: "+55 98 99967-6346" }).telefone).toBe("98999676346");
     expect(esquema.parse({ ...VALIDO, telefone: "(098) 99967-6346" }).telefone).toBe("98999676346");
   });
-
-  it("recusa acompanhante com nome acima do limite gravável", () => {
-    const longo = "Maria ".repeat(25).trim();
-    expect(longo.length).toBeGreaterThan(120);
-    expect(errosDe({ ...VALIDO, acompanhantes: [{ nome: longo }] }, "acompanhantes.0.nome")).toContain(
-      erros.acompanhanteNome,
-    );
-  });
 });
 
 describe("propriedade: tudo que o formulário aprova, o banco grava e a leitura aceita", () => {
@@ -225,12 +218,8 @@ describe("propriedade: tudo que o formulário aprova, o banco grava e a leitura 
   const entradas: EntradaRsvp[] = [
     VALIDO,
     { ...VALIDO, nome: "A".repeat(120) },
-    {
-      ...VALIDO,
-      acompanhantes: Array.from({ length: casamento.rsvp.maxAcompanhantes }, () => ({ nome: "B".repeat(120) })),
-    },
     { ...VALIDO, convidadoPor: "C".repeat(60), recado: "d".repeat(240) },
-    { ...VALIDO, status: "recusou", acompanhantes: [{ nome: "x".repeat(500) }], convidadoPor: "y".repeat(500) },
+    { ...VALIDO, status: "recusou", convidadoPor: "y".repeat(500) },
     { ...VALIDO, telefone: "(11) 3232-1234" },
   ];
 
@@ -249,7 +238,6 @@ describe("propriedade: tudo que o formulário aprova, o banco grava e a leitura 
       telefone: nova.telefone,
       telefone_hash: hash,
       vai_comparecer: nova.status === "confirmado",
-      acompanhantes: nova.acompanhantes,
       quem_convidou: nova.convidadoPor || null,
       recado: nova.recado || null,
       atualiza_de: null,
@@ -274,7 +262,7 @@ describe("passoDoCampo", () => {
     expect(passoDoCampo("nome")).toBe(1);
     expect(passoDoCampo("telefone")).toBe(1);
     expect(passoDoCampo("status")).toBe(2);
-    expect(passoDoCampo("acompanhantes.0.nome")).toBe(3);
+    expect(passoDoCampo("convidadoPor")).toBe(3);
     expect(passoDoCampo("recado")).toBe(3);
   });
 });

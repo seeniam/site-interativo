@@ -15,7 +15,13 @@ const { convite } = textos;
 /** Contagem regressiva (briefing 6.1, item 3). */
 export function SecaoContagem() {
   return (
-    <section id="contagem" aria-labelledby="contagem-titulo" className="conteiner scroll-mt-20 respiro-secao">
+    // Respiro de seção em cima, meio respiro embaixo: a contagem é curta e leva direto a "Quando e onde"
+    // (sem o recorte entre as duas, o respiro inteiro dos dois lados virava um buraco — DECISOES A3).
+    <section
+      id="contagem"
+      aria-labelledby="contagem-titulo"
+      className="conteiner scroll-mt-20 pt-[clamp(72px,12vw,140px)] pb-[clamp(36px,6vw,70px)]"
+    >
       <TituloSecao id="contagem-titulo" variante="discreto">
         {convite.contagem.titulo}
       </TituloSecao>
@@ -59,24 +65,7 @@ export function SecaoTrajes() {
       <div className="conteiner flex flex-col items-center text-center">
         <TituloSecao id="trajes-titulo">{convite.trajes.titulo}</TituloSecao>
         <p className="font-display text-31 text-tinta">{trajes.titulo}</p>
-        <p className="mt-3 medida text-16 text-fumaca">
-          {estaPendente(trajes.descricao) ? <TextoPendente item={trajes.descricao} /> : trajes.descricao}
-        </p>
-        <div className="mt-10 flex flex-col items-center gap-5">
-          <p className="text-14 text-fumaca">{convite.trajes.paleta}</p>
-          <ul className="flex gap-8">
-            {trajes.paleta.map((cor) => (
-              <li key={cor.hex} className="flex flex-col items-center gap-3">
-                <span
-                  aria-hidden
-                  className="size-14 rounded-full shadow-quente ring-1 ring-borda"
-                  style={{ background: cor.hex }}
-                />
-                <span className="text-14 text-tinta">{cor.nome}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <p className="mt-3 medida text-16 text-balance text-fumaca">{trajes.orientacao}</p>
       </div>
     </section>
   );

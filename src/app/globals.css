@@ -1065,56 +1065,6 @@ html[data-abertura] .heroi-foto-revela {
     line-height: 1;
   }
 
-  /* Recorte de detalhe 21:9 (DECISOES H3). */
-  .recorte {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 21 / 9;
-    margin-inline: -20px;
-    clip-path: inset(0 50% 0 50%);
-    transition: clip-path 640ms var(--ease-convite);
-  }
-  @media (min-width: 640px) {
-    .recorte {
-      margin-inline: 0;
-      border-radius: var(--radius-secao);
-    }
-  }
-  @media (min-width: 1024px) {
-    .recorte {
-      max-width: 760px;
-      margin-inline: auto;
-    }
-  }
-  .recorte[data-aberto] {
-    clip-path: inset(0 0 0 0);
-  }
-  .recorte__grao {
-    position: absolute;
-    inset: 0;
-    opacity: 0.18;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .42 0 0 0 0 .18 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-  }
-  .recorte__filete {
-    position: absolute;
-    inset-inline: 0;
-    bottom: 0;
-    height: 1px;
-    background-image: var(--gradiente-ouro);
-  }
-  .recorte__foto {
-    object-fit: cover;
-  }
-  .recorte__veu {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(120% 140% at 50% 50%, transparent 40%, rgb(23 20 15 / 0.35) 100%),
-      linear-gradient(to bottom, rgb(232 208 138 / 0.08), rgb(140 107 47 / 0.12));
-    mix-blend-mode: multiply;
-  }
-
   /* Presentes: três planos, Ouro em destaque. */
   .presentes-planos {
     display: grid;
@@ -1217,9 +1167,6 @@ html[data-abertura] .heroi-foto-revela {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .recorte {
-    clip-path: none;
-  }
   .contagem__digito--vira {
     animation: digito-funde 150ms ease-out;
   }
@@ -1693,45 +1640,6 @@ html[data-abertura] .heroi-foto-revela {
   .opcao-resposta:has(input:focus-visible) {
     outline: 2px solid var(--ouro-escuro);
     outline-offset: 2px;
-  }
-
-  /* Stepper de acompanhantes: botões grandes de menos e mais. */
-  .stepper {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .stepper__botao {
-    display: grid;
-    width: 52px;
-    height: 52px;
-    flex: none;
-    place-items: center;
-    border: 1px solid color-mix(in srgb, var(--fumaca) 80%, white);
-    border-radius: 999px;
-    background: var(--branco);
-    color: var(--tinta);
-    cursor: pointer;
-    touch-action: manipulation;
-    transition:
-      border-color 200ms var(--ease-convite),
-      opacity 200ms var(--ease-convite);
-  }
-  @media (hover: hover) {
-    .stepper__botao:not([aria-disabled="true"]):hover {
-      border-color: var(--ouro-escuro);
-    }
-  }
-  .stepper__botao[aria-disabled="true"] {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-  .stepper__valor {
-    flex: 1;
-    color: var(--tinta);
-    font-family: var(--font-display);
-    font-size: var(--text-20);
-    text-align: center;
   }
 
   .acoes-rsvp {

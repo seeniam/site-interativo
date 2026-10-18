@@ -2,14 +2,12 @@
 
 export type StatusResposta = "confirmado" | "recusou";
 
-/** O que o formulário de RSVP produz, já validado. */
+/** O que o formulário de RSVP produz, já validado. O convite é individual: uma resposta = uma pessoa. */
 export interface NovaConfirmacao {
   nome: string;
   /** Só dígitos, com DDD: 10 (fixo) ou 11 (celular). */
   telefone: string;
   status: StatusResposta;
-  /** Nomes de quem vem junto. Vazio quando a pessoa não vai. */
-  acompanhantes: readonly string[];
   /** Quem convidou. Vazio quando a pessoa não vai. */
   convidadoPor: string;
   recado: string;

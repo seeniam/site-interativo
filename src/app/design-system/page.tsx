@@ -82,21 +82,18 @@ const CONVIDADOS_DE_EXEMPLO = [
   {
     nome: "Nome de exemplo com sobrenome",
     status: "confirmado",
-    acompanhantes: 2,
     convidadoPor: ela,
     confirmadoEm: new Date("2027-03-12T15:00:00-03:00"),
   },
   {
     nome: "Outro convidado de exemplo",
     status: "confirmado",
-    acompanhantes: 0,
     convidadoPor: ele,
     confirmadoEm: new Date("2027-03-14T10:00:00-03:00"),
   },
   {
     nome: "Convidado que não poderá ir",
     status: "recusou",
-    acompanhantes: 0,
     convidadoPor: ela,
     confirmadoEm: new Date("2027-03-20T19:30:00-03:00"),
   },
@@ -113,7 +110,6 @@ const CAMPOS_A_CONFIRMAR: Record<CampoAConfirmar, string> = {
   "whatsapp.numero": "WhatsApp",
   "local.cerimoniaNoMesmoLocal": "Cerimônia",
   "versiculo.referencia": "Versículo",
-  "rsvp.maxAcompanhantes": "Acompanhantes",
 };
 const A_CONFIRMAR = Object.entries(casamento.aConfirmar) as [CampoAConfirmar, string][];
 

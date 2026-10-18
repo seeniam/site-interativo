@@ -1,4 +1,4 @@
-import { CalendarDays, Phone, UsersRound } from "lucide-react";
+import { CalendarDays, Phone } from "lucide-react";
 import { SeloStatus } from "@/components/ui/SeloStatus";
 import { textos } from "@/config/textos";
 import { formatarDiaMes } from "@/lib/format";
@@ -7,8 +7,6 @@ import type { StatusResposta } from "@/types/dominio";
 export interface CardConvidadoProps {
   nome: string;
   status: StatusResposta;
-  /** Quantas pessoas vêm junto (não conta o próprio convidado). */
-  acompanhantes: number;
   /** Quem convidou: o nome da noiva ou do noivo. Vazio para quem não vem. */
   convidadoPor: string;
   confirmadoEm: Date;
@@ -25,7 +23,6 @@ export interface CardConvidadoProps {
 export function CardConvidado({
   nome,
   status,
-  acompanhantes,
   convidadoPor,
   confirmadoEm,
   telefone,
@@ -46,14 +43,6 @@ export function CardConvidado({
       </div>
 
       <dl className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-14 text-fumaca">
-        {status === "confirmado" && acompanhantes > 0 && (
-          <div>
-            <dt className="sr-only">{rotulos.acompanhantes}</dt>
-            <dd className="flex items-center gap-1.5 numeros">
-              <UsersRound aria-hidden size={15} strokeWidth={1.5} className="text-ouro-escuro" />+{acompanhantes}
-            </dd>
-          </div>
-        )}
         {convidadoPor && (
           <div>
             <dt className="sr-only">{rotulos.convidadoPor}</dt>

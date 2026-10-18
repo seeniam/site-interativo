@@ -12,8 +12,6 @@ import type { ConfiguracaoCasamento } from "@/types/casamento";
 import { PRESENTES } from "./presentes";
 import imagemCasal from "../../public/images/casal.jpeg";
 
-const MAX_ACOMPANHANTES = 4;
-
 export const casamento = {
   noivos: {
     ela: "Jaqueline",
@@ -25,13 +23,6 @@ export const casamento = {
   fotoCasal: {
     imagem: imagemCasal,
     alt: "Jaqueline e Diorlando abraçados num jardim à noite, iluminados por luzes quentes; ela de vestido azul-claro, ele de terno azul-marinho.",
-    detalhe: {
-      alt: "Detalhe das mãos do casal: a de Diorlando, com a aliança, na cintura de Jaqueline.",
-      // Recorte fechado da mesma foto (briefing 3.7). Nesta foto a mão dela não mostra anel;
-      // a aliança visível é a dele — o recorte fica nas duas mãos (DECISOES H3).
-      posicao: "60% 43%",
-      escala: 1.8,
-    },
   },
 
   // Confirmado pelo casal: 21/12/2026, uma segunda-feira. Não é engano.
@@ -74,13 +65,12 @@ export const casamento = {
 
   historia: pendente("3 a 5 marcos de “nossa história” (ano, título e uma frase)"),
 
+  // Definido pelo casal (18/10/2026). Dourado e branco são as cores do evento (decoração e
+  // cerimônia), não código de vestimenta — por isso não há amostras de cor (DECISOES A2).
   trajes: {
     titulo: "Traje social",
-    descricao: pendente("Orientação de traje"),
-    paleta: [
-      { hex: "#C9A227", nome: "Dourado" },
-      { hex: "#FFFFFF", nome: "Branco" },
-    ],
+    orientacao:
+      "A escolha das cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à noiva.",
   },
 
   // Escrito a partir dos dados confirmados, sem fato novo (DECISOES V6).
@@ -96,10 +86,6 @@ export const casamento = {
         "São. Tudo acontece no Espaço Max, em São Luís, a partir das 16h30. O endereço completo e o mapa estão em “Quando e onde”.",
     },
     {
-      pergunta: "Posso levar acompanhantes?",
-      resposta: `Pode, até ${MAX_ACOMPANHANTES} por convite. Na confirmação de presença você escreve o nome de cada um.`,
-    },
-    {
       pergunta: "Como dou um presente?",
       resposta:
         "Escolha uma cota na lista de presentes e pague por PIX, lendo o QR Code ou copiando o código. Se puder, mande o comprovante pelo WhatsApp depois.",
@@ -110,9 +96,9 @@ export const casamento = {
     },
   ],
 
+  // O convite é individual: não há acompanhantes (DECISOES A1).
   rsvp: {
     prazo: pendente("Prazo para confirmar presença"),
-    maxAcompanhantes: MAX_ACOMPANHANTES,
   },
 
   aConfirmar: {},

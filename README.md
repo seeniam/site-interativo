@@ -46,10 +46,10 @@ a memória.
 Tudo o que aparece no site sai de dois arquivos:
 
 - **`src/config/casamento.ts`**: data, local, versículo, PIX, WhatsApp, cotas de presente (em
-  `src/config/presentes.ts`), limite de acompanhantes, FAQ e os dados ainda **a definir**.
+  `src/config/presentes.ts`), trajes, FAQ e os dados ainda **a definir**.
   - Um dado que ainda não existe se escreve `pendente("descrição")`. O site mostra um placeholder com o selo
     "a definir" e o item aparece em `/design-system`. Quando o casal mandar o dado, troque pelo valor.
-  - Os três "a definir" de hoje: marcos da nossa história, traje e prazo para confirmar
+  - Os dois "a definir" de hoje: marcos da nossa história e prazo para confirmar
     (`docs/PENDENCIAS.md`).
 - **`src/config/textos.ts`**: todos os textos da interface, na voz do casal.
 
@@ -65,6 +65,8 @@ instruções estão no topo do arquivo) e depois `pnpm gerar:imagens`.
 4. **Rode o schema uma vez.** Em **Storage**, clique no banco e depois em **Open in Neon**. No **SQL Editor**,
    cole o conteúdo de `db/schema.sql` e execute. (Alternativa pelo terminal:
    `psql "$DATABASE_URL" -f db/schema.sql`.)
+   **Banco já existente?** As mudanças de schema ficam em `db/migracoes/`, com a ordem certa escrita no
+   topo de cada arquivo (ex.: `2026-10-18-remover-acompanhantes.sql` roda **depois** de publicar o site novo).
 5. Em **Settings → Environment Variables**, crie `SENHA_NOIVOS`, `SESSAO_SECRET` e `RSVP_SALT` para Production.
    Para um preview de demonstração para o casal, crie `DEMO=true` só em Preview.
 6. **Deployments → Redeploy** para as variáveis valerem.
@@ -78,12 +80,12 @@ instruções estão no topo do arquivo) e depois `pnpm gerar:imagens`.
 Abra o link de demonstração (preview com `DEMO=true`) no celular de um deles.
 
 1. **O convite (30 s).** Na abertura, o monograma J & D se desenha sozinho. Role devagar: a foto e os nomes,
-   o versículo, a contagem regressiva, o recorte das mãos com a aliança, "Quando e onde" com o mapa e o botão de
-   agenda, trajes, presentes, dúvidas. Mostre os selos "a definir": é onde entram os três dados que faltam.
+   o versículo, a contagem regressiva, "Quando e onde" com o mapa e o botão de
+   agenda, trajes, presentes, dúvidas. Mostre os selos "a definir": é onde entram os dois dados que faltam.
 2. **Presentear (30 s).** Toque em **Presentear**, escolha a **Cota Ouro**: o QR Code e o código PIX aparecem
    com o nome de Jaqueline como recebedora. Toque em **Copiar código PIX** e depois em **Enviar comprovante**: o
    WhatsApp abre com a mensagem pronta.
-3. **Confirmar presença (30 s).** Toque em **Confirmar**. Nome, telefone, "Sim, estarei lá", um acompanhante,
+3. **Confirmar presença (30 s).** Toque em **Confirmar**. Nome, telefone, "Sim, estarei lá",
    "Quem convidou: Jaqueline", um recado. **Enviar resposta** leva ao "Obrigado!" com confete dourado.
 4. **A lista dos noivos (30 s).** No rodapé, **Lista de convidados**, senha `demo`. A resposta que vocês
    acabaram de mandar já está lá, junto com as 12 respostas fictícias. Mostre os contadores, a busca, o chip

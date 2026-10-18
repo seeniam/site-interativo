@@ -476,3 +476,22 @@ o mapa; screenshots e decisões desatualizados. Também foi pego na revisão vis
 | E3 | Endereço público via `VERCEL_PROJECT_PRODUCTION_URL` (variável de sistema da Vercel). | Links absolutos do OG e do sitemap sem acrescentar variável às cinco do briefing. |
 | E4 | Confete só em CSS, desenhado no servidor (zero JS), em vez de `dynamic(() => …, { ssr: false })`. O QR é carregado sob demanda no cliente (`import("qrcode")`) e o mapa só depois do clique. *(Desvio do texto, registrado.)* | O objetivo da seção 8 é não pesar no carregamento. Confete sem JavaScript nenhum pesa menos que um componente carregado depois. |
 | E5 | `sharp` entrou como dependência de desenvolvimento (só para o script de imagens). | Antes vinha "emprestado" do Next; explícito é mais honesto e o tipo funciona. |
+
+---
+
+# Correções do cliente (18/10/2026)
+
+Três correções pedidas depois da Fase 7. A primeira era conteúdo errado no ar.
+
+| # | Correção | Motivo | O que foi feito |
+|---|----------|--------|-----------------|
+| A1 | **Acompanhantes não existem neste casamento.** O convite é individual: uma confirmação = uma pessoa. | O requisito vinha do `BRIEFING.md` e estava errado. | Removido de ponta a ponta: pergunta do FAQ; passo, stepper e campos de nome no formulário; `maxAcompanhantes` (config, tipos, esquema zod); coluna `acompanhantes` (`db/schema.sql`, insert, select, tipos, esquemas de gravação e leitura, limites); "+2" nos cartões e coluna na tabela de `/convidados`; colunas no CSV; busca por nome de acompanhante; contadores (rótulo sem "contando acompanhantes", subtotal "N confirmados"). O seed da demonstração perdeu os acompanhantes, e os recados no plural ("Estaremos lá", "Vamos com as crianças") viraram singulares. `BRIEFING.md` corrigido (com um aviso explícito no topo, para o erro não voltar). |
+| A1.1 | Migração versionada em `db/migracoes/2026-10-18-remover-acompanhantes.sql` (`alter table … drop column if exists acompanhantes`). **Ordem: publicar primeiro, migrar depois.** | O site novo não lê nem grava a coluna e funciona com ela ainda lá (o `default '[]'` cobre o insert). O site antigo grava a coluna e quebraria sem ela. | Teste contra um banco criado com o schema antigo: grava e lê antes do `alter`, roda a migração, grava e lê depois. |
+| A1.2 | Testes de guarda (asserções de **ausência**): o config não menciona acompanhante; o convite inteiro não tem a palavra; um campo `acompanhantes` mandado por fora para `/api/rsvp` é descartado e não chega ao banco. | Para o requisito não voltar por engano. | Nenhum teste afirma mais o comportamento antigo. |
+| A2 | **Trajes viram texto definido**: "Trajes" / "Traje social" / "A escolha das cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à noiva." Sem amostras de cor, sem "a definir". | Dourado e branco são as cores do evento (decoração e cerimônia), não código de vestimenta. Mostrá-las como paleta convidava a ir de branco, que é cor reservada à noiva. | Config (`trajes.orientacao`), tipo, esquema do config e seção atualizados; D2 saiu do `PENDENCIAS.md`. |
+| A3 | **Sem recorte de detalhe 21:9.** A foto aparece só no herói. | O arquivo tem 960×1280: qualquer corte fechado o bastante para parecer detalhe fica borrado no celular. | Componente, config (`fotoCasal.detalhe`), tipo e CSS removidos. A contagem passa direto para "Quando e onde". Com o respiro inteiro dos dois lados, o vão ficava grande demais no desktop (280 px depois de um bloco curto, revisão visual); a contagem passou a ter meio respiro embaixo, e a transição fica contínua. A regra "Economia da foto única" do briefing virou "A foto única". |
+
+**Decisões anteriores que deixam de valer:** H1 (foto em dois lugares), H3 (recorte das mãos), H6 (paleta dos
+trajes com nome da cor), o "acompanhantes" de V6 (o FAQ não tem mais essa pergunta), a observação da aliança em
+`PENDENCIAS.md` e as menções a acompanhantes nas Fases 5 e 6 (R-, C- e o fechamento delas descrevem o que existia
+naquela data). O registro histórico acima fica como estava, para a linha do tempo continuar legível.
