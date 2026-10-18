@@ -73,8 +73,9 @@ Fora disso, decida, registre a premissa em `DECISOES.md` e siga.
 - WhatsApp de comprovante = mesmo número da chave PIX.
 - Cerimônia e recepção no Espaço Max, a partir das 16h30.
 
-**AINDA "A DEFINIR" — só dois, nenhum trava você:** marcos de "nossa história" (só texto)
-e prazo do RSVP. (Traje foi definido em 18/10/2026: ver 6.1, item 6.) Sem os marcos, a seção inteira NÃO é renderizada — nada de marco
+**AINDA "A DEFINIR" — só um, e não trava você:** marcos de "nossa história" (só texto).
+(Traje foi definido em 18/10/2026, ver 6.1, item 6. O prazo do RSVP foi **retirado**: o site
+não mostra prazo, nem placeholder, nem pergunta de FAQ sobre ele.) Sem os marcos, a seção inteira NÃO é renderizada — nada de marco
 inventado. Use o vocabulário da seção 4 ("a confirmar" × "a definir", com estados visuais
 distintos) e mantenha `PENDENCIAS.md` em dia. A única foto é `public/images/casal.jpg`.
 
@@ -310,11 +311,9 @@ export const casamento = {
   historia: [ /* ⚠️ A DEFINIR: 3 a 5 marcos, SÓ TEXTO (ano + título + uma frase) */ ],
   // Sem galeria: existe uma única foto, usada só no herói. Ver "A foto única" na seção 3.7.
   trajes: {
-    titulo: "Traje social",
     orientacao: "A escolha das cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à noiva.",
   }, // definido em 18/10/2026 — sem amostras de cor (ver 6.1, item 6)
   faq: [ /* ⚠️ PENDENTE */ ],
-  rsvp: { prazo: "TODO" }, // ⚠️ — convite individual: não existe limite de acompanhantes
 } as const;
 ```
 
@@ -324,7 +323,7 @@ interface como um placeholder elegante (nunca "undefined", nunca quebrado).
 **Vocabulário obrigatório (vale no código, nos selos da interface e no `PENDENCIAS.md`):**
 - **"a confirmar"** = o dado chegou, mas há dúvida sobre ele (ano, referência do versículo,
   de-para das cotas, nome do recebedor do PIX, número do WhatsApp, local da cerimônia).
-- **"a definir"** = o dado ainda não existe (nossa história, prazo do RSVP).
+- **"a definir"** = o dado ainda não existe (hoje, só a nossa história).
 Os dois estados são visualmente distintos: "a confirmar" em `--champanhe` com texto
 `--ouro-escuro`; "a definir" em `--linho` com texto `--fumaca`. Nunca usar um termo pelo outro.
 
@@ -448,14 +447,16 @@ Ordem das seções (mobile-first, tudo em coluna no celular):
    cliente + link do Google Calendar. Mapa embedado só carrega depois do clique
    (`lite mode`), para não pesar o LCP. O endereço precisa ser **copiável com um toque**
    (botão "Copiar endereço") — é o que o convidado manda para o motorista de aplicativo.
-6. **Trajes**: só texto. Título "Trajes", destaque "Traje social" e a linha "A escolha das
-   cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à
-   noiva." **Sem amostras de cor**: dourado e branco são as cores do evento (decoração e
+6. **Trajes**: só texto. Título "Trajes" e a linha "A escolha das cores fica a critério de
+   cada convidado. Pedimos apenas que o branco seja reservado à noiva." **Sem destaque
+   "Traje social"** (retirado a pedido do cliente) e **sem amostras de cor**: dourado e branco são as cores do evento (decoração e
    cerimônia), não código de vestimenta — mostrá-las como paleta convidava a ir de branco,
    cor reservada à noiva.
-7. **Presentes (teaser)**: três cotas em destaque + botão "Ver lista completa".
+7. **Presentes (teaser)**: três cotas em destaque + botão "Ver lista completa". O texto de
+   apoio convida a presentear (voz do casal, polida, sem soar opcional): nada de "se quiser".
 8. **Dúvidas frequentes**: acordeão acessível (`<details>` estilizado ou Radix), 4 a 6 perguntas.
-9. **RSVP (teaser)**: faixa com prazo ("Confirme até 00/00") e botão grande.
+9. **RSVP (teaser)**: faixa com o convite ("Vem com a gente?") e botão grande. **Sem prazo**
+   (retirado pelo cliente em 18/10/2026).
 10. **Rodapé**: monograma, assinatura em Pinyon ("com amor, X & Y"), link discreto para
     `/convidados`, créditos.
 
@@ -677,4 +678,4 @@ no Espaço Max às 16h30, e **uma única foto disponível, sem previsão de outr
 **Bloqueiam a Fase 3 mas têm plano B (placeholder honesto):**
 - [ ] 3 a 5 marcos de "nossa história" (ano + título + uma frase). **Só texto.**
 - [x] Traje / dress code — definido em 18/10/2026: traje social, branco reservado à noiva.
-- [ ] Prazo para confirmação de presença.
+- [x] Prazo para confirmação de presença — retirado do site em 18/10/2026.

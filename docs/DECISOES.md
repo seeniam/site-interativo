@@ -495,3 +495,13 @@ Três correções pedidas depois da Fase 7. A primeira era conteúdo errado no a
 trajes com nome da cor), o "acompanhantes" de V6 (o FAQ não tem mais essa pergunta), a observação da aliança em
 `PENDENCIAS.md` e as menções a acompanhantes nas Fases 5 e 6 (R-, C- e o fechamento delas descrevem o que existia
 naquela data). O registro histórico acima fica como estava, para a linha do tempo continuar legível.
+
+---
+
+# Ajustes de conteúdo do cliente (18/10/2026, segunda rodada)
+
+| # | Pedido | O que foi feito |
+|---|--------|-----------------|
+| B1 | Retirar "Prazo para confirmar presença · a definir". | O prazo sai de **todos** os lugares onde aparecia: o cabeçalho de `/confirmar-presenca`, a faixa do RSVP na home (fica o título e o botão) e a pergunta "Até quando posso confirmar presença?" do FAQ (a resposta era só o placeholder, então a pergunta saiu junto). Saem também `rsvp.prazo` do config e dos tipos e os textos "Confirme até" e "Responda até". D3 sai do `PENDENCIAS.md`: o único "a definir" que sobra é a história. Com isso, **o FAQ ficou com 3 perguntas** (o briefing sugere 4 a 6); não inventei uma quarta. |
+| B2 | Retirar "Traje social". | Sai o destaque. A seção fica com o título "Trajes" e a frase sobre as cores e o branco da noiva, que agora é o texto de apoio do título (o mesmo padrão da seção de presentes). `trajes.titulo` sai do config. |
+| B3 | Texto dos presentes mais apelativo/imperativo, polido, sem dar a impressão de que o presente é opcional. | Era: "Sua presença já é o presente. Se quiser nos ajudar a começar a vida a dois, escolha uma cota." Agora: "Para começarmos a vida a dois, contamos com o seu presente. Escolha a sua cota e faça o PIX: cada uma nos ajuda a montar a nossa casa." Saem o "se quiser" e o "já é o presente", que davam a saída. "Montar a nossa casa" repete o que `/presentear` já diz ("ajuda a começar a nossa casa"): nenhum fato novo. Teste de guarda confere que as duas expressões antigas não voltam. |

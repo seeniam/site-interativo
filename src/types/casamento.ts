@@ -109,9 +109,8 @@ export interface ConfiguracaoCasamento {
   presentes: readonly Presente[];
   /** "A definir": sem os marcos, a seção inteira não é renderizada (briefing 6.1). */
   historia: Talvez<readonly MarcoHistoria[]>;
-  trajes: { titulo: string; orientacao: string };
+  trajes: { orientacao: string };
   faq: readonly PerguntaFrequente[];
-  rsvp: { prazo: Talvez<string> };
   /** O motivo de cada dúvida, na voz de quem vai perguntar ao casal. */
   aConfirmar: Readonly<Partial<Record<CampoAConfirmar, string>>>;
 }

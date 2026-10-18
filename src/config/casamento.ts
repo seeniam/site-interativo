@@ -68,7 +68,6 @@ export const casamento = {
   // Definido pelo casal (18/10/2026). Dourado e branco são as cores do evento (decoração e
   // cerimônia), não código de vestimenta — por isso não há amostras de cor (DECISOES A2).
   trajes: {
-    titulo: "Traje social",
     orientacao:
       "A escolha das cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à noiva.",
   },
@@ -90,16 +89,7 @@ export const casamento = {
       resposta:
         "Escolha uma cota na lista de presentes e pague por PIX, lendo o QR Code ou copiando o código. Se puder, mande o comprovante pelo WhatsApp depois.",
     },
-    {
-      pergunta: "Até quando posso confirmar presença?",
-      resposta: pendente("Prazo para confirmar presença"),
-    },
   ],
-
-  // O convite é individual: não há acompanhantes (DECISOES A1).
-  rsvp: {
-    prazo: pendente("Prazo para confirmar presença"),
-  },
 
   aConfirmar: {},
 } as const satisfies ConfiguracaoCasamento;

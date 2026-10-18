@@ -53,7 +53,8 @@ export const textos = {
     },
     presentes: {
       titulo: "Presentes",
-      texto: "Sua presença já é o presente. Se quiser nos ajudar a começar a vida a dois, escolha uma cota.",
+      texto:
+        "Para começarmos a vida a dois, contamos com o seu presente. Escolha a sua cota e faça o PIX: cada uma nos ajuda a montar a nossa casa.",
       verLista: "Ver lista completa",
     },
     duvidas: {
@@ -61,7 +62,6 @@ export const textos = {
     },
     rsvp: {
       titulo: "Vem com a gente?",
-      confirmeAte: "Confirme até",
       botao: "Confirmar presença",
     },
   },
@@ -108,7 +108,6 @@ export const textos = {
   },
   rsvp: {
     titulo: "Confirmar presença",
-    responderAte: "Responda até",
     passoDeTotal: (passo: number, total: number) => `Passo ${passo} de ${total}`,
     passos: {
       quem: "Quem é você",
