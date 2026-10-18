@@ -102,7 +102,8 @@ const CONVIDADOS_DE_EXEMPLO = [
   },
 ] as const;
 
-const PENDENCIAS = listarPendencias(casamento);
+/** Sem repetição: o mesmo dado pode aparecer em mais de um lugar do config (ex.: prazo no RSVP e no FAQ). */
+const PENDENCIAS = [...new Map(listarPendencias(casamento).map((p) => [p.descricao, p])).values()];
 
 /** Nome legível de cada campo "a confirmar" — documentação interna desta página. */
 const CAMPOS_A_CONFIRMAR: Record<CampoAConfirmar, string> = {
@@ -475,17 +476,24 @@ export default function DesignSystemPage() {
             descricao="Dois estados, nunca um pelo outro. “A confirmar”: o dado chegou, mas há dúvida — ele aparece, com o selo. “A definir”: o dado não existe — o lugar dele mostra o que falta. As duas listas são lidas da configuração."
           >
             <h3 className="mb-3 text-16 font-normal text-tinta">A confirmar</h3>
+            <p className="mb-4 text-14 text-fumaca">Como um dado com dúvida aparece (exemplo de estado):</p>
             <p className="mb-5 font-display text-25">
               <ValorAConfirmar>{formatarDataPorExtenso(casamento.data)}</ValorAConfirmar>
             </p>
-            <dl className="mb-14 divide-y divide-borda rounded-card bg-branco px-5 ring-1 ring-borda sm:px-8">
-              {A_CONFIRMAR.map(([campo, motivo]) => (
-                <div key={campo} className="flex flex-col gap-1 py-3.5 sm:flex-row sm:gap-8">
-                  <dt className="w-40 shrink-0 text-14 font-normal text-tinta">{CAMPOS_A_CONFIRMAR[campo]}</dt>
-                  <dd className="text-14 text-fumaca">{motivo}</dd>
-                </div>
-              ))}
-            </dl>
+            {A_CONFIRMAR.length > 0 ? (
+              <dl className="mb-14 divide-y divide-borda rounded-card bg-branco px-5 ring-1 ring-borda sm:px-8">
+                {A_CONFIRMAR.map(([campo, motivo]) => (
+                  <div key={campo} className="flex flex-col gap-1 py-3.5 sm:flex-row sm:gap-8">
+                    <dt className="w-40 shrink-0 text-14 font-normal text-tinta">{CAMPOS_A_CONFIRMAR[campo]}</dt>
+                    <dd className="text-14 text-fumaca">{motivo}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p className="mb-14 rounded-card bg-branco px-5 py-4 text-14 text-fumaca ring-1 ring-borda sm:px-8">
+                Nada a confirmar: o casal confirmou todos os dados enviados.
+              </p>
+            )}
 
             <h3 className="mb-3 text-16 font-normal text-tinta">A definir</h3>
             <p className="mb-4 text-14 text-fumaca">

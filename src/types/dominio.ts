@@ -1,30 +1,29 @@
-/** Entidades do domínio que vivem no backend (Firestore ou mock local). */
+/** Entidades do domínio guardadas no Postgres (ou no adaptador em memória da demonstração). */
 
 export type StatusResposta = "confirmado" | "recusou";
 
-/**
- * Uma resposta de RSVP. As confirmações são só de inclusão (DECISOES F2):
- * responder de novo cria outro registro, e vale o mais recente de cada telefone.
- */
-export interface Confirmacao {
-  id: string;
+/** O que o formulário de RSVP produz, já validado. */
+export interface NovaConfirmacao {
   nome: string;
   /** Só dígitos, com DDD: 10 (fixo) ou 11 (celular). */
   telefone: string;
   status: StatusResposta;
   /** Nomes de quem vem junto. Vazio quando a pessoa não vai. */
   acompanhantes: readonly string[];
-  /** Quem convidou (nome da noiva, do noivo, ou o que a pessoa digitou). Vazio quando não vai. */
+  /** Quem convidou. Vazio quando a pessoa não vai. */
   convidadoPor: string;
   recado: string;
-  criadoEm: Date;
 }
 
-export type NovaConfirmacao = Omit<Confirmacao, "id" | "criadoEm">;
-
-/** Um presente nomeado que alguém já deu. Sem dado pessoal (DECISOES F3). */
-export interface PresenteReservado {
+/**
+ * Uma linha de `confirmacoes`. Respostas são só de inclusão: responder de novo grava outra
+ * linha com `atualizaDe`, e vale a mais recente de cada `telefoneHash`.
+ * Sai do servidor apenas pela rota dos noivos (`GET /api/convidados`), nunca por rota pública.
+ */
+export interface Confirmacao extends NovaConfirmacao {
   id: string;
-  presenteId: string;
+  telefoneHash: string;
+  /** Hash da resposta que esta substitui, quando é uma atualização. */
+  atualizaDe: string | null;
   criadoEm: Date;
 }

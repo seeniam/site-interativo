@@ -75,9 +75,14 @@ export function CardPresente({
       <div className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
         <Titulo className="font-display text-25 font-normal text-tinta">{titulo}</Titulo>
 
-        <p className="text-14 text-fumaca">
-          {estaPendente(descricao) ? <TextoPendente item={descricao} /> : descricao}
-        </p>
+        {/* Descrição vazia = o casal não quis frase para este presente: a linha não existe. */}
+        {estaPendente(descricao) ? (
+          <p className="text-14 text-fumaca">
+            <TextoPendente item={descricao} />
+          </p>
+        ) : descricao ? (
+          <p className="text-14 text-fumaca">{descricao}</p>
+        ) : null}
 
         {presenteado ? (
           <div className="mt-auto flex flex-col gap-3 pt-3">

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { casamento } from "@/config/casamento";
 import { textos } from "@/config/textos";
 import { esquemaConfig } from "./config";
-import { esquemaConfirmacao, esquemaPresenteReservado, filtrarValidos } from "./dominio";
+import { esquemaLinhaConfirmacao, esquemaRegistro } from "./dominio";
 import { criarEsquemaRsvp, paraNovaConfirmacao, pareceRobo, type EntradaRsvp } from "./rsvp";
 
 const esquema = criarEsquemaRsvp(casamento.rsvp.maxAcompanhantes);
@@ -113,42 +113,37 @@ describe("formulário de RSVP", () => {
   });
 });
 
-describe("registros armazenados", () => {
-  const registro = {
-    id: "abc",
+describe("linhas lidas do banco", () => {
+  const linha = {
+    id: "12",
     nome: "Maria",
     telefone: "98999676346",
-    status: "confirmado",
+    telefone_hash: "a".repeat(64),
+    vai_comparecer: true,
     acompanhantes: ["João"],
-    convidadoPor: "Jaqueline",
-    recado: "",
-    criadoEm: "2026-10-17T12:00:00.000Z",
+    quem_convidou: "Jaqueline",
+    recado: null,
+    atualiza_de: null,
+    criado_em: "2026-10-17T12:00:00.000Z",
   };
 
-  it("converte a data salva como texto", () => {
-    expect(esquemaConfirmacao.parse(registro).criadoEm).toEqual(new Date("2026-10-17T12:00:00.000Z"));
+  it("aceita a linha como o Postgres devolve (bigint em texto, data ISO, nulos)", () => {
+    const lido = esquemaLinhaConfirmacao.parse(linha);
+    expect(lido.criado_em).toEqual(new Date("2026-10-17T12:00:00.000Z"));
+    expect(esquemaLinhaConfirmacao.parse({ ...linha, id: 12, criado_em: new Date() }).id).toBe(12);
   });
 
   it.each<[string, Record<string, unknown>]>([
     ["telefone com máscara", { telefone: "(98) 99967-6346" }],
-    ["status desconhecido", { status: "talvez" }],
-    ["data inválida", { criadoEm: "ontem" }],
+    ["telefone que o app não formataria", { telefone: "0000000000" }],
+    ["hash fora do formato", { telefone_hash: "abc" }],
+    ["data inválida", { criado_em: "ontem" }],
+    ["data nula (não vira 1970)", { criado_em: null }],
+    ["data numérica (não vira 1970)", { criado_em: 0 }],
     ["acompanhantes demais", { acompanhantes: Array.from({ length: 11 }, () => "X") }],
     ["recado longo", { recado: "a".repeat(241) }],
   ])("recusa %s", (_rotulo, alteracao) => {
-    expect(esquemaConfirmacao.safeParse({ ...registro, ...alteracao }).success).toBe(false);
-  });
-
-  it("filtrarValidos descarta o que está corrompido sem derrubar a lista", () => {
-    const lista = [registro, { lixo: true }, null, { ...registro, id: "def" }];
-    expect(filtrarValidos(esquemaConfirmacao, lista).map((c) => c.id)).toEqual(["abc", "def"]);
-  });
-
-  it("presente reservado: só id, presenteId e data", () => {
-    expect(esquemaPresenteReservado.safeParse({ id: "1", presenteId: "ouro", criadoEm: new Date() }).success).toBe(
-      true,
-    );
-    expect(esquemaPresenteReservado.safeParse({ id: "1", presenteId: "", criadoEm: new Date() }).success).toBe(false);
+    expect(esquemaLinhaConfirmacao.safeParse({ ...linha, ...alteracao }).success).toBe(false);
   });
 });
 
@@ -217,7 +212,7 @@ describe("nomes digitados no celular", () => {
   });
 });
 
-describe("propriedade: tudo que o formulário aprova, a leitura aceita", () => {
+describe("propriedade: tudo que o formulário aprova, o banco grava e a leitura aceita", () => {
   // Fecha a classe de bug "gravou e sumiu": se um limite divergir, este teste quebra.
   const entradas: EntradaRsvp[] = [
     VALIDO,
@@ -235,34 +230,24 @@ describe("propriedade: tudo que o formulário aprova, a leitura aceita", () => {
     const dados = esquema.safeParse(entrada);
     expect(dados.success).toBe(true);
     if (!dados.success) return;
-    const registro = { ...paraNovaConfirmacao(dados.data), id: "x", criadoEm: new Date() };
-    expect(esquemaConfirmacao.safeParse(registro).error?.issues ?? []).toEqual([]);
-  });
-});
-
-describe("leitura recusa dado adulterado", () => {
-  const base = {
-    id: "abc",
-    nome: "Maria",
-    telefone: "98999676346",
-    status: "confirmado",
-    acompanhantes: [],
-    convidadoPor: "Jaqueline",
-    recado: "",
-    criadoEm: "2026-10-17T12:00:00.000Z",
-  };
-
-  it.each<[string, unknown]>([
-    ["null", null],
-    ["número", 0],
-    ["booleano", true],
-    ["texto sem formato ISO", "17/10/2026"],
-  ])("criadoEm %s não vira 1970", (_rotulo, criadoEm) => {
-    expect(esquemaConfirmacao.safeParse({ ...base, criadoEm }).success).toBe(false);
-  });
-
-  it("telefone que o app não formataria", () => {
-    expect(esquemaConfirmacao.safeParse({ ...base, telefone: "0000000000" }).success).toBe(false);
+    const nova = paraNovaConfirmacao(dados.data);
+    const hash = "f".repeat(64);
+    expect(esquemaRegistro.safeParse({ ...nova, telefoneHash: hash, atualizaDe: null }).error?.issues ?? []).toEqual(
+      [],
+    );
+    const linha = {
+      id: "1",
+      nome: nova.nome,
+      telefone: nova.telefone,
+      telefone_hash: hash,
+      vai_comparecer: nova.status === "confirmado",
+      acompanhantes: nova.acompanhantes,
+      quem_convidou: nova.convidadoPor || null,
+      recado: nova.recado || null,
+      atualiza_de: null,
+      criado_em: new Date(),
+    };
+    expect(esquemaLinhaConfirmacao.safeParse(linha).error?.issues ?? []).toEqual([]);
   });
 });
 

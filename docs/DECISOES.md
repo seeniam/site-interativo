@@ -180,3 +180,46 @@ A regra definitiva é escrita na Fase 5.
    documentada), para o roteiro de 2 minutos do casal funcionar.
 6. **SHA-256 no navegador** (`crypto.subtle`) só existe em contexto seguro (https ou localhost) — a demonstração
    aberta por IP da rede local não teria o aviso de "já confirmou".
+
+---
+
+# Briefing v3 (2026-10-17) — Postgres na Vercel, foto única, execução contínua
+
+O cliente substituiu o briefing: sai o Firebase, entra **Postgres (Neon) acessado só por Route
+Handlers**; sai a galeria (existe **uma** foto); todos os dados do casal estão **confirmados**
+(recebedora "JAQUELINE BARROS ALVARES", 21/12/2026 segunda-feira intencional etc.). Pediu execução
+contínua da Fase 1 (retrabalho) até a última fase, com portão e commit por fase.
+
+## Premissas gerais desta rodada
+| # | Premissa | Motivo |
+|---|----------|--------|
+| V1 | O pedido diz "até a Fase 10", mas a seção 10 termina na **Fase 7**. Executo até a 7. | Não há fases 8–10 descritas; inventá-las seria criar requisito. |
+| V2 | **Cotas nunca se esgotam.** `presentes_reservados` e `POST /api/presentes/[id]/reservar` existem como pedido, mas só aceitam presentes **nomeados**; cota responde 400. *(Discordância registrada.)* | Com `cota_id` como chave primária, o primeiro presente na Cota Ouro a esgotaria para todos — só 3 presentes no total. E a rota é pública: qualquer visitante "esgotaria" as três cotas com um POST. Hoje não há presentes nomeados, então nada fica indisponível. |
+| V3 | Sem `DATABASE_URL` → demonstração em memória (como pede o briefing), **exceto na produção da Vercel** (`VERCEL_ENV=production`) sem `DEMO=true`: aí é erro explícito. | Dado pessoal: um deploy que esqueceu o banco gravaria as respostas reais na memória e as perderia, e mostraria convidados fictícios aos noivos. |
+| V4 | Foto continua em `public/images/casal.jpeg` (G2). | Arquivo original do cliente, não renomeado. |
+| V5 | Selo "a confirmar" mantém F1 (texto em `--tinta`, ouro no filete e no ponto). | O briefing repete `--ouro-escuro` sobre `--champanhe` (4,28:1); a seção 7.2 manda acessibilidade vencer o token. |
+| V6 | **FAQ escrito a partir dos dados confirmados** (data e dia útil, horário, local, presentes, confirmação, acompanhantes), na voz do casal, com valores interpolados do config — sem fato novo. Pergunta cuja resposta depende de dado "a definir" (traje, prazo) mostra o placeholder. | O briefing pede o FAQ com o aviso de dia útil e não lista o FAQ como "a definir". |
+| V7 | Duração do evento na agenda (6 h) é **padrão técnico**, não pendência do cliente. | O briefing limita os "a definir" a três itens; a agenda precisa de um término. |
+
+---
+
+## Fase 1 (retrabalho) — dados no servidor
+
+### O que vai ser feito
+1. **Remover** `src/lib/dados/` (Firebase), `firestore.rules`, seus testes e a dependência `firebase`.
+2. `db/schema.sql` exatamente como a seção 5.
+3. `src/lib/db/` (só servidor, `server-only`): interface do repositório; adaptador **Postgres** (`@neondatabase/serverless`, SQL à mão, colunas explícitas, nunca `select *`) sobre um executor de consultas; adaptador **em memória com seed** (12 confirmações fictícias, telefones `(98) 90000-00XX`); escolha pelo ambiente (V3); `telefone_hash = sha256(telefone + RSVP_SALT)` calculado no servidor.
+4. Testes do adaptador Postgres contra o **SQL real** do `db/schema.sql` em `pg-mem`, e do adaptador em memória.
+5. Config com os dados confirmados; tipos sem galeria; "nossa história" vira `Talvez` de lista inteira (sem marcos, a seção não existe); `aConfirmar` fica vazio.
+6. `.env.example` com `DATABASE_URL`, `SENHA_NOIVOS`, `SESSAO_SECRET`, `RSVP_SALT`, `DEMO` — nenhuma `NEXT_PUBLIC_`.
+
+### Fora do escopo
+- Route Handlers, sessão dos noivos e limite por IP: Fase 5 (e 6 para `/api/convidados`).
+
+### Fechamento da Fase 1 (retrabalho)
+- Firebase removido por inteiro (`lib/dados`, `firestore.rules`, testes, dependência).
+- `db/schema.sql` igual à seção 5 (índice com nome explícito, para o arquivo rodar igual em qualquer Postgres).
+- `src/lib/db/`: interface, adaptador Postgres (Neon HTTP, SQL à mão, colunas explícitas — teste garante que não há `select *`), adaptador em memória com seed de 12 respostas fictícias, hash do telefone no servidor, leitura do ambiente (V3). Entrada `index.ts` marcada `server-only`.
+- O adaptador Postgres é testado contra o **`db/schema.sql` real** no `pg-mem`. Um detalhe do pg-mem (`on conflict do nothing returning` devolve linha mesmo ignorando) levou a reservar com `where not exists` + `on conflict` — correto nos dois.
+- Config com os dados confirmados; sem galeria; "nossa história" = lista inteira "a definir" (sem marcos, sem seção); cotas sem frase (descrição vazia, como no briefing); FAQ a partir dos dados confirmados (V6).
+- Os "a definir" ficaram exatamente os três do briefing (D1–D3).

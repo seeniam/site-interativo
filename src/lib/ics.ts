@@ -2,14 +2,7 @@
  * "Adicionar à agenda": arquivo .ics (RFC 5545) e link do Google Agenda, gerados no cliente.
  * Funções puras — o "agora" do DTSTAMP entra por parâmetro.
  */
-import { ouSenao } from "@/lib/pendente";
 import type { ConfiguracaoCasamento } from "@/types/casamento";
-
-/**
- * Plano B enquanto o horário de término está "a definir" (PENDENCIAS P9): o .ics precisa de
- * um fim. Quando o casal informar, `casamento.agenda.duracaoHoras` passa a valer.
- */
-export const DURACAO_PLANO_B_HORAS = 6;
 
 export interface EventoAgenda {
   /** Identificador estável: reimportar o arquivo atualiza o evento em vez de duplicar. */
@@ -113,8 +106,7 @@ export function eventoDoCasamento(
 ): EventoAgenda {
   const inicio = new Date(config.data);
   if (Number.isNaN(inicio.getTime())) throw new RangeError(`Data do casamento inválida: ${config.data}`);
-  const horas = ouSenao(config.agenda.duracaoHoras, DURACAO_PLANO_B_HORAS);
-  const fim = new Date(inicio.getTime() + horas * 60 * 60 * 1000);
+  const fim = new Date(inicio.getTime() + config.agenda.duracaoHoras * 60 * 60 * 1000);
   const { titulo } = config.noivos;
   return {
     uid: `casamento-${config.data.slice(0, 10)}-${config.noivos.monograma.esquerda}${config.noivos.monograma.direita}@convite`.toLowerCase(),

@@ -23,21 +23,16 @@ export type Local = Endereco & { facebook?: string } & (
     { cerimoniaNoMesmoLocal: true } | { cerimoniaNoMesmoLocal: false; cerimonia: Endereco & { horarioTexto: string } }
   );
 
+/** Um marco de "nossa história" — só texto (não há outras fotos, briefing 3.7). */
 export interface MarcoHistoria {
-  ano: Talvez<string>;
-  titulo: Talvez<string>;
-  texto: Talvez<string>;
-  /** Caminho em /public. Enquanto não houver foto própria, a página usa `fotoCasal`. */
-  foto: Talvez<string>;
-}
-
-export interface FotoGaleria {
-  src: StaticImageData;
-  alt: string;
+  ano: string;
+  titulo: string;
+  texto: string;
 }
 
 export interface PerguntaFrequente {
-  pergunta: Talvez<string>;
+  pergunta: string;
+  /** Pode estar "a definir" quando depende de um dado que o casal ainda não enviou. */
   resposta: Talvez<string>;
 }
 
@@ -84,6 +79,14 @@ export type CampoAConfirmar =
   | "versiculo.referencia"
   | "rsvp.maxAcompanhantes";
 
+/** A foto única, em seus dois enquadramentos (briefing 3.7, "Economia da foto única"). */
+export interface FotoCasal {
+  imagem: StaticImageData;
+  alt: string;
+  /** Recorte fechado da mão dela com a aliança, para a faixa 21:9. */
+  detalhe: { alt: string; posicao: string; escala: number };
+}
+
 export interface ConfiguracaoCasamento {
   noivos: {
     ela: string;
@@ -96,25 +99,22 @@ export interface ConfiguracaoCasamento {
     sobrenomes?: { ela: string; ele: string };
   };
   /** Importada estaticamente: dá dimensões e blur automático ao next/image. */
-  fotoCasal: { imagem: StaticImageData; alt: string };
+  fotoCasal: FotoCasal;
   /** ISO 8601 com fuso de Brasília. */
   data: string;
   horarioTexto: string;
-  /**
-   * O cliente informou só o início. "A definir": enquanto não vier, a agenda usa o plano B
-   * de `lib/ics.ts` (DURACAO_PLANO_B_HORAS).
-   */
-  agenda: { duracaoHoras: Talvez<number> };
+  /** Padrão técnico (DECISOES V7): o cliente informou só o início; a agenda precisa de término. */
+  agenda: { duracaoHoras: number };
   local: Local;
   versiculo: { texto: string; referencia: string };
   pix: DadosPixRecebedor;
   whatsapp: { numero: string; mensagemComprovante: string };
   presentes: readonly Presente[];
-  historia: readonly MarcoHistoria[];
-  galeria: Talvez<readonly FotoGaleria[]>;
+  /** "A definir": sem os marcos, a seção inteira não é renderizada (briefing 6.1). */
+  historia: Talvez<readonly MarcoHistoria[]>;
   trajes: { titulo: string; descricao: Talvez<string>; paleta: readonly string[] };
   faq: readonly PerguntaFrequente[];
   rsvp: { prazo: Talvez<string>; maxAcompanhantes: number };
   /** O motivo de cada dúvida, na voz de quem vai perguntar ao casal. */
-  aConfirmar: Readonly<Record<CampoAConfirmar, string>>;
+  aConfirmar: Readonly<Partial<Record<CampoAConfirmar, string>>>;
 }

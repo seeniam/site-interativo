@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { casamento } from "@/config/casamento";
 import { textos } from "@/config/textos";
 import {
-  DURACAO_PLANO_B_HORAS,
   dobrarLinhaIcs,
   escaparTextoIcs,
   eventoDoCasamento,
@@ -136,8 +135,8 @@ describe("lembrete e duração", () => {
     expect(alarme.some((l) => l.startsWith("DESCRIPTION:Casamento de Jaqueline & Diorlando"))).toBe(true);
   });
 
-  it("término 'a definir' usa o plano B; valor informado passa a valer", () => {
-    expect(evento.fim.getTime() - evento.inicio.getTime()).toBe(DURACAO_PLANO_B_HORAS * 3_600_000);
+  it("a duração vem do config (padrão técnico, DECISOES V7)", () => {
+    expect(evento.fim.getTime() - evento.inicio.getTime()).toBe(casamento.agenda.duracaoHoras * 3_600_000);
     const informado = eventoDoCasamento({ ...casamento, agenda: { duracaoHoras: 4 } }, textos.agenda);
     expect(informado.fim.getTime() - informado.inicio.getTime()).toBe(4 * 3_600_000);
   });

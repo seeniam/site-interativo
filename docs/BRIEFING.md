@@ -1,42 +1,99 @@
-# SUPER PROMPT — Site de Casamento "Dourado & Branco"
+# PROMPT COMPLETO — Site de casamento Jaqueline & Diorlando
 
-> **Como usar:** crie uma pasta vazia, salve este arquivo como `docs/BRIEFING.md`,
-> coloque a foto do casal em `public/images/casal.jpg` e cole no **Claude Code**
-> o bloco "PROMPT DE ABERTURA" (seção 0). Depois vá colando **uma fase por vez**
-> (seção 10), só avançando quando a anterior passar no Fechamento.
+> Cole este arquivo INTEIRO no Claude Code. Ele contém a instrução de execução e o
+> briefing completo. Antes de colar, salve a foto do casal em `public/images/casal.jpg`.
 
 ---
 
-## 0. PROMPT DE ABERTURA (cole isto primeiro no Claude Code)
+## INSTRUÇÃO DE EXECUÇÃO
 
-```
-Leia docs/BRIEFING.md por inteiro antes de escrever qualquer linha de código.
+Salve o texto a partir de "BRIEFING" (abaixo) como `docs/BRIEFING.md` e leia por inteiro
+antes de qualquer coisa. Ele é a fonte de verdade e vence qualquer conflito com o que você
+tiver em memória de versões anteriores deste projeto.
 
-Você vai acumular cinco papéis e deve se comportar como cada um deles em cada entrega:
+**MUDANÇA DE ARQUITETURA (a maior desde o início).** Saiu o Firebase. O backend é Postgres
+gerenciado na Vercel (Neon), acessado SOMENTE por Route Handlers do Next. O navegador nunca
+fala com o banco. Não existe `firestore.rules`, não existe Firebase Auth, não instale Java
+nem Firebase CLI. A camada `lib/firebase` da Fase 1 deve ser REMOVIDA, não adaptada —
+substitua por `lib/db/` com adaptador em memória quando não houver `DATABASE_URL`. Apague
+também o `firestore.rules` e seus testes.
 
-- FRONTEND STAFF ENGINEER: arquitetura limpa, TypeScript strict, zero `any`, componentes
+**MUDANÇA DE ARTE.** Não existe mais seção de galeria. O cliente tem UMA foto e não terá
+outras. Leia "Economia da foto única" na seção 3.7: a foto aparece em exatamente dois
+enquadramentos (herói inteiro + um recorte fechado da mão dela com a aliança, numa faixa
+21:9 entre seções). "Nossa história" virou tipografia pura, sem foto. Não repita a mesma
+imagem em mais lugares e não baixe foto de banco com casal aleatório.
+
+**SEU PAPEL — cinco papéis acumulados, e você responde por todos em cada entrega:**
+- **FRONTEND STAFF ENGINEER:** arquitetura limpa, TypeScript strict, zero `any`, componentes
   pequenos e puros, server/client components usados com critério, performance como requisito
-  (não como ajuste final), nenhum TODO esquecido no código.
-- DESIGNER SÊNIOR (direção de arte): nada de template. Cada tela tem hierarquia, ritmo,
-  respiro e uma decisão estética deliberada. A seção 9 ("PROIBIDOS") é lei.
-- PO/PMO: antes de cada fase, escreva em docs/DECISOES.md o que vai fazer, o que está
+  e não como ajuste final, nenhum TODO esquecido no código.
+- **DESIGNER SÊNIOR:** nada de template. Cada tela tem hierarquia, ritmo, respiro e uma
+  decisão estética deliberada. A seção 9 ("PROIBIDOS") é lei.
+- **PO/PMO:** antes de cada fase, escreva em `docs/DECISOES.md` o que vai fazer, o que está
   fora do escopo e quais premissas assumiu. Nada de inventar requisito; o que faltar vira
-  linha em docs/PENDENCIAS.md e um placeholder honesto no código.
-- QA SÊNIOR: você testa o que você escreveu. Toda fase fecha com lint + typecheck + build +
-  testes + screenshots do Playwright revisados por você mesmo contra a direção de arte.
-  Se um screenshot ficou feio, você conserta e tira de novo ANTES de dizer que terminou.
-- MOBILE WEB SÊNIOR: o site é mobile-first de verdade. Você projeta em 390px primeiro e
-  só depois expande. Alvos de toque ≥ 44px, sem scroll horizontal, sem layout shift,
-  safe-area do iPhone respeitada, teclado do celular não pode cobrir o campo em foco.
+  linha em `docs/PENDENCIAS.md` e um placeholder honesto no código.
+- **QA SÊNIOR:** você testa o que você escreveu. Toda fase fecha com lint, typecheck, build,
+  testes e screenshots do Playwright revisados por você mesmo contra a direção de arte. Se um
+  screenshot ficou feio, conserte e tire de novo ANTES de dizer que terminou.
+- **MOBILE WEB SÊNIOR:** mobile-first de verdade. Projete em 390px primeiro e só depois
+  expanda. Alvos de toque ≥ 44px, sem scroll horizontal, sem layout shift, safe-area do
+  iPhone respeitada, teclado do celular nunca cobrindo o campo em foco.
 
-Regra de ouro do projeto: **se ficar parecido com um template de casamento genérico,
-está errado e deve ser refeito.** O cliente é o casal da foto em public/images/casal.jpg.
+**Regra de ouro:** se ficar parecido com um template de casamento genérico, está errado e
+deve ser refeito.
 
-Comece pela FASE 0 (seção 10 do briefing). Não pule fases. Não implemente fases futuras
-adiantado. Ao fim de cada fase, pare e me mostre as evidências.
-```
+**O QUE EU QUERO AGORA.** Execute da Fase 1 (retrabalho) até a Fase 10, em sequência, sem
+esperar minha liberação entre elas. Mantenha os portões: cada fase só é dada por fechada com
+lint, typecheck, testes, build e screenshots revisados POR VOCÊ contra as seções 3 e 9, com
+commit próprio e `DECISOES.md` atualizado. Não pule fase, não implemente fase futura
+adiantado, não feche fase com teste falhando.
+
+**PARE E ME PERGUNTE apenas se:**
+- uma decisão for irreversível e puder razoavelmente ir para os dois lados;
+- o briefing se contradisser em algo que muda o produto;
+- uma correção exigir desfazer trabalho de uma fase já fechada;
+- você identificar risco de segurança ou de dado pessoal — nesse caso **feche o buraco
+  primeiro e me conte depois**, não espere resposta para proteger dado.
+
+Fora disso, decida, registre a premissa em `DECISOES.md` e siga.
+
+**DADOS DO CASAL — TUDO CONFIRMADO, NÃO PERGUNTE DE NOVO:**
+- 21/12/2026, **segunda-feira, intencional**. Deixe claro no FAQ que é dia útil.
+- Colossenses 3:14.
+- Cotas: Bronze R$ 150, Prata R$ 200, Ouro R$ 250.
+- Recebedora do PIX: "Jaqueline Barros Alvares" (24 caracteres, cabe no limite de 25 — não
+  abrevie, não "melhore").
+- WhatsApp de comprovante = mesmo número da chave PIX.
+- Cerimônia e recepção no Espaço Max, a partir das 16h30.
+
+**AINDA "A DEFINIR" — só três, nenhuma trava você:** marcos de "nossa história" (só texto),
+traje e prazo do RSVP. Sem os marcos, a seção inteira NÃO é renderizada — nada de marco
+inventado. Use o vocabulário da seção 4 ("a confirmar" × "a definir", com estados visuais
+distintos) e mantenha `PENDENCIAS.md` em dia. A única foto é `public/images/casal.jpg`.
+
+**VARIÁVEIS DE AMBIENTE:** crie `.env.example` versionado com `DATABASE_URL`,
+`SENHA_NOIVOS`, `SESSAO_SECRET`, `RSVP_SALT` e `DEMO`. Nenhuma com prefixo `NEXT_PUBLIC_`.
+O projeto tem que rodar e demonstrar sem nenhuma delas preenchida (modo demonstração da
+seção 5).
+
+**AO FINAL, me entregue:**
+1. um resumo por fase, com o hash do commit e o que ficou de fora;
+2. a lista do que você decidiu sozinho, e com que premissa;
+3. o passo a passo do deploy na Vercel, incluindo onde rodar o `db/schema.sql`;
+4. os caminhos das pastas de screenshots de cada fase;
+5. o roteiro de 2 minutos para eu apresentar ao casal.
+
+Se em algum momento você perceber que uma instrução do briefing produz resultado pior que a
+alternativa, não a siga em silêncio nem a ignore: aplique o que está escrito, registre a
+discordância em `DECISOES.md` e me diga no relatório final. A exceção é **acessibilidade e
+dado pessoal**, onde o correto vence o documento e você corrige na hora.
+
+**Comece pelo retrabalho da Fase 1.**
 
 ---
+
+# BRIEFING
 
 ## 1. O que é este projeto
 
@@ -61,7 +118,7 @@ com 4G ruim, e decide em 10 segundos se aquilo parece especial.
 
 | Rota | Existe na referência? | O que faz aqui |
 |------|----------------------|----------------|
-| `/` | sim | Convite: herói com foto do casal, nomes, versículo, data/hora, contagem regressiva, local, CTAs "Presentear" e "Confirmar presença", nossa história, galeria, trajes, dúvidas frequentes |
+| `/` | sim | Convite: herói com foto do casal, nomes, versículo, data/hora, contagem regressiva, local, CTAs "Presentear" e "Confirmar presença", nossa história, trajes, dúvidas frequentes |
 | `/presentear` | sim | Lista de presentes (cotas em PIX + presentes nomeados) |
 | `/confirmar-presente/[id]` | sim | Tela do PIX: QR Code gerado na hora, código copia-e-cola, botão "Copiar", botão "Enviar comprovante" (WhatsApp) |
 | `/confirmar-presenca` | sim | Formulário de RSVP (nome, telefone, vai comparecer, quem convidou, acompanhantes) |
@@ -155,7 +212,8 @@ Momentos orquestrados (os que valem a pena):
    recebe um flash de `--champanhe` que desaparece em 600ms.
 5. **RSVP enviado:** transição para `/agradecimento` com confete dourado (canvas leve,
    ~2.5s, no máximo 120 partículas, para sozinho) e o monograma pulsando uma vez.
-6. **Galeria:** abrir foto com `layoutId` (a miniatura vira o lightbox), arrastar para fechar.
+6. **Recorte de detalhe:** ao entrar na viewport, a faixa 21:9 revela com um
+   `clip-path` que abre do centro (~600ms), uma vez só.
 
 Regras: nada de parallax pesado, nada de hover que levanta todos os cards, nada de
 contador animando em todo lugar. **Respeitar `prefers-reduced-motion`**: nesse caso,
@@ -174,8 +232,20 @@ tudo vira fade simples de 150ms e o confete não roda.
   um `overlay` de `linear-gradient(to top, rgb(23 20 15 / .55), transparent 55%)`
   para o texto branco ter contraste real.
 - `next/image` com AVIF/WebP, `priority` só no herói, `placeholder="blur"`, `sizes` corretos.
-- Proporções fixas: herói 3:4 no celular e 16:10 no desktop (crop pelo `object-position`),
-  galeria 1:1, história 4:5.
+- Proporções fixas: herói 3:4 no celular e 16:10 no desktop (crop pelo `object-position`).
+
+**Economia da foto única (restrição confirmada pelo cliente).** Existe UMA foto, e não
+haverá outras. Ela aparece em exatamente **dois lugares**, com enquadramentos que não se
+parecem:
+1. **Herói** — a foto inteira, respiração completa, é o primeiro impacto.
+2. **Um recorte fechado de detalhe** — a mão dela sobre o peito dele, com a aliança —
+   usado uma única vez, como textura entre duas seções (faixa larga e baixa, tipo 21:9).
+   É o mesmo arquivo, mas ninguém percebe que é a mesma imagem.
+Mais que isso cansa e denuncia a escassez. A OG image reusa o herói, o que não conta
+porque vive fora do site.
+**Não existe seção de galeria.** Seis quadrados da mesma foto é pior do que não ter
+seção. Em vez dela, o lugar que sobra no `/` é ocupado pelo que temos de verdade:
+contagem regressiva, história e dúvidas frequentes respiram mais.
 - Faltando outras fotos: usar **apenas** a do casal em composições diferentes e registrar
   em `docs/PENDENCIAS.md` o que o cliente precisa enviar. **Nunca** usar foto de banco de
   imagem com casal aleatório.
@@ -199,7 +269,7 @@ export const casamento = {
     sobrenomes: { ela: "", ele: "" },           // opcional, só se quiserem no rodapé
   },
 
-  // ⚠️ CONFIRMAR O ANO. 21/12/2026 cai numa SEGUNDA-FEIRA.
+  // Confirmado pelo casal: 21/12/2026, uma segunda-feira. Não é engano.
   data: "2026-12-21T16:30:00-03:00",
   horarioTexto: "a partir das 16h30",
 
@@ -209,36 +279,36 @@ export const casamento = {
     enderecoCurto: "Chácara Itapiracó, São Luís — MA",
     mapsUrl: "https://maps.app.goo.gl/B53pcb3Xwk8eaSpu6",
     facebook: "https://www.facebook.com/458117960894623",
-    // ⚠️ confirmar se a cerimônia religiosa é no mesmo endereço ou em outro local
+    // Confirmado: cerimônia e recepção no Espaço Max, a partir das 16h30.
     cerimoniaNoMesmoLocal: true,
   },
 
   versiculo: {
     texto: "E, acima de tudo, tenham amor, pois o amor une perfeitamente todas as coisas.",
-    referencia: "Colossenses 3:14", // ⚠️ o cliente escreveu 3.4; o texto corresponde a 3:14
+    referencia: "Colossenses 3:14", // confirmado pelo casal
   },
 
   pix: {
     chave: "98999676346",          // chave do tipo TELEFONE
     chaveFormatoBrCode: "+5598999676346", // é ASSIM que entra no payload EMV (campo 01)
-    nomeRecebedor: "JAQUELINE",    // ⚠️ nome completo como aparece no extrato, máx. 25 caracteres
+    nomeRecebedor: "JAQUELINE BARROS ALVARES", // confirmado; 24 caracteres, cabe no limite de 25
     cidade: "SAO LUIS",            // sem acento, maiúsculas, máx. 15 caracteres
   },
 
   whatsapp: {
-    numero: "5598999676346",       // ⚠️ confirmar se é o mesmo número da chave PIX
+    numero: "5598999676346",       // confirmado: mesmo número da chave PIX
     mensagemComprovante: "Oi! Acabei de enviar o presente de vocês 💛 Segue o comprovante:",
   },
 
-  // ⚠️ confirmar o de-para valor × nome: a hierarquia natural é Bronze < Prata < Ouro
+  // Confirmado pelo casal: Bronze 150, Prata 200, Ouro 250.
   presentes: [
     { id: "bronze", tipo: "cota", titulo: "Cota Bronze", valor: 150, descricao: "", icone: "taca" },
     { id: "prata",  tipo: "cota", titulo: "Cota Prata",  valor: 200, descricao: "", icone: "alianca" },
     { id: "ouro",   tipo: "cota", titulo: "Cota Ouro",   valor: 250, descricao: "", icone: "presente", destaque: true },
   ],
 
-  historia: [ /* ⚠️ PENDENTE: 3 a 5 marcos */ ],
-  galeria:  [ /* ⚠️ PENDENTE: 6 a 10 fotos */ ],
+  historia: [ /* ⚠️ A DEFINIR: 3 a 5 marcos, SÓ TEXTO (ano + título + uma frase) */ ],
+  // Sem galeria: existe uma única foto. Ver "Economia da foto única" na seção 3.7.
   trajes: { titulo: "Traje social", descricao: "TODO", paleta: ["#C9A227", "#FFFFFF"] }, // ⚠️
   faq: [ /* ⚠️ PENDENTE */ ],
   rsvp: { prazo: "TODO", maxAcompanhantes: 4 }, // ⚠️
@@ -251,7 +321,7 @@ interface como um placeholder elegante (nunca "undefined", nunca quebrado).
 **Vocabulário obrigatório (vale no código, nos selos da interface e no `PENDENCIAS.md`):**
 - **"a confirmar"** = o dado chegou, mas há dúvida sobre ele (ano, referência do versículo,
   de-para das cotas, nome do recebedor do PIX, número do WhatsApp, local da cerimônia).
-- **"a definir"** = o dado ainda não existe (nossa história, galeria, trajes, prazo do RSVP).
+- **"a definir"** = o dado ainda não existe (nossa história, trajes, prazo do RSVP).
 Os dois estados são visualmente distintos: "a confirmar" em `--champanhe` com texto
 `--ouro-escuro`; "a definir" em `--linho` com texto `--fumaca`. Nunca usar um termo pelo outro.
 
@@ -263,46 +333,78 @@ Os dois estados são visualmente distintos: "a confirmar" em `--champanhe` com t
 - **Tailwind CSS v4** com os tokens da seção 3.2 como variáveis CSS em `@theme`
 - **motion** (framer-motion) para animação · **lucide-react** para ícones
 - **react-hook-form + zod** para formulários · **sonner** para toasts
-- **Firebase (Firestore)** como backend do RSVP e dos presentes — client SDK, sem servidor.
-  **Nunca** colocar chave de serviço no cliente. As chaves públicas do Firebase vão em
-  `.env.local` (`NEXT_PUBLIC_*`) com `.env.example` versionado.
+- **Banco: Postgres gerenciado criado dentro da própria Vercel** (Neon, pelo Marketplace).
+  A Vercel injeta a connection string nas variáveis de ambiente sozinha — você não copia
+  chave nenhuma. Driver `@neondatabase/serverless`, SQL escrito à mão (sem ORM: o schema
+  tem três tabelas, um ORM aqui só adiciona peça).
 
-  ### Modelo de dados e regras — leitura NUNCA é pública
-  > Correção de uma falha da versão anterior deste briefing, que liberava `read` em
-  > `confirmacoes`. Isso deixava nome e telefone de todos os convidados legíveis por
-  > qualquer visitante, bastando abrir o console do navegador. Não é risco teórico: é
-  > exposição de dado pessoal de centenas de pessoas, e o PIN de `/convidados` não
-  > protegia nada, porque a regra do Firestore é o que vale, não a interface.
+  ### Por que não um SDK de banco no navegador
+  > A versão anterior deste briefing usava Firestore com o SDK no cliente e errou ao
+  > liberar leitura pública em `confirmacoes`, deixando nome e telefone de todos os
+  > convidados acessíveis pelo console do navegador. A troca para Route Handlers remove
+  > a classe inteira do problema: **o navegador nunca fala com o banco.** Não existe
+  > arquivo de regras para acertar; quem decide o que sai é o código do servidor.
 
-  **`confirmacoes/{autoId}`** — todo o dado pessoal (nome, telefone, acompanhantes, recado).
-  - `create`: liberado, **com validação de formato na própria regra** (tipos, tamanho máximo
-    de cada campo, telefone com 10 ou 11 dígitos, no máximo N acompanhantes, recado ≤ 240,
-    nenhum campo além dos previstos, `criadoEm == request.time`).
-  - `read`, `update`, `delete`: **somente os noivos** —
-    `request.auth != null && request.auth.uid in [UID_JAQUELINE, UID_DIORLANDO]`.
-    Os UIDs vêm de `.env` e entram na regra por geração do arquivo, nunca escritos à mão.
+  ### Schema (`db/schema.sql`, rodado uma vez)
+  ```sql
+  create table confirmacoes (
+    id            bigserial primary key,
+    nome          text        not null,
+    telefone      text        not null,
+    telefone_hash text        not null,          -- sha256(telefone + RSVP_SALT do servidor)
+    vai_comparecer boolean    not null,
+    acompanhantes jsonb       not null default '[]'::jsonb,
+    quem_convidou text,
+    recado        text,
+    atualiza_de   text,                          -- hash da resposta que esta substitui
+    criado_em     timestamptz not null default now()
+  );
+  create index on confirmacoes (telefone_hash);
+  create table presentes_reservados (
+    cota_id      text primary key,
+    reservado_em timestamptz not null default now()
+  );
+  ```
 
-  **`rsvp_index/{sha256(telefone + SALT)}`** — só para o aviso "você já confirmou".
-  - Contém **exclusivamente** `{ em: timestamp }`. Nenhum nome, nenhum telefone, nenhum
-    status. Mesmo lido, não identifica ninguém.
-  - `get`: liberado. **`list`: bloqueado** — isso é o que impede alguém baixar a coleção.
-  - Honestidade sobre o limite: com o salt no cliente, quem souber um telefone específico
-    consegue descobrir se aquela pessoa confirmou. Não vaza *quem* confirmou, mas confirma
-    um palpite. Mitigar com **Firebase App Check** e aceitar o resto como risco residual,
-    registrado em `DECISOES.md`. Se isso incomodar, a alternativa é não ter o aviso.
+  ### Route Handlers (`app/api/...`) — a única porta para o banco
+  - `POST /api/rsvp` — valida com o mesmo schema zod do formulário, **no servidor**,
+    calcula o `telefone_hash` e grava. Honeypot + limite por IP (3 envios por minuto,
+    em memória já basta). Devolve só `{ ok: true }`.
+  - `POST /api/rsvp/verificar` — recebe o telefone, devolve **apenas**
+    `{ jaConfirmou: boolean, em?: string }`. O telefone nunca volta, nome nenhum volta,
+    e o salt vive só no servidor. Limite por IP também, para não virar sonda de telefone.
+  - `GET /api/presentes` — público, devolve só a lista de ids já reservados.
+  - `POST /api/presentes/[id]/reservar` — marca a cota.
+  - `GET /api/convidados` — **exige a sessão dos noivos** (abaixo). Sem cookie válido,
+    responde 401 e pronto; nenhum dado sai.
 
-  **`presentes_reservados/{idDaCota}`** — `read` público (não tem dado pessoal), `create`
-  liberado com validação, `update`/`delete` bloqueados.
+  ### Acesso dos noivos (simples e suficiente)
+  Uma senha única compartilhada pelos dois, guardada em `SENHA_NOIVOS` (variável de
+  ambiente do servidor, nunca `NEXT_PUBLIC_`). `POST /api/entrar` compara e devolve um
+  **cookie httpOnly, secure, sameSite=lax, assinado** com `SESSAO_SECRET`, válido 30 dias.
+  Sem cadastro, sem conta para criar, sem e-mail. A proteção real é o 401 do servidor;
+  a tela de login é só a porta.
 
-  **Nunca** conceder `update` a visitante: "atualizar a resposta" grava um novo documento
-  em `confirmacoes` com `atualizaDe: <hash>`, e a lista mostra o mais recente por hash.
-  Assim ninguém consegue alterar nem apagar a resposta de outra pessoa.
+  ### Regras que não se negociam
+  - Nenhuma variável com segredo pode ter o prefixo `NEXT_PUBLIC_`.
+  - Nenhum `select *` de `confirmacoes` em rota pública.
+  - Validação sempre repetida no servidor, mesmo já existindo no formulário.
+  - `.env.example` versionado; `.env.local` no `.gitignore`.
+  - **Testes obrigatórios** das rotas (Vitest + banco de teste ou `pg-mem`): visitante
+    anônimo grava RSVP válido, é rejeitado com payload inválido, leva 401 em
+    `/api/convidados`, e `/api/rsvp/verificar` devolve só o booleano e a data.
+    Rota sem teste de autorização não conta como pronta.
 
-  **Teste obrigatório** com `@firebase/rules-unit-testing`, rodando no `pnpm test`:
-  visitante anônimo consegue `create` válido, é **negado** em `read`/`list` de
-  `confirmacoes`, é negado em `list` de `rsvp_index`, é negado em `update` e `delete`;
-  usuário autenticado fora da lista de UIDs é negado em tudo; os noivos leem. Regra sem
-  teste não conta como regra.
+  ### Modo demonstração (para o roteiro de 2 minutos)
+  Com `DEMO=true` (ou sem `DATABASE_URL`), a aplicação sobe no adaptador em memória com
+  seed: ~12 confirmações fictícias, nomes claramente inventados, telefones no padrão
+  `(98) 90000-00XX`. A senha dos noivos nesse modo é `demo`, exibida na própria tela de
+  login num aviso discreto ("modo demonstração"). Esse aviso **só** existe quando `DEMO`
+  está ligado — jamais aparece em produção, e há teste garantindo isso.
+
+  ### Desenvolvimento local
+  A camada de dados fica atrás de uma interface em `lib/db/`. Sem `DATABASE_URL`, ela cai
+  num adaptador em memória com seed, para rodar a demo sem banco nenhum.
 - **PIX gerado no cliente**: implementar o payload **BR Code (EMV)** em `lib/pix.ts`
   — função pura `gerarPayloadPix({ chave, nome, cidade, valor, txid })` com **CRC16-CCITT (0x1021)**,
   coberta por teste unitário comparando com um payload conhecido. QR via `qrcode` (canvas/SVG).
@@ -314,7 +416,8 @@ Os dois estados são visualmente distintos: "a confirmar" em `--champanhe` com t
 - **date-fns** com locale pt-BR.
 - Testes: **Vitest** (unitários: pix, formatadores, schemas zod) + **Playwright**
   (E2E e screenshots em 390×844, 768×1024, 1440×900).
-- Deploy: **Vercel** (padrão) ou Firebase Hosting. Node LTS, `pnpm`.
+- Deploy: **Vercel** (plano Hobby; o site é presente, não trabalho cobrado). Node LTS, `pnpm`.
+  Push no GitHub → importar na Vercel → criar o Postgres pelo Marketplace → publicar.
 
 ---
 
@@ -331,9 +434,11 @@ Ordem das seções (mobile-first, tudo em coluna no celular):
 3. **Contagem regressiva**: quatro blocos (dias · horas · minutos · segundos), números em
    Cormorant 49px com tabular-nums, rótulos em versalete. Quando a data passar, troca para
    "Hoje é o dia" e, depois, para "Casados desde 19.07.2027" — tratar os três estados.
-4. **Nossa história**: timeline vertical com filete dourado, 3 a 5 marcos, foto em 4:5
-   alternando o lado no desktop. Se o cliente não mandou conteúdo, mostrar 3 marcos
-   genéricos marcados como placeholder em `docs/PENDENCIAS.md`.
+4. **Nossa história**: timeline vertical com filete dourado, 3 a 5 marcos, **só texto**
+   (não há fotos). Sem foto, o peso recai na tipografia: ano em Cormorant grande e
+   dourado, título em Jost 500, frase em até duas linhas, muito respiro entre marcos.
+   O losango do filete marca cada ponto. Enquanto o casal não mandar o conteúdo, a seção
+   inteira não é renderizada — nada de marco inventado. Fica listada como "a definir".
 5. **Quando e onde**: card único do **Espaço Max** (o config tem `cerimoniaNoMesmoLocal`;
    se virar `false`, o componente passa a renderizar dois cards lado a lado — já deixe
    preparado). Nome do espaço em Cormorant, endereço completo, ícone próprio de taça,
@@ -393,9 +498,10 @@ Formulário em **três passos** com barra de progresso em filete dourado:
 Regras de UX obrigatórias:
 - Validação em `onBlur`, mensagem de erro humana ("Faltou o telefone pra gente te avisar de mudanças").
 - Botão de envio com estado `carregando` e proteção contra duplo clique.
-- **Idempotência**: consultar `rsvp_index/{hash do telefone}` com um `get` (nunca listar
-  `confirmacoes`) e, se existir, mostrar "Você já confirmou em 00/00. Quer atualizar sua
-  resposta?". Atualizar grava um documento novo com `atualizaDe`, nunca sobrescreve.
+- **Idempotência**: no passo 1, ao sair do campo de telefone, chamar
+  `POST /api/rsvp/verificar` e, se já houver resposta, mostrar "Você já confirmou em 00/00.
+  Quer atualizar sua resposta?". Atualizar grava uma linha nova com `atualiza_de`,
+  nunca sobrescreve a anterior.
 - Campo honeypot escondido + limite simples por `sessionStorage` contra spam.
 - Erro de rede: manter os dados preenchidos e oferecer "Tentar de novo".
 - Sucesso → `/agradecimento?nome=...` (só o primeiro nome, nada sensível na URL).
@@ -420,14 +526,15 @@ Regras de UX obrigatórias:
   ordenação por nome/data, 25 por página.
 - **Agrupamento opcional** por "quem convidou", com subtotal por grupo.
 - **Exportar CSV** (gerado no cliente, `;` como separador, UTF-8 com BOM para abrir no Excel).
-- **Acesso restrito aos noivos.** A rota inteira exige login (Firebase Auth, e-mail e senha,
-  duas contas criadas à mão no console — não há cadastro público). Visitante sem sessão vê
-  uma tela de login sóbria com o monograma, nunca a lista nem os contadores.
-  A proteção real está na regra do Firestore (seção 5); a tela de login é só a porta.
+- **Acesso restrito aos noivos.** A rota exige a sessão da seção 5 (senha única + cookie
+  assinado). Sem cookie, a página mostra uma tela de login sóbria com o monograma, e o
+  `GET /api/convidados` responde 401 — nem lista, nem contadores, nem total.
 - Telefone exibido mascarado (`(98) 9****-**94`) mesmo depois do login, com um botão
   "Mostrar telefones" — aqui sim como camada de discrição, para a tela não ficar cheia de
   número exposto quando alguém olha por cima do ombro ou quando os noivos tiram um print.
-- **Atualizar**: botão com ícone de refresh + `onSnapshot` do Firestore para chegar sozinho.
+- **Atualizar**: botão com ícone de refresh + revalidação automática a cada 15s enquanto a
+  aba estiver visível (`document.visibilityState`), que numa lista de casamento é
+  indistinguível de tempo real e não gasta conexão aberta.
 - **Estados**: carregando (skeletons com o shimmer dourado), vazio ("Ninguém confirmou ainda.
   Compartilhe o convite 💛" — sem emoji: usar o ícone próprio de aliança), e erro com "Tentar de novo".
 
@@ -503,8 +610,9 @@ filete, monograma, ícones, card de presente e um card de convidado.
 ### Fase 1 — Dados, domínio e PIX
 Tipos em `src/types`. Schemas zod. `lib/pix.ts` com o BR Code + CRC16 e **teste unitário com
 payload conhecido**. `lib/ics.ts` (gerar `.ics` e link do Google Calendar). `lib/format.ts`
-(BRL, telefone, data pt-BR). Camada `lib/firebase` com fallback **mock local** (`localStorage`)
-quando não houver `.env.local`, para a demo rodar sem backend.
+(BRL, telefone, data pt-BR). Camada `lib/db/` com a interface de dados e um adaptador
+**em memória com seed** quando não houver `DATABASE_URL`, para a demo rodar sem banco.
+(Se a Fase 1 já entregou uma camada `lib/firebase`, ela é substituída aqui.)
 **Fechamento:** Vitest cobrindo pix (inclusive CRC), schemas e formatadores, com casos negativos.
 
 ### Fase 2 — Layout, navegação e abertura
@@ -513,7 +621,7 @@ A animação de abertura do convite (3.5.1) com `sessionStorage`.
 **Fechamento:** screenshots do layout vazio nas 3 larguras + teste de navegação (Playwright).
 
 ### Fase 3 — `/` o convite
-Todas as 10 seções da 6.1. Contagem regressiva com os 3 estados. Galeria com `layoutId`.
+Todas as seções da 6.1. Contagem regressiva com os 3 estados. Recorte de detalhe 21:9.
 Acordeão acessível. "Adicionar à agenda" funcionando.
 **Fechamento:** Lighthouse mobile ≥ 95; screenshots revisados; teste E2E da rolagem e dos CTAs.
 
@@ -524,8 +632,8 @@ teste que valida o payload PIX da tela contra `lib/pix.ts`.
 
 ### Fase 5 — `/confirmar-presenca` e `/agradecimento`
 Formulário em 3 passos, acompanhantes, idempotência, honeypot, erros, confete.
-**Esta fase escreve o `firestore.rules` definitivo da seção 5**, com os testes de regra.
-Nada vai para produção com leitura pública em `confirmacoes`.
+**Esta fase escreve as Route Handlers e o schema da seção 5**, com os testes de autorização.
+Nada vai para produção com dado pessoal saindo de rota pública.
 **Fechamento:** E2E do caminho feliz, do caminho "não vou", do telefone repetido e da
 falha de rede (mock); teste de teclado do início ao fim sem mouse.
 
@@ -553,15 +661,14 @@ Manter em `docs/PENDENCIAS.md` e cobrar:
 **Já temos** (estão em `casamento.ts`): local, endereço, Google Maps, horário (16h30),
 versículo, chave PIX, valores e nomes das três cotas.
 
-**Bloqueiam a Fase 3 (confirmar com o cliente):**
-- [ ] **Ano do casamento.** 21/12/2026 cai numa **segunda-feira** — confirmar se é 2026 mesmo.
-- [ ] **De-para das cotas**: Bronze/Prata/Ouro = 150/200/250? (a ordem que o cliente mandou inverte Bronze e Prata).
-- [ ] **Nome do recebedor do PIX** exatamente como aparece no extrato do banco (máx. 25 caracteres).
-- [ ] **WhatsApp para comprovantes** — é o mesmo número da chave PIX?
-- [ ] **Cerimônia religiosa**: é no Espaço Max ou em outro endereço/horário?
+**Confirmado pelo casal em 17/10/2026** — nada aqui bloqueia mais: data 21/12/2026
+(segunda-feira, intencional), Colossenses 3:14, cotas Bronze 150 / Prata 200 / Ouro 250,
+recebedora "Jaqueline Barros Alvares", WhatsApp igual à chave PIX, cerimônia e recepção
+no Espaço Max às 16h30, e **uma única foto disponível, sem previsão de outras**.
+
+**Resolvidos (histórico):**
 
 **Bloqueiam a Fase 3 mas têm plano B (placeholder honesto):**
-- [ ] 3 a 5 marcos de "nossa história" (ano + título + uma frase).
-- [ ] 6 a 10 fotos para a galeria (hoje só temos a foto do casal).
+- [ ] 3 a 5 marcos de "nossa história" (ano + título + uma frase). **Só texto.**
 - [ ] Traje / dress code.
 - [ ] Prazo para confirmação de presença e limite de acompanhantes.
