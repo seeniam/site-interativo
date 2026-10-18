@@ -45,5 +45,5 @@ export const esquemaConfig = z.object({
     )
     .min(1)
     .refine((lista) => new Set(lista.map((p) => p.id)).size === lista.length, { error: "ids de presente repetidos" }),
-  trajes: z.object({ titulo: z.string().min(1), orientacao: z.string().min(1) }),
+  trajes: z.object({ orientacao: z.string().min(1) }),
 });

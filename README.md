@@ -49,7 +49,7 @@ Tudo o que aparece no site sai de dois arquivos:
   `src/config/presentes.ts`), trajes, FAQ e os dados ainda **a definir**.
   - Um dado que ainda não existe se escreve `pendente("descrição")`. O site mostra um placeholder com o selo
     "a definir" e o item aparece em `/design-system`. Quando o casal mandar o dado, troque pelo valor.
-  - Os dois "a definir" de hoje: marcos da nossa história e prazo para confirmar
+  - O único "a definir" de hoje: marcos da nossa história
     (`docs/PENDENCIAS.md`).
 - **`src/config/textos.ts`**: todos os textos da interface, na voz do casal.
 
@@ -81,7 +81,7 @@ Abra o link de demonstração (preview com `DEMO=true`) no celular de um deles.
 
 1. **O convite (30 s).** Na abertura, o monograma J & D se desenha sozinho. Role devagar: a foto e os nomes,
    o versículo, a contagem regressiva, "Quando e onde" com o mapa e o botão de
-   agenda, trajes, presentes, dúvidas. Mostre os selos "a definir": é onde entram os dois dados que faltam.
+   agenda, trajes, presentes, dúvidas. A seção "Nossa história" ainda não aparece: ela surge sozinha quando o casal mandar os marcos.
 2. **Presentear (30 s).** Toque em **Presentear**, escolha a **Cota Ouro**: o QR Code e o código PIX aparecem
    com o nome de Jaqueline como recebedora. Toque em **Copiar código PIX** e depois em **Enviar comprovante**: o
    WhatsApp abre com a mensagem pronta.

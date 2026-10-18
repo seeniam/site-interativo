@@ -188,11 +188,11 @@ test.describe("quando e onde", () => {
 });
 
 test.describe("trajes, presentes, dúvidas e RSVP", () => {
-  test("trajes: só texto — traje social e o pedido de reservar o branco à noiva (DECISOES A2)", async ({ page }) => {
+  test("trajes: só texto — o pedido de reservar o branco à noiva (DECISOES A2)", async ({ page }) => {
     await page.goto("/");
     const trajes = page.locator("#trajes");
     await expect(trajes.getByRole("heading", { name: "Trajes" })).toBeVisible();
-    await expect(trajes).toContainText("Traje social");
+    await expect(trajes).not.toContainText("Traje social");
     await expect(trajes).toContainText(
       "A escolha das cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à noiva.",
     );
@@ -200,6 +200,13 @@ test.describe("trajes, presentes, dúvidas e RSVP", () => {
     await expect(trajes.locator("[data-pendente]")).toHaveCount(0);
     await expect(trajes.locator("[style*='background']")).toHaveCount(0);
     await expect(trajes).not.toContainText("Dourado");
+  });
+
+  test("presentes: o texto convida a presentear, sem tornar o presente opcional", async ({ page }) => {
+    await page.goto("/");
+    const texto = page.locator("#presentes");
+    await expect(texto).toContainText("contamos com o seu presente");
+    await expect(texto).not.toContainText(/se quiser|já é o presente/i);
   });
 
   test("presentes: as três cotas levam ao PIX de cada uma, e há a lista completa", async ({ page }) => {
@@ -228,12 +235,12 @@ test.describe("trajes, presentes, dúvidas e RSVP", () => {
     await expect(page.locator("#duvidas details").first()).not.toHaveAttribute("open", /.*/);
   });
 
-  test("faixa do RSVP: prazo a definir e botão grande para confirmar", async ({ page }) => {
+  test("faixa do RSVP: só o convite e o botão grande — sem prazo, sem placeholder", async ({ page }) => {
     await page.goto("/");
     const faixa = page.locator(".faixa-rsvp");
-    // Sem prazo, a frase não vira "Confirme até Prazo para…": aparece só o placeholder.
-    await expect(faixa).not.toContainText("Confirme até");
-    await expect(faixa.locator("[data-pendente]")).toContainText("Prazo para confirmar presença");
+    await expect(faixa.getByRole("heading", { name: "Vem com a gente?" })).toBeVisible();
+    await expect(faixa).not.toContainText(/confirme até|prazo/i);
+    await expect(faixa.locator("[data-pendente]")).toHaveCount(0);
     await expect(faixa.getByRole("link", { name: "Confirmar presença" })).toHaveAttribute(
       "href",
       "/confirmar-presenca",

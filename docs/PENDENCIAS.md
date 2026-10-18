@@ -23,6 +23,8 @@ só no herói).
 - **Trajes:** traje social. "A escolha das cores fica a critério de cada convidado. Pedimos
   apenas que o branco seja reservado à noiva." Sem amostras de cor (DECISOES A2).
 - **Convite individual:** não existem acompanhantes (DECISOES A1).
+- **Prazo para confirmar presença:** retirado do site em 18/10/2026 — não há mais "Responda até", nem
+  placeholder, nem pergunta no FAQ (DECISOES B1). Se o casal quiser um prazo no futuro, é só voltar a incluir.
 
 ## A confirmar
 
@@ -33,7 +35,6 @@ Nenhum item.
 | # | Item | Onde entra | Enquanto não chega |
 |---|------|------------|--------------------|
 | D1 | 3 a 5 marcos de "nossa história" — **só texto** (ano, título, uma frase) | Seção "Nossa história" | A seção inteira **não é renderizada**. Nada de marco inventado. |
-| D3 | Prazo para confirmar presença | Faixa do RSVP, FAQ | Placeholder "a definir" no "Confirme até" e na resposta do FAQ |
 
 ## Histórico (resolvido)
 

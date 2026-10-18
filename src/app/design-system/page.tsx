@@ -99,7 +99,7 @@ const CONVIDADOS_DE_EXEMPLO = [
   },
 ] as const;
 
-/** Sem repetição: o mesmo dado pode aparecer em mais de um lugar do config (ex.: prazo no RSVP e no FAQ). */
+/** Sem repetição: o mesmo dado pode aparecer em mais de um lugar do config (ex.: um dado usado na seção e também no FAQ). */
 const PENDENCIAS = [...new Map(listarPendencias(casamento).map((p) => [p.descricao, p])).values()];
 
 /** Nome legível de cada campo "a confirmar" — documentação interna desta página. */

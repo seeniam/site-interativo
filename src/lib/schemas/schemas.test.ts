@@ -169,10 +169,14 @@ describe("o que o casal definiu em 18/10/2026", () => {
 
   it("trajes: texto definido, sem amostras de cor e sem placeholder", () => {
     expect(casamento.trajes).toEqual({
-      titulo: "Traje social",
       orientacao:
         "A escolha das cores fica a critério de cada convidado. Pedimos apenas que o branco seja reservado à noiva.",
     });
+  });
+
+  it("o prazo de confirmação não existe no config nem no FAQ (retirado em 18/10/2026)", () => {
+    expect(JSON.stringify(casamento)).not.toMatch(/prazo|até quando posso confirmar/i);
+    expect(casamento).not.toHaveProperty("rsvp");
   });
 
   it("a foto do casal tem um enquadramento só (o do herói)", () => {

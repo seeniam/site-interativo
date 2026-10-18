@@ -63,9 +63,9 @@ export function SecaoTrajes() {
   return (
     <section id="trajes" aria-labelledby="trajes-titulo" className="bg-linho respiro-secao">
       <div className="conteiner flex flex-col items-center text-center">
-        <TituloSecao id="trajes-titulo">{convite.trajes.titulo}</TituloSecao>
-        <p className="font-display text-31 text-tinta">{trajes.titulo}</p>
-        <p className="mt-3 medida text-16 text-balance text-fumaca">{trajes.orientacao}</p>
+        <TituloSecao id="trajes-titulo" apoio={trajes.orientacao}>
+          {convite.trajes.titulo}
+        </TituloSecao>
       </div>
     </section>
   );
@@ -114,25 +114,12 @@ export function SecaoDuvidas() {
 
 /** Faixa do RSVP (briefing 6.1, item 9). */
 export function FaixaRsvp() {
-  const { prazo } = casamento.rsvp;
   return (
     <section aria-labelledby="rsvp-titulo" className="conteiner pb-[clamp(72px,12vw,140px)]">
       <div className="faixa-rsvp">
         <h2 id="rsvp-titulo" className="font-display text-39 font-light text-tinta sm:text-49">
           {convite.rsvp.titulo}
         </h2>
-        {/* Sem prazo definido, a frase não pode virar "Confirme até Prazo para…": só o placeholder. */}
-        <p className="text-16 text-fumaca">
-          {estaPendente(prazo) ? (
-            <span className="whitespace-nowrap">
-              <TextoPendente item={prazo} />
-            </span>
-          ) : (
-            <>
-              {convite.rsvp.confirmeAte} <span className="text-tinta">{prazo}</span>
-            </>
-          )}
-        </p>
         <BotaoLink href="/confirmar-presenca" tamanho="grande">
           {convite.rsvp.botao}
         </BotaoLink>
